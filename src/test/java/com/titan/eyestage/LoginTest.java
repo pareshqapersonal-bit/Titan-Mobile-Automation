@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import POM.LoginElements;
 import io.appium.java_client.android.AndroidDriver;
 
-public class LoginTest extends Demo {
+public class LoginTest extends Base {
 	
 	
 	

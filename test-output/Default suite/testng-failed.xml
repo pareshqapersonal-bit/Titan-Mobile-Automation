@@ -5,8 +5,8 @@
     <classes>
       <class name="com.titan.eyestage.LoginTest">
         <methods>
-          <include name="opn_app"/>
           <include name="Steps"/>
+          <include name="opn_app"/>
           <include name="endThesession"/>
         </methods>
       </class> <!-- com.titan.eyestage.LoginTest -->

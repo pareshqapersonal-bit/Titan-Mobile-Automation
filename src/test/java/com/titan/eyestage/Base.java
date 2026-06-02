@@ -13,7 +13,7 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 
-public class Demo {
+public class Base{
 	protected AndroidDriver driver;
     @BeforeMethod
     public void opn_app() throws MalformedURLException {
@@ -23,7 +23,9 @@ public class Demo {
         options.setPlatformName("Android");
         options.setDeviceName("Vivo V25"); // change if needed
 
-        options.setApp("C:\\Users\\Developer\\Downloads\\TEP_STAGE.apk");
+        String apkPath = System.getProperty("user.home")
+                + "\\Downloads\\TEP_STAGE.apk";
+        options.setApp(apkPath);
         options.setAutoGrantPermissions(true);
         options.setNoReset(false);
         options.setAppWaitDuration(Duration.ofSeconds(30));
