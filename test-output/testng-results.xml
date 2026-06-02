@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2026-06-02T13:48:58 IST" name="Default suite" finished-at="2026-06-02T13:49:31 IST" duration-ms="33103">
+    <groups>
+    </groups>
+    <test started-at="2026-06-02T13:48:58 IST" name="Default test" finished-at="2026-06-02T13:49:31 IST" duration-ms="33103">
+      <class name="com.titan.eyestage.LoginTest">
+        <test-method is-config="true" signature="opn_app()[pri:0, instance:com.titan.eyestage.LoginTest@35d019a3]" started-at="2026-06-02T13:48:58 IST" name="opn_app" finished-at="2026-06-02T13:49:06 IST" duration-ms="7985" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- opn_app -->
+        <test-method signature="Steps()[pri:0, instance:com.titan.eyestage.LoginTest@35d019a3]" started-at="2026-06-02T13:49:06 IST" name="Steps" finished-at="2026-06-02T13:49:31 IST" duration-ms="25069" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- Steps -->
+        <test-method is-config="true" signature="endThesession()[pri:0, instance:com.titan.eyestage.LoginTest@35d019a3]" started-at="2026-06-02T13:49:31 IST" name="endThesession" finished-at="2026-06-02T13:49:31 IST" duration-ms="0" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- endThesession -->
+      </class> <!-- com.titan.eyestage.LoginTest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
