@@ -12,12 +12,11 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-
-
+import Utilities.CommonUtils;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 
-public class LoginElements  {
+public class LoginElements extends CommonUtils  {
 	
 	AndroidDriver driver = null;
 	public LoginElements(AndroidDriver driver)
@@ -53,13 +52,17 @@ public class LoginElements  {
 	
 	public void testexecution() throws InterruptedException {
 		
-		wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
+		//wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
+		click(Drawer);
 		
-	wait.until(ExpectedConditions.visibilityOf(	loginIcon)).click();
+	//wait.until(ExpectedConditions.visibilityOf(	loginIcon)).click();
+		click(loginIcon);
+	//wait.until(ExpectedConditions.visibilityOf(MobileTextField)).sendKeys(Keys.ENTER);
+		sendKeys(MobileTextField, "8698294937");
+	//MobileTextField.sendKeys("8698294937");
+	//wait.until(ExpectedConditions.visibilityOf(loginCTA)).click();
+	click(loginCTA);
 	
-	wait.until(ExpectedConditions.visibilityOf(MobileTextField)).sendKeys(Keys.ENTER);
-	MobileTextField.sendKeys("8698294937");
-	wait.until(ExpectedConditions.visibilityOf(loginCTA)).click();
 	
 	/*
 	 * List<WebElement> elements =
@@ -78,8 +81,10 @@ public class LoginElements  {
 	System.out.println("EditText count = " + edits.size());
 
 	edits.get(0).sendKeys("254265");
-	wait.until(ExpectedConditions.visibilityOf(loginsubmission)).click();
-	
+	//wait.until(ExpectedConditions.visibilityOf(loginsubmission)).click();
+	click(loginsubmission);
+//	wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
+    click(Drawer);	
 
 	
 	
@@ -89,8 +94,8 @@ public class LoginElements  {
 	//Logout execution
 		public void logoutSteps()
 		{
-			wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
-			
+			//wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
+			click(Drawer);
 			driver.findElement(
 				    AppiumBy.androidUIAutomator(
 				        "new UiScrollable(new UiSelector().scrollable(true))" +
@@ -98,8 +103,8 @@ public class LoginElements  {
 				    )
 				).click();
 			
-			wait.until(ExpectedConditions.visibilityOf(logoutConfirmation)).click();
-			
+			//wait.until(ExpectedConditions.visibilityOf(logoutConfirmation)).click();
+			click(logoutConfirmation);
 		}
 
 		

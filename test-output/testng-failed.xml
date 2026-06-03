@@ -10,6 +10,7 @@
           <include name="endThesession"/>
           <include name="tearDownReport"/>
           <include name="setupReport"/>
+          <include name="tearDown"/>
         </methods>
       </class> <!-- com.titan.eyestage.LoginTest -->
     </classes>
