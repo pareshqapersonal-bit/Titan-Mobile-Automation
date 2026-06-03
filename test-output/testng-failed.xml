@@ -8,6 +8,8 @@
           <include name="Steps"/>
           <include name="opn_app"/>
           <include name="endThesession"/>
+          <include name="tearDownReport"/>
+          <include name="setupReport"/>
         </methods>
       </class> <!-- com.titan.eyestage.LoginTest -->
     </classes>

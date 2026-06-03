@@ -18,8 +18,15 @@ public class LoginTest extends Base {
 	public void Steps() throws InterruptedException
 	{  
 
-		LoginElements le = new LoginElements(driver);
-		le.testexecution();
+		test = extent.createTest("Login Test");
+
+	    test.info("Launching App");
+
+	    LoginElements le = new LoginElements(driver);
+
+	    le.testexecution();
+
+	    test.pass("Login Successful");
 		le.logoutSteps();
 		
 	}

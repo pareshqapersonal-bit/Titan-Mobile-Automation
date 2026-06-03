@@ -6,15 +6,31 @@ import java.time.Duration;
 
 import org.openqa.selenium.By;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+
+import Utilities.ExtentManager;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 
 public class Base{
 	protected AndroidDriver driver;
+	  public static ExtentReports extent;
+	  public static ExtentTest test;
+	@BeforeSuite
+    public void setupReport() {
+
+        extent = ExtentManager.getInstance();
+
+        System.out.println("Extent Report Started");
+    }
+	
     @BeforeMethod
     public void opn_app() throws MalformedURLException {
 
@@ -47,4 +63,14 @@ public class Base{
     {
     	
     }
+    
+    @AfterSuite
+    public void tearDownReport() {
+
+        extent.flush();
+
+        System.out.println("Extent Report Generated");
+    }
+
+    
 }
