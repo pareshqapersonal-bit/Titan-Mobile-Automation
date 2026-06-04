@@ -9,7 +9,7 @@ import org.testng.internal.TestResult;
 
 import com.titan.eyestage.Base;
 
-public class TestListner extends Base implements ITestListener {
+public class TestListener extends Base implements ITestListener {
 	
 	public void onTestStart(ITestResult result)
 	{

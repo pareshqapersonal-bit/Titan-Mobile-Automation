@@ -13,7 +13,7 @@ import POM.LoginElements;
 import Utilities.DataProviderUtil;
 import io.appium.java_client.android.AndroidDriver;
 
-@Listeners(Utilities.TestListner.class)
+@Listeners(Utilities.TestListener.class)
 public class LoginTest extends Base {
 	
 	
