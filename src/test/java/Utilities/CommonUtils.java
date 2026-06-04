@@ -2,14 +2,17 @@ package Utilities;
 
 import java.time.Duration;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.titan.eyestage.Base;
 
-public class CommonUtils extends Base {
+import io.appium.java_client.android.AndroidDriver;
 
+public class CommonUtils extends Base {
+	
     public void click(WebElement element) {
 
         WebDriverWait wait =
@@ -33,6 +36,16 @@ public class CommonUtils extends Base {
 
         element.clear();
         element.sendKeys(value);
+    }
+    //Enter
+    public void enter(WebElement element)
+    {
+    	 WebDriverWait wait =
+                 new WebDriverWait(driver,
+                         Duration.ofSeconds(30));
+    	  wait.until(
+                 ExpectedConditions.visibilityOf(element))
+                 .sendKeys(Keys.ENTER);
     }
 
     public String getText(WebElement element) {
