@@ -5,32 +5,42 @@ import java.time.Duration;
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import POM.LoginElements;
+import Utilities.DataProviderUtil;
 import io.appium.java_client.android.AndroidDriver;
 
+@Listeners(Utilities.TestListner.class)
 public class LoginTest extends Base {
 	
 	
 	
 	
-	@Test
-	public void Steps() throws InterruptedException
+	@Test(dataProvider = "userDatails", dataProviderClass = DataProviderUtil.class)
+	public void Steps(String number, String pass) throws InterruptedException
 	{  
 
-		test = extent.createTest("Login Test");
-
-	    test.info("Launching App");
-
+		
 	    LoginElements le = new LoginElements(driver);
 
-	    le.testexecution();
+	    le.testexecution( number, pass);
 	    
-
-	    test.pass("Login Successful");
 		le.logoutSteps();
 		
+	}
+	
+	
+	@DataProvider(name="LoginData")
+	public Object[][] userData()
+	{
+		return new Object[][] {
+			{"8698294937"},
+			{"8779906355"},
+			{"9594262573"}
+		};
 	}
 
 }

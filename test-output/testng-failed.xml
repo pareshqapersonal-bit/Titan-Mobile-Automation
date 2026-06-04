@@ -5,7 +5,7 @@
     <classes>
       <class name="com.titan.eyestage.LoginTest">
         <methods>
-          <include name="Steps"/>
+          <include name="Steps" invocation-numbers="0 1"/>
           <include name="opn_app"/>
           <include name="endThesession"/>
           <include name="tearDownReport"/>

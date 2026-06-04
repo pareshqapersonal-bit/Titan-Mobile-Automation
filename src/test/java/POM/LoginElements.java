@@ -50,7 +50,7 @@ public class LoginElements extends CommonUtils  {
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
 	
-	public void testexecution() throws InterruptedException {
+	public void testexecution(String number, String pass) throws InterruptedException {
 		
 		//wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
 		click(Drawer);
@@ -58,7 +58,7 @@ public class LoginElements extends CommonUtils  {
 	//wait.until(ExpectedConditions.visibilityOf(	loginIcon)).click();
 		click(loginIcon);
 	//wait.until(ExpectedConditions.visibilityOf(MobileTextField)).sendKeys(Keys.ENTER);
-		sendKeys(MobileTextField, "8698294937");
+		sendKeys(MobileTextField, number);
 	//MobileTextField.sendKeys("8698294937");
 	//wait.until(ExpectedConditions.visibilityOf(loginCTA)).click();
 	click(loginCTA);
@@ -80,7 +80,7 @@ public class LoginElements extends CommonUtils  {
 
 	System.out.println("EditText count = " + edits.size());
 
-	edits.get(0).sendKeys("254265");
+	edits.get(0).sendKeys(pass);
 	//wait.until(ExpectedConditions.visibilityOf(loginsubmission)).click();
 	click(loginsubmission);
 //	wait.until(ExpectedConditions.visibilityOf(Drawer)).click();

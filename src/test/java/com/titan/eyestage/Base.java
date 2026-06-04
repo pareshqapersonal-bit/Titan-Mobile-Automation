@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeSuite;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 
+import Utilities.ConfigReader;
 import Utilities.ExtentManager;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
@@ -38,12 +39,12 @@ public class Base{
     public void opn_app() throws MalformedURLException {
 
         UiAutomator2Options options = new UiAutomator2Options();
-
-        options.setPlatformName("Android");
-        options.setDeviceName("Vivo V25"); // change if needed
+        ConfigReader config = new ConfigReader();
+        options.setPlatformName(config.getProperty("platformName"));
+        options.setDeviceName(config.getProperty("deviceName")); // change if needed
 
         String apkPath = System.getProperty("user.home")
-                + "\\Downloads\\TEP_STAGE.apk";
+                + "\\Downloads\\"+config.getProperty("appName");
         options.setApp(apkPath);
         options.setAutoGrantPermissions(true);
         options.setNoReset(false);
@@ -52,7 +53,7 @@ public class Base{
 //        AppiumDriver driver = new AppiumDriver(
 //                new URL("http://127.0.0.1:4723"),
 //                options);
-        driver = new AndroidDriver(new URL("http://127.0.0.1:4723"), options);
+        driver = new AndroidDriver(new URL(config.getProperty("appiumURL")), options);
     
 
         System.out.println("App launched successfully");

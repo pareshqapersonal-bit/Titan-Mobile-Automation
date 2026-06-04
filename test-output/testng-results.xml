@@ -1,40 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+<testng-results ignored="0" total="2" passed="0" failed="2" skipped="0">
   <reporter-output>
   </reporter-output>
-  <suite started-at="2026-06-03T13:39:25 IST" name="Default suite" finished-at="2026-06-03T13:40:10 IST" duration-ms="44569">
+  <suite started-at="2026-06-04T07:34:47 IST" name="Default suite" finished-at="2026-06-04T07:37:19 IST" duration-ms="151585">
     <groups>
     </groups>
-    <test started-at="2026-06-03T13:39:25 IST" name="Default test" finished-at="2026-06-03T13:40:10 IST" duration-ms="44569">
+    <test started-at="2026-06-04T07:34:47 IST" name="Default test" finished-at="2026-06-04T07:37:19 IST" duration-ms="151585">
       <class name="com.titan.eyestage.LoginTest">
-        <test-method is-config="true" signature="setupReport()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:39:24 IST" name="setupReport" finished-at="2026-06-03T13:39:25 IST" duration-ms="713" status="PASS">
+        <test-method is-config="true" signature="setupReport()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:34:47 IST" name="setupReport" finished-at="2026-06-04T07:34:47 IST" duration-ms="268" status="PASS">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- setupReport -->
-        <test-method is-config="true" signature="opn_app()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:39:25 IST" name="opn_app" finished-at="2026-06-03T13:39:41 IST" duration-ms="15547" status="PASS">
+        <test-method is-config="true" signature="opn_app()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:34:48 IST" name="opn_app" finished-at="2026-06-04T07:34:56 IST" duration-ms="8774" status="PASS">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- opn_app -->
-        <test-method signature="Steps()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:39:41 IST" name="Steps" finished-at="2026-06-03T13:40:10 IST" duration-ms="28938" status="PASS">
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- Steps -->
-        <test-method is-config="true" signature="endThesession()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:40:10 IST" name="endThesession" finished-at="2026-06-03T13:40:10 IST" duration-ms="0" status="PASS">
-          <reporter-output>
-          </reporter-output>
-        </test-method> <!-- endThesession -->
-        <test-method is-config="true" signature="tearDown(org.testng.ITestResult)[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:40:10 IST" name="tearDown" finished-at="2026-06-03T13:40:10 IST" duration-ms="1" status="PASS">
+        <test-method signature="Steps(java.lang.String,java.lang.String)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:34:56 IST" name="Steps" data-provider="userDatails" finished-at="2026-06-04T07:36:02 IST" duration-ms="65212" status="FAIL">
           <params>
             <param index="0">
               <value>
-                <![CDATA[[TestResult name=Steps status=SUCCESS method=LoginTest.Steps()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec] output={null}]]]>
+                <![CDATA[8698294937]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[254265]]>
+              </value>
+            </param>
+          </params>
+          <exception class="java.lang.NullPointerException">
+            <message>
+              <![CDATA[Cannot invoke "org.openqa.selenium.WebDriver.getClass()" because "exceptionDriver" is null]]>
+            </message>
+            <full-stacktrace>
+              <![CDATA[java.lang.NullPointerException: Cannot invoke "org.openqa.selenium.WebDriver.getClass()" because "exceptionDriver" is null
+at org.openqa.selenium.support.ui.WebDriverWait.timeoutException(WebDriverWait.java:86)
+at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:234)
+at Utilities.CommonUtils.click(CommonUtils.java:19)
+at POM.LoginElements.testexecution(LoginElements.java:87)
+at com.titan.eyestage.LoginTest.Steps(LoginTest.java:29)
+at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:141)
+at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:697)
+at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:230)
+at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:63)
+at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:1005)
+at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:203)
+at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:154)
+at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:134)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+at org.testng.TestRunner.privateRun(TestRunner.java:744)
+at org.testng.TestRunner.run(TestRunner.java:616)
+at org.testng.SuiteRunner.runTest(SuiteRunner.java:421)
+at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:413)
+at org.testng.SuiteRunner.privateRun(SuiteRunner.java:373)
+at org.testng.SuiteRunner.run(SuiteRunner.java:312)
+at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+at org.testng.TestNG.runSuitesSequentially(TestNG.java:1274)
+at org.testng.TestNG.runSuitesLocally(TestNG.java:1208)
+at org.testng.TestNG.runSuites(TestNG.java:1112)
+at org.testng.TestNG.run(TestNG.java:1079)
+at org.testng.remote.AbstractRemoteTestNG.run(AbstractRemoteTestNG.java:115)
+at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:293)
+at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:91)
+]]>
+            </full-stacktrace>
+          </exception> <!-- java.lang.NullPointerException -->
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- Steps -->
+        <test-method is-config="true" signature="endThesession()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:36:02 IST" name="endThesession" finished-at="2026-06-04T07:36:02 IST" duration-ms="1" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- endThesession -->
+        <test-method is-config="true" signature="tearDown(org.testng.ITestResult)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:36:02 IST" name="tearDown" finished-at="2026-06-04T07:36:02 IST" duration-ms="781" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[TestResult name=Steps status=FAILURE method=LoginTest.Steps(java.lang.String,java.lang.String)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14] output={null}]]]>
               </value>
             </param>
           </params>
           <reporter-output>
           </reporter-output>
         </test-method> <!-- tearDown -->
-        <test-method is-config="true" signature="tearDownReport()[pri:0, instance:com.titan.eyestage.LoginTest@7c7a06ec]" started-at="2026-06-03T13:40:10 IST" name="tearDownReport" finished-at="2026-06-03T13:40:11 IST" duration-ms="922" status="PASS">
+        <test-method is-config="true" signature="opn_app()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:36:02 IST" name="opn_app" finished-at="2026-06-04T07:36:13 IST" duration-ms="10410" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- opn_app -->
+        <test-method signature="Steps(java.lang.String,java.lang.String)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:36:13 IST" name="Steps" data-provider="userDatails" finished-at="2026-06-04T07:37:18 IST" duration-ms="65640" status="FAIL">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[8779906355]]>
+              </value>
+            </param>
+            <param index="1">
+              <value>
+                <![CDATA[123456]]>
+              </value>
+            </param>
+          </params>
+          <exception class="java.lang.NullPointerException">
+            <message>
+              <![CDATA[Cannot invoke "org.openqa.selenium.WebDriver.getClass()" because "exceptionDriver" is null]]>
+            </message>
+            <full-stacktrace>
+              <![CDATA[java.lang.NullPointerException: Cannot invoke "org.openqa.selenium.WebDriver.getClass()" because "exceptionDriver" is null
+at org.openqa.selenium.support.ui.WebDriverWait.timeoutException(WebDriverWait.java:86)
+at org.openqa.selenium.support.ui.FluentWait.until(FluentWait.java:234)
+at Utilities.CommonUtils.click(CommonUtils.java:19)
+at POM.LoginElements.testexecution(LoginElements.java:87)
+at com.titan.eyestage.LoginTest.Steps(LoginTest.java:29)
+at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:141)
+at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:697)
+at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:230)
+at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:63)
+at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:1005)
+at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:203)
+at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:154)
+at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:134)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1597)
+at org.testng.TestRunner.privateRun(TestRunner.java:744)
+at org.testng.TestRunner.run(TestRunner.java:616)
+at org.testng.SuiteRunner.runTest(SuiteRunner.java:421)
+at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:413)
+at org.testng.SuiteRunner.privateRun(SuiteRunner.java:373)
+at org.testng.SuiteRunner.run(SuiteRunner.java:312)
+at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+at org.testng.TestNG.runSuitesSequentially(TestNG.java:1274)
+at org.testng.TestNG.runSuitesLocally(TestNG.java:1208)
+at org.testng.TestNG.runSuites(TestNG.java:1112)
+at org.testng.TestNG.run(TestNG.java:1079)
+at org.testng.remote.AbstractRemoteTestNG.run(AbstractRemoteTestNG.java:115)
+at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:293)
+at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:91)
+]]>
+            </full-stacktrace>
+          </exception> <!-- java.lang.NullPointerException -->
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- Steps -->
+        <test-method is-config="true" signature="endThesession()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:37:18 IST" name="endThesession" finished-at="2026-06-04T07:37:18 IST" duration-ms="0" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- endThesession -->
+        <test-method is-config="true" signature="tearDown(org.testng.ITestResult)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:37:18 IST" name="tearDown" finished-at="2026-06-04T07:37:19 IST" duration-ms="710" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[TestResult name=Steps status=FAILURE method=LoginTest.Steps(java.lang.String,java.lang.String)[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14] output={null}]]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+        <test-method is-config="true" signature="tearDownReport()[pri:0, instance:com.titan.eyestage.LoginTest@305b7c14]" started-at="2026-06-04T07:37:20 IST" name="tearDownReport" finished-at="2026-06-04T07:37:20 IST" duration-ms="17" status="PASS">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- tearDownReport -->
