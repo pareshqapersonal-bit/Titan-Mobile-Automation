@@ -11,6 +11,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 import Utilities.CommonUtils;
 import io.appium.java_client.AppiumBy;
@@ -46,6 +47,9 @@ public class LoginElements extends CommonUtils  {
 	
 	@FindBy(id="android:id/button1")
 	WebElement logoutConfirmation;
+	
+	@FindBy(id="com.titan.eyecare:id/txt_username")
+	WebElement profileName;
 	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
@@ -86,7 +90,9 @@ public class LoginElements extends CommonUtils  {
 //	wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
     click(Drawer);	
 
-	
+	String userPRofileName= wait.until(ExpectedConditions.visibilityOf(profileName)).getText();
+	System.out.println("My name is"+userPRofileName);
+	Assert.assertEquals(userPRofileName, "Hello Paresh,");
 	
 	
 	}
