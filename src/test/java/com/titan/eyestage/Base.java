@@ -18,8 +18,7 @@ import org.testng.annotations.BeforeSuite;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 
-import Utilities.ConfigReader;
-import Utilities.ExtentManager;
+import Utilities.*;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 
@@ -27,6 +26,7 @@ public class Base{
 	protected static AndroidDriver driver;
 	  public static ExtentReports extent;
 	  public static ExtentTest test;
+	  
 	@BeforeSuite
     public void setupReport() {
 
@@ -40,14 +40,14 @@ public class Base{
 
         UiAutomator2Options options = new UiAutomator2Options();
         ConfigReader config = new ConfigReader();
+        
         options.setPlatformName(config.getProperty("platformName"));
         options.setDeviceName(config.getProperty("deviceName")); // change if needed
 
-        String apkPath = System.getProperty("user.home")
-                + "\\Downloads\\"+config.getProperty("appName");
+        String apkPath = config.getProperty("apkPath");
         options.setApp(apkPath);
         options.setAutoGrantPermissions(true);
-        options.setNoReset(false);
+        options.setNoReset(true);
         options.setAppWaitDuration(Duration.ofSeconds(30));
 //
 //        AppiumDriver driver = new AppiumDriver(
@@ -61,12 +61,7 @@ public class Base{
   driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
     }
     
-    
-    @AfterMethod
-    public void endThesession()
-    {
-    	
-    }
+  
     
     @AfterSuite
     public void tearDownReport() {
