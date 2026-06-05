@@ -2,6 +2,8 @@ package com.titan.eyestage;
 
 import java.time.Duration;
 
+import javax.swing.text.Utilities;
+
 import org.openqa.selenium.support.PageFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
@@ -12,14 +14,16 @@ import org.testng.annotations.Test;
 import POM.LoginElements;
 import Utilities.DataProviderUtil;
 import io.appium.java_client.android.AndroidDriver;
+import Utilities.*;
 
-@Listeners(Utilities.TestListener.class)
+@Listeners(TestListener.class)
 public class LoginTest extends Base {
 	
 	
 	
 	
-	@Test(dataProvider = "userDatails", dataProviderClass = DataProviderUtil.class)
+	@Test(retryAnalyzer = RetryAnalyzer.class,   description = "TC_LOGIN_001 - Verify user login",
+			dataProvider = "userDatails", dataProviderClass = DataProviderUtil.class)
 	public void Steps(String number, String pass) throws InterruptedException
 	{  
 

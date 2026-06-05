@@ -1,11 +1,13 @@
 package Utilities;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestResult;
 
 import com.titan.eyestage.Base;
 
@@ -57,5 +59,15 @@ public class CommonUtils extends Base {
         return wait.until(
                 ExpectedConditions.visibilityOf(element))
                 .getText();
+    }
+    
+    //Testcase details
+    public static String getTestData(ITestResult result) {
+
+        if (result.getParameters().length == 0) {
+            return "";
+        }
+
+        return " | " + Arrays.toString(result.getParameters());
     }
 }

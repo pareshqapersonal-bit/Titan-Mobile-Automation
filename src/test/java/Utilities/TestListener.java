@@ -1,5 +1,6 @@
 package Utilities;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.testng.ITestContext;
@@ -13,7 +14,12 @@ public class TestListener extends Base implements ITestListener {
 	
 	public void onTestStart(ITestResult result)
 	{
-		test = extent.createTest(result.getName()+" "+Arrays.toString(result.getParameters()));
+		String testName = result.getMethod().getDescription();
+
+		if (testName == null || testName.isEmpty()) {
+		    testName = result.getMethod().getMethodName();
+		}
+		test = extent.createTest(testName + CommonUtils.getTestData(result));	
 		System.out.println(result.getName()+"Started");
 	}
 
@@ -28,7 +34,16 @@ public class TestListener extends Base implements ITestListener {
 
 	@Override
 	public void onTestFailure(ITestResult result) {
+		String screenshotPath = null;
+		try {
+			screenshotPath = captureScreenshot(result.getName());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		test.fail(result.getThrowable());
+		test.addScreenCaptureFromPath(screenshotPath);
 		ITestListener.super.onTestFailure(result);
 		System.out.println(
                 result.getName() +

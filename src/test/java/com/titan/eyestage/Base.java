@@ -24,7 +24,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 
 public class Base{
-	protected AndroidDriver driver;
+	protected static AndroidDriver driver;
 	  public static ExtentReports extent;
 	  public static ExtentTest test;
 	@BeforeSuite
@@ -95,8 +95,8 @@ public class Base{
     }
     
     //after method
-    @AfterMethod
-    public void tearDown(ITestResult result) throws IOException {
+   
+    /*public void tearDown(ITestResult result) throws IOException {
 
         if(result.getStatus() == ITestResult.FAILURE) {
 
@@ -116,10 +116,17 @@ public class Base{
         else {
 
             test.skip("Test Skipped");
+        }*/
+    
+    @AfterMethod
+    public void tearDown() {
+
+        if(driver != null) {
+            driver.quit();
         }
+    }
     }
     
     
 
     
-}
