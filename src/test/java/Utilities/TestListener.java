@@ -53,6 +53,7 @@ public class TestListener extends Base implements ITestListener {
 	@Override
 	public void onTestSkipped(ITestResult result) {
 		// TODO Auto-generated method stub
+		test.skip("Retry Attempt");
 		ITestListener.super.onTestSkipped(result);
 		  System.out.println(
 	                result.getName() +

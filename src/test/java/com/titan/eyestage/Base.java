@@ -47,7 +47,7 @@ public class Base{
         String apkPath = config.getProperty("apkPath");
         options.setApp(apkPath);
         options.setAutoGrantPermissions(true);
-        options.setNoReset(true);
+        options.setNoReset(false);
         options.setAppWaitDuration(Duration.ofSeconds(30));
 //
 //        AppiumDriver driver = new AppiumDriver(
@@ -55,7 +55,8 @@ public class Base{
 //                options);
         driver = new AndroidDriver(new URL(config.getProperty("appiumURL")), options);
     
-
+        System.out.println("Package = " + driver.getCurrentPackage());
+        System.out.println("Activity = " + driver.currentActivity());
         System.out.println("App launched successfully");
        // driver.findElement(By.xpath("//android.widget.RelativeLayout[@resource-id=\"com.titan.eyecare:id/rl_toolbar_app\"]")).click();
   driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
