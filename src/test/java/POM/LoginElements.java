@@ -112,7 +112,22 @@ public class LoginElements extends CommonUtils  {
 			//wait.until(ExpectedConditions.visibilityOf(logoutConfirmation)).click();
 			click(logoutConfirmation);
 		}
-
 		
+		
+		//small login function without navigation
+
+		public void shortLogin(String number, String pass)
+		{
+			sendKeys(MobileTextField, number);
+			click(loginCTA);
+			List<WebElement> edits =
+			        driver.findElements(AppiumBy.className("android.widget.EditText"));
+
+			System.out.println("EditText count = " + edits.size());
+
+			edits.get(0).sendKeys(pass);
+			
+			click(loginsubmission);
+		}
 		
 }

@@ -1,0 +1,39 @@
+package Testcases;
+
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
+
+import com.titan.eyestage.Base;
+
+import POM.LoginElements;
+import POM.PurchaseJourneyElements;
+import Utilities.DataProviderUtil;
+import Utilities.TestListener;
+
+@Listeners(TestListener.class)
+public class PurchaseJourneyTesting extends Base {
+	
+	@Test(description = "TC_LOGIN_001 - Verify Purchase journey flow", dataProvider = "userDatails",
+			dataProviderClass = DataProviderUtil.class)
+	public void Steps(String number, String pass) throws InterruptedException
+	{  
+
+		
+	   LoginElements le = new LoginElements(driver);
+
+	  //  le.testexecution( number, pass);
+	    
+	    PurchaseJourneyElements pj = new PurchaseJourneyElements(driver);
+	    pj.searchSteps();
+	    pj.cartFlow();
+		le.shortLogin(number, pass);
+		pj.cartFlow();
+		pj.proceedToCheckout();
+		pj.proceedToPay();
+		pj.payment();
+		
+		
+	
+	}
+
+}
