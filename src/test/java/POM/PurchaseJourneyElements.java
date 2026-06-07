@@ -1,7 +1,12 @@
 package POM;
 
-import java.time.Duration;
+import static org.testng.Assert.assertEquals;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -39,7 +44,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement proceedToCheckout;
 	
-	@FindBy(xpath = "//*[@text='Axis']")
+	@FindBy(xpath = "//android.widget.LinearLayout[@resource-id=\"com.titan.eyecare:id/ll_checkout_payment_method_banking_list\"]/android.widget.LinearLayout[2]")
 	WebElement bankSelection;
 	
 	@FindBy(id="com.titan.eyecare:id/layout_checkout_button")
@@ -48,7 +53,8 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement continuePaymentCTA;;
 	
-	
+	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
+	WebElement paymentConfirmation;;
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
 	
@@ -96,6 +102,34 @@ public class PurchaseJourneyElements extends CommonUtils {
 		click(continuePaymentCTA);
 		
 		System.out.println("DOM RazorPay"+driver.getContextHandles());
+	}
+	
+	//Razorpay working
+	public void razorPay() throws InterruptedException
+	{
+		Thread.sleep(1000);
+		Set<String> context = driver.getContextHandles();
+		System.out.println("Context is"+context);
+		
+		for(String ctext : context)
+	    {
+	        System.out.println(ctext);
+	        if(ctext.contains("WEBVIEW"))
+	        {
+	        	List<WebElement> buttons =
+	        		    driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
+
+	        		System.out.println("Count = " + buttons.size());
+	        		driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+	        
+	        	break;
+	        }
+	    }
+		Thread.sleep(1000);
+		assertEquals(getText(paymentConfirmation), "Wohoo!");
+	//	driver.context("WEBVIEW_com.titan.eyecare");
+
+		
 	}
 
 }

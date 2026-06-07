@@ -49,6 +49,9 @@ public class Base{
         options.setAutoGrantPermissions(true);
         options.setNoReset(false);
         options.setAppWaitDuration(Duration.ofSeconds(30));
+        options.setCapability("chromedriverAutodownload", true);
+        options.setCapability("ensureWebviewsHavePages", true);
+        options.setCapability("webviewConnectTimeout", 20000);
 //
 //        AppiumDriver driver = new AppiumDriver(
 //                new URL("http://127.0.0.1:4723"),
