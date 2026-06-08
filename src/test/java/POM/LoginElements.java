@@ -51,6 +51,9 @@ public class LoginElements extends CommonUtils  {
 	@FindBy(id="com.titan.eyecare:id/txt_username")
 	WebElement profileName;
 	
+	@FindBy(xpath = "//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_login_label\"]")
+	WebElement loginPageTitleText;
+	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
 	
@@ -130,4 +133,32 @@ public class LoginElements extends CommonUtils  {
 			click(loginsubmission);
 		}
 		
-}
+		
+		//Login page visibility
+		/*public boolean isLoginPageDisplayed()
+		{
+			try {
+			 visibilityOf(loginPageTitleText);
+				System.out.println(getText(loginPageTitleText));
+				return loginPageTitleText.isDisplayed();
+				
+			}catch (Exception e) {
+				  e.printStackTrace();
+				return false;
+			}*/
+			
+			
+			public boolean isLoginPageDisplayed()
+			{
+			    System.out.println("Checking Login Page");
+
+			    int count = driver.findElements(
+			            AppiumBy.id("com.titan.eyecare:id/txt_login_label"))
+			            .size();
+
+			    System.out.println("Count = " + count);
+
+			    return count > 0;
+			}
+		}
+

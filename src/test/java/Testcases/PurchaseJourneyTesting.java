@@ -1,5 +1,7 @@
 package Testcases;
 
+import java.io.IOException;
+
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -15,7 +17,7 @@ public class PurchaseJourneyTesting extends Base {
 	
 	@Test(description = "TC_LOGIN_001 - Verify Purchase journey flow", dataProvider = "userDatails",
 			dataProviderClass = DataProviderUtil.class)
-	public void Steps(String number, String pass) throws InterruptedException
+	public void Steps(String number, String pass) throws InterruptedException, IOException
 	{  
 
 		
@@ -25,9 +27,9 @@ public class PurchaseJourneyTesting extends Base {
 	    
 	    PurchaseJourneyElements pj = new PurchaseJourneyElements(driver);
 	    pj.searchSteps();
-	    pj.cartFlow();
-		le.shortLogin(number, pass);
-		pj.cartFlow();
+	    pj.cartFlow(number,pass);
+	 
+		
 		pj.proceedToCheckout();
 		pj.proceedToPay();
 		pj.payment();
