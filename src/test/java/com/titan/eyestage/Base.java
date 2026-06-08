@@ -77,7 +77,10 @@ public class Base{
     
     //Screenshot function
     public String captureScreenshot(String testName) throws IOException {
-
+    	File folder = new File("Screenshots");
+    	if (!folder.exists()) {
+    	    folder.mkdirs();
+    	}
         File src = ((TakesScreenshot) driver)
                 .getScreenshotAs(OutputType.FILE);
 
