@@ -1,5 +1,6 @@
 package com.titan.eyestage;
 
+import java.io.IOException;
 import java.time.Duration;
 
 import javax.swing.text.Utilities;
@@ -24,7 +25,7 @@ public class LoginTest extends Base {
 	
 	@Test(retryAnalyzer = RetryAnalyzer.class,   description = "TC_LOGIN_001 - Verify user login",
 			dataProvider = "userDatails", dataProviderClass = DataProviderUtil.class)
-	public void Steps(String number, String pass) throws InterruptedException
+	public void Steps(String number, String pass) throws InterruptedException, IOException
 	{  
 
 		

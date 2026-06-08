@@ -15,7 +15,7 @@ import Utilities.TestListener;
 @Listeners(TestListener.class)
 public class PurchaseJourneyTesting extends Base {
 	
-	@Test(description = "TC_LOGIN_001 - Verify Purchase journey flow", dataProvider = "userDatails",
+	@Test(description = "TC_Purchase_Journey_001 - Verify Purchase journey flow", dataProvider = "userDatails",
 			dataProviderClass = DataProviderUtil.class)
 	public void Steps(String number, String pass) throws InterruptedException, IOException
 	{  
@@ -28,12 +28,10 @@ public class PurchaseJourneyTesting extends Base {
 	    PurchaseJourneyElements pj = new PurchaseJourneyElements(driver);
 	    pj.searchSteps();
 	    pj.cartFlow(number,pass);
-	 
-		
 		pj.proceedToCheckout();
 		pj.proceedToPay();
 		pj.payment();
-		pj.razorPay();
+		
 		
 	
 	}

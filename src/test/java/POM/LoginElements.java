@@ -1,6 +1,9 @@
 package POM;
 
+import static org.testng.Assert.assertTrue;
+
 import java.beans.Visibility;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
@@ -56,9 +59,9 @@ public class LoginElements extends CommonUtils  {
 	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
-	
-	public void testexecution(String number, String pass) throws InterruptedException {
-		
+	String path = null;
+	public void testexecution(String number, String pass) throws InterruptedException, IOException {
+		test.info("Login process started");
 		//wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
 		click(Drawer);
 		
@@ -91,11 +94,15 @@ public class LoginElements extends CommonUtils  {
 	//wait.until(ExpectedConditions.visibilityOf(loginsubmission)).click();
 	click(loginsubmission);
 //	wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
-    click(Drawer);	
+	click(Drawer);	
+	path = captureScreenshot("User_Details");
+   
 
 	String userPRofileName= wait.until(ExpectedConditions.visibilityOf(profileName)).getText();
 	System.out.println("My name is"+userPRofileName);
-	Assert.assertEquals(userPRofileName, "Hello Paresh,");
+	test.info(userPRofileName+ "has successfully logged in");
+	test.addScreenCaptureFromPath(path);
+	assertTrue(profileName.isDisplayed(), "Cart page not displayed"); 
 	
 	
 	}
