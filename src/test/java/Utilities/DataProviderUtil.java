@@ -16,4 +16,18 @@ public class DataProviderUtil {
 		};
 	}
 
+	
+@DataProvider(name="Categories")
+	
+	public Object[][] testData1	()
+	{
+		return new Object[][]
+		{
+			
+			{"Sunglasses"},
+			{"Contact Lenses"},
+			{"Eyeglasses"}
+			
+		};
+	}
 }
