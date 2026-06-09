@@ -101,17 +101,19 @@ public class LoginElements extends CommonUtils  {
 	String userPRofileName= wait.until(ExpectedConditions.visibilityOf(profileName)).getText();
 	System.out.println("My name is"+userPRofileName);
 	test.info(userPRofileName+ "has successfully logged in");
+	visibilityOf(profileName);
 	test.addScreenCaptureFromPath(path);
-	assertTrue(profileName.isDisplayed(), "Cart page not displayed"); 
+	assertTrue(profileName.isDisplayed(), "User login failed"); 
 	
 	
 	}
 	
 	//Logout execution
-		public void logoutSteps()
+		public void logoutSteps() throws IOException
 		{
 			//wait.until(ExpectedConditions.visibilityOf(Drawer)).click();
 			click(Drawer);
+			test.info("Log out process started");
 			driver.findElement(
 				    AppiumBy.androidUIAutomator(
 				        "new UiScrollable(new UiSelector().scrollable(true))" +
@@ -121,6 +123,10 @@ public class LoginElements extends CommonUtils  {
 			
 			//wait.until(ExpectedConditions.visibilityOf(logoutConfirmation)).click();
 			click(logoutConfirmation);
+			path = captureScreenshot("User_Details");
+			test.info("User has successfully logged out");
+			test.addScreenCaptureFromPath(path);
+			
 		}
 		
 		

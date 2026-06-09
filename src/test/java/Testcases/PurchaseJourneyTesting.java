@@ -31,6 +31,7 @@ public class PurchaseJourneyTesting extends Base {
 		pj.proceedToCheckout();
 		pj.proceedToPay();
 		pj.payment();
+		pj.razorPay();
 		
 		
 	

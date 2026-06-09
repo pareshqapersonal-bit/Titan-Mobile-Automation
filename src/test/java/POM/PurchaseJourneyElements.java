@@ -61,6 +61,15 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(id="com.titan.eyecare:id/txt_title")
 	WebElement cartTitle;
 	
+	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
+	WebElement OrderSuccess;
+	
+	@FindBy(id="com.titan.eyecare:id/txt_app_rate_btn_later")
+	WebElement closeRating;
+	
+	@FindBy(id="com.titan.eyecare:id/txt_payment_success_id")
+	WebElement OrderIDText;
+	
 	//LoginElements le = new LoginElements(driver);
 	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
@@ -109,6 +118,8 @@ public class PurchaseJourneyElements extends CommonUtils {
 		test.info("Proceeding to checkout");
 		click(proceedToCheckout);
 		 test.pass("Address page opened");
+		
+		 visibilityOf(cartTitle);
 		 path = captureScreenshot("Address page");
 		 test.info("Address page displayed");
 		 test.addScreenCaptureFromPath(path);
@@ -123,7 +134,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 		test.info("Selecting Addresses");
 		click(proceedToPay);
 		test.pass("Selected  Addresses");
-		
+		visibilityOf(cartTitle);
 		path = captureScreenshot("Payment page");
 		 test.info("Payment page displayed");
 		 test.addScreenCaptureFromPath(path);
@@ -144,12 +155,13 @@ public class PurchaseJourneyElements extends CommonUtils {
 		
 		click(bankSelection);
 		click(continuePaymentCTA);
+		
 		test.pass("Payment method selected");
 		System.out.println("DOM RazorPay"+driver.getContextHandles());
 	}
 	
 	//Razorpay working
-	public void razorPay() throws InterruptedException
+	public void razorPay() throws InterruptedException, IOException
 	{
 		 test.info("Initiating Razorpay payment");
 		Thread.sleep(1000);
@@ -171,9 +183,17 @@ public class PurchaseJourneyElements extends CommonUtils {
 	        }
 	    }
 		Thread.sleep(1000);
-		assertEquals(getText(paymentConfirmation), "Wohoo!");
+		
+		//assertEquals(getText(paymentConfirmation), "Wohoo!");
 	//	driver.context("WEBVIEW_com.titan.eyecare");
 		 test.pass("Payment completed");
+		 click(OrderSuccess);
+		 click(closeRating);
+		 visibilityOf(OrderIDText);
+		 path = captureScreenshot("Order ID");
+		 test.info(getText(OrderIDText)+" is the OrderID");
+		 test.addScreenCaptureFromPath(path);
+		 assertTrue(OrderIDText.isDisplayed());
 		
 	}
 
