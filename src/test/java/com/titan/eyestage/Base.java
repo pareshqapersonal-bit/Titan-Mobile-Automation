@@ -40,12 +40,51 @@ public class Base{
 
         UiAutomator2Options options = new UiAutomator2Options();
         ConfigReader config = new ConfigReader();
+        String env = config.getProperty("environment");
         
         options.setPlatformName(config.getProperty("platformName"));
         options.setDeviceName(config.getProperty("deviceName")); // change if needed
 
-        String apkPath = config.getProperty("apkPath");
-        options.setApp(apkPath);
+		/*
+		 * String apkPath = config.getProperty("apkPath"); options.setApp(apkPath);
+		 * options.setCapability( "appPackage", config.getProperty("appPackage"));
+		 * options.setCapability( "appActivity", config.getProperty("appActivity"));
+		 */
+        
+        if(env.equalsIgnoreCase("stage"))
+        {
+        	 System.out.println("Launching STAGE build");
+
+        	    options.setApp(config.getProperty("apkPath"));
+
+        	    options.setCapability(
+        	            "appPackage",
+        	            config.getProperty("appPackage"));
+
+        	    options.setCapability(
+        	            "appActivity",
+        	            config.getProperty("appActivity"));
+
+        	    options.setNoReset(false);
+        }
+        else
+        {
+        	System.out.println("Launching LIVE build");
+
+            options.setCapability(
+                    "appPackage",
+                    config.getProperty("appPackage"));
+
+            options.setCapability(
+                    "appActivity",
+                    config.getProperty("appActivity"));
+
+            options.setNoReset(true);
+
+            options.setCapability(
+                    "dontStopAppOnReset",
+                    true);
+        }
         options.setAutoGrantPermissions(true);
         options.setNoReset(false);
         options.setAppWaitDuration(Duration.ofSeconds(30));

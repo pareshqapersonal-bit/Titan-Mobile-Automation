@@ -10,12 +10,13 @@ import com.titan.eyestage.Base;
 import POM.LoginElements;
 import POM.PurchaseJourneyElements;
 import Utilities.DataProviderUtil;
+import Utilities.RetryAnalyzer;
 import Utilities.TestListener;
 
 @Listeners(TestListener.class)
 public class PurchaseJourneyTesting extends Base {
 	
-	@Test(description = "TC_Purchase_Journey_001 - Verify Purchase journey flow", dataProvider = "userDatails",
+	@Test(retryAnalyzer = RetryAnalyzer.class,description = "TC_Purchase_Journey_001 - Verify Purchase journey flow", dataProvider = "userDatails",
 			dataProviderClass = DataProviderUtil.class)
 	public void Steps(String number, String pass) throws InterruptedException, IOException
 	{  

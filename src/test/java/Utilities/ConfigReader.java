@@ -12,18 +12,35 @@ public class ConfigReader {
 	    public ConfigReader() {
 
 	        try {
-	        	path = Paths.get(
-	        		    System.getProperty("user.dir"),
-	        		    "Resources",
-	        		    "Config.properties"
-	        		).toString();
-
+				
+	        	
+	        	//Hardcoded env
+				  path = Paths.get( System.getProperty("user.dir"), "Resources",
+				  "Config.properties" ).toString();
+				 
+	        	
+	        	
+	        	//Dynamic env code
+				/*
+				 * String env = System.getProperty("env", "stage");
+				 * 
+				 * String configFile = env.equalsIgnoreCase("live") ? "Config-Live.properties" :
+				 * "Config-Stage.properties";
+				 * 
+				 * path = Paths.get( System.getProperty("user.dir"), "Resources", configFile
+				 * ).toString();
+				 */
 	            FileInputStream fis =
 	                new FileInputStream(
 	                    path);
 
 	            prop = new Properties();
 	            prop.load(fis);
+				/*
+				 * System.out.println("Environment = " + env);
+				 * System.out.println("Config File = " + configFile);
+				 * System.out.println("Path = " + path);
+				 */
 
 	        } catch (IOException e) {
 
