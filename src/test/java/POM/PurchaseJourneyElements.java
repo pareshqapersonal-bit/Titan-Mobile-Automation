@@ -105,6 +105,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 		test.pass("Product added to cart");
 		
 		visibilityOf(cartTitle);
+		visibilityOf(proceedToCheckout);
 		
 		path = captureScreenshot("Cart_Page");
 		test.info("Cart Page Displayed");
@@ -120,6 +121,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 		 test.pass("Address page opened");
 		
 		 visibilityOf(cartTitle);
+		 visibilityOf(proceedToPay);
 		 path = captureScreenshot("Address page");
 		 test.info("Address page displayed");
 		 test.addScreenCaptureFromPath(path);
@@ -135,6 +137,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 		click(proceedToPay);
 		test.pass("Selected  Addresses");
 		visibilityOf(cartTitle);
+		visibilityOf(continuePaymentCTA);
 		path = captureScreenshot("Payment page");
 		 test.info("Payment page displayed");
 		 test.addScreenCaptureFromPath(path);

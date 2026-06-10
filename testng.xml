@@ -8,6 +8,7 @@
             <class name="com.titan.eyestage.LoginTest"/>
             <class name="Testcases.TrackOrderTest"/>
               <class name="Testcases.PurchaseJourneyTesting"/>
+              <class name="com.titan.eyestage.HomePageVerification"/>
         </classes>
 
     </test>
