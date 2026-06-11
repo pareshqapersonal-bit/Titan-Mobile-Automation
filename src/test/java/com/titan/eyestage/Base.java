@@ -54,40 +54,32 @@ public class Base{
         
         if(env.equalsIgnoreCase("stage"))
         {
-        	 System.out.println("Launching STAGE build");
+        	 options.setApp(config.getProperty("apkPath"));
 
-        	    options.setApp(config.getProperty("apkPath"));
-
-        	    options.setCapability(
-        	            "appPackage",
+        	    options.setCapability("appPackage",
         	            config.getProperty("appPackage"));
 
-        	    options.setCapability(
-        	            "appActivity",
+        	    options.setCapability("appActivity",
         	            config.getProperty("appActivity"));
+
+        	    options.setCapability("appWaitActivity", "*");
 
         	    options.setNoReset(false);
         }
         else
         {
-        	System.out.println("Launching LIVE build");
-
-            options.setCapability(
-                    "appPackage",
+        	options.setCapability("appPackage",
                     config.getProperty("appPackage"));
 
-            options.setCapability(
-                    "appActivity",
+            options.setCapability("appActivity",
                     config.getProperty("appActivity"));
 
             options.setNoReset(true);
 
-            options.setCapability(
-                    "dontStopAppOnReset",
-                    true);
+            options.setCapability("dontStopAppOnReset", true);
         }
         options.setAutoGrantPermissions(true);
-        options.setNoReset(false);
+       
         options.setAppWaitDuration(Duration.ofSeconds(30));
         options.setCapability("chromedriverAutodownload", true);
         options.setCapability("ensureWebviewsHavePages", true);
