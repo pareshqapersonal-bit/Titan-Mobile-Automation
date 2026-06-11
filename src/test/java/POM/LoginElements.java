@@ -57,6 +57,13 @@ public class LoginElements extends CommonUtils  {
 	@FindBy(xpath = "//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_login_label\"]")
 	WebElement loginPageTitleText;
 	
+	@FindBy(id="com.android.permissioncontroller:id/permission_allow_foreground_only_button")
+	WebElement locationperm;
+	
+	@FindBy(id="com.android.permissioncontroller:id/permission_deny_button")
+	WebElement notPerm;
+	
+	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
 	String path = null;
@@ -160,6 +167,29 @@ public class LoginElements extends CommonUtils  {
 				return false;
 			}*/
 			
+		
+		public void permissionPopup()
+		{
+		    try
+		    {
+		        WebDriverWait wait =
+		                new WebDriverWait(driver, Duration.ofSeconds(3));
+
+		        wait.until(ExpectedConditions.visibilityOf(locationperm));
+		        click(locationperm);
+
+		    } catch(Exception e) {}
+
+		    try
+		    {
+		        WebDriverWait wait =
+		                new WebDriverWait(driver, Duration.ofSeconds(3));
+
+		        wait.until(ExpectedConditions.visibilityOf(notPerm));
+		        click(notPerm);
+
+		    } catch(Exception e) {}
+		}
 			
 			public boolean isLoginPageDisplayed()
 			{

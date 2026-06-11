@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeSuite;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 
+import POM.LoginElements;
 import Utilities.*;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
@@ -101,7 +102,10 @@ public class Base{
         System.out.println("Activity = " + driver.currentActivity());
         System.out.println("App launched successfully");
        // driver.findElement(By.xpath("//android.widget.RelativeLayout[@resource-id=\"com.titan.eyecare:id/rl_toolbar_app\"]")).click();
+        
   driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+  LoginElements le = new LoginElements(driver);
+  le.permissionPopup();
     }
     
   
