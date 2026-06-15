@@ -89,6 +89,15 @@ public class Base{
 //                new URL("http://127.0.0.1:4723"),
 //                options);
         driver = new AndroidDriver(new URL(config.getProperty("appiumURL")), options);
+        //For live
+        if (config.getProperty("environment").equalsIgnoreCase("live")) {
+        	System.out.println("Environment = " + config.getProperty("environment"));
+        	System.out.println("App Package = " + config.getProperty("appPackage"));
+            System.out.println("Activating LIVE app...");
+            driver.activateApp(config.getProperty("appPackage"));
+        }
+
+       
     
         System.out.println("Package = " + driver.getCurrentPackage());
         System.out.println("Activity = " + driver.currentActivity());
