@@ -30,4 +30,13 @@ public class DataProviderUtil {
 			
 		};
 	}
+
+@DataProvider(name="findMYFit")
+  public Object[][] testdata2()
+  {  return new Object[][]
+		  {
+		  {"Eyeglasses","35","15","125"},
+		  {"Sunglasses","36","20","130"}
+		  };
+  }
 }

@@ -169,26 +169,21 @@ public class LoginElements extends CommonUtils  {
 			
 		
 		public void permissionPopup()
-		{
-		    try
-		    {
-		        WebDriverWait wait =
-		                new WebDriverWait(driver, Duration.ofSeconds(3));
+		{try {
 
-		        wait.until(ExpectedConditions.visibilityOf(locationperm));
-		        click(locationperm);
+	        List<WebElement> allowButtons =
+	                driver.findElements(
+	                    AppiumBy.id(
+	                        "com.android.permissioncontroller:id/permission_allow_button"));
 
-		    } catch(Exception e) {}
+	        if (!allowButtons.isEmpty()) {
+	            allowButtons.get(0).click();
+	            test.info("Permission popup handled.");
+	        }
 
-		    try
-		    {
-		        WebDriverWait wait =
-		                new WebDriverWait(driver, Duration.ofSeconds(3));
-
-		        wait.until(ExpectedConditions.visibilityOf(notPerm));
-		        click(notPerm);
-
-		    } catch(Exception e) {}
+	    } catch (Exception e) {
+	        test.info("Permission popup not displayed.");
+	    }
 		}
 			
 			public boolean isLoginPageDisplayed()
