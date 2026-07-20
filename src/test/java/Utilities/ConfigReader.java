@@ -25,6 +25,7 @@ public class ConfigReader {
 
             prop = new Properties();
             prop.load(fis);
+            fis.close();
 
             // Step 2: Read environment from Config.properties
             String env = prop.getProperty("environment", "stage");
@@ -43,12 +44,31 @@ public class ConfigReader {
 
             fis = new FileInputStream(path);
 
-            prop = new Properties();
+            
             prop.load(fis);
 
             System.out.println("Environment = " + env);
             System.out.println("Config File = " + configFile);
             System.out.println("Path = " + path);
+            
+            String executionMode = prop.getProperty("executionMode", "local");
+            fis.close();
+
+            if (executionMode.equalsIgnoreCase("browserstack")) {
+
+                String bsPath = Paths.get(
+                        System.getProperty("user.dir"),
+                        "Resources",
+                        "config-browserstack.properties")
+                        .toString();
+
+                FileInputStream bsFis = new FileInputStream(bsPath);
+
+                prop.load(bsFis);
+
+                System.out.println("BrowserStack Config Loaded");
+                bsFis.close();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

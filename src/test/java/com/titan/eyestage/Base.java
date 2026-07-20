@@ -22,7 +22,8 @@ import POM.LoginElements;
 import Utilities.*;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
-
+import java.util.HashMap;
+import java.util.Map;
 public class Base{
 	protected static AndroidDriver driver;
 	  public static ExtentReports extent;
@@ -42,6 +43,8 @@ public class Base{
         UiAutomator2Options options = new UiAutomator2Options();
         ConfigReader config = new ConfigReader();
         String env = config.getProperty("environment");
+        
+        String executionMode = config.getProperty("executionMode");
         
         options.setPlatformName(config.getProperty("platformName"));
         options.setDeviceName(config.getProperty("deviceName")); // change if needed
@@ -88,7 +91,56 @@ public class Base{
 //        AppiumDriver driver = new AppiumDriver(
 //                new URL("http://127.0.0.1:4723"),
 //                options);
-        driver = new AndroidDriver(new URL(config.getProperty("appiumURL")), options);
+       // driver = new AndroidDriver(new URL(config.getProperty("appiumURL")), options);
+        
+        System.out.println("Execution Mode = " + executionMode);
+        System.out.println("Driver URL = " + ("browserstack".equalsIgnoreCase(executionMode)
+                ? "BrowserStack"
+                : config.getProperty("appiumURL")));
+        
+        if ("local".equalsIgnoreCase(executionMode)) {
+
+            driver = new AndroidDriver(
+                    new URL(config.getProperty("appiumURL")),
+                    options);
+
+        }
+        else if ("browserstack".equalsIgnoreCase(executionMode)) {
+
+        	Map<String, Object> bstackOptions = new HashMap<>();
+
+            bstackOptions.put("userName",
+                    config.getProperty("browserstack.username"));
+
+            bstackOptions.put("accessKey",
+                    config.getProperty("browserstack.accessKey"));
+
+            bstackOptions.put("projectName",
+                    config.getProperty("browserstack.project"));
+
+            bstackOptions.put("buildName",
+                    config.getProperty("browserstack.build"));
+
+            bstackOptions.put("sessionName",
+                    config.getProperty("browserstack.session"));
+
+            options.setCapability("bstack:options", bstackOptions);
+
+            options.setDeviceName(
+                    config.getProperty("browserstack.device"));
+
+            options.setPlatformVersion(
+                    config.getProperty("browserstack.osVersion"));
+
+            options.setApp(
+                    config.getProperty("browserstack.app"));
+
+            driver = new AndroidDriver(
+                    new URL("https://hub-cloud.browserstack.com/wd/hub"),
+                    options);
+            
+            System.out.println("Session ID = " + driver.getSessionId());
+        }
         //For live
         if (config.getProperty("environment").equalsIgnoreCase("live")) {
         	System.out.println("Environment = " + config.getProperty("environment"));
