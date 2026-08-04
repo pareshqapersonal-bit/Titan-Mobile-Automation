@@ -78,30 +78,40 @@ public class PurchaseJourneyElements extends CommonUtils {
 	String path = null;
 	
 	//Search flow
-	public void searchSteps()
+	public void searchSteps(String sku)
 	{   
 		test.info("Searching for product");
 	
 		click(searchClick);
-		sendKeys(searchField, "GM344PK1F");
+		sendKeys(searchField, sku);
 		
 		test.info("Product Searching completed");
 	}
 	
+	public void backToSearch() {
+
+	    driver.navigate().back();
+	    driver.navigate().back();
+	    driver.navigate().back();
+	    driver.navigate().back();
+	    visibilityOf(searchClick);
+	}
+	
 	
 	//Cart flow
-	public void cartFlow(String number, String pass) throws IOException
+	public void cartFlow(String number, String pass,boolean checkLogin) throws IOException
 	{
 		test.info("Adding product to cart");
 		click(productSelection);
 		click(buyNowCTA);
-		if(le.isLoginPageDisplayed())
-		{
-			System.out.println("inside fun");
-			le.shortLogin(number, pass);
-			click(buyNowCTA);
-			
-		}
+		 if (checkLogin && le.isLoginPageDisplayed()) {
+		        System.out.println("Login required");
+
+		        le.shortLogin(number, pass);
+
+		        click(buyNowCTA);
+		    }
+
 		test.pass("Product added to cart");
 		
 		visibilityOf(cartTitle);

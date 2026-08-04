@@ -55,19 +55,25 @@ public class Base{
 		 * options.setCapability( "appActivity", config.getProperty("appActivity"));
 		 */
         
-        if(env.equalsIgnoreCase("stage"))
-        {
-        	 options.setApp(config.getProperty("apkPath"));
+        if (env.equalsIgnoreCase("stage")) {
 
-        	    options.setCapability("appPackage",
-        	            config.getProperty("appPackage"));
+            options.setApp(config.getProperty("apkPath"));
 
-        	    options.setCapability("appActivity",
-        	            config.getProperty("appActivity"));
+            options.setCapability(
+                    "appPackage",
+                    config.getProperty("appPackage"));
 
-        	    options.setCapability("appWaitActivity", "*");
+            options.setCapability(
+                    "appActivity",
+                    config.getProperty("appActivity"));
 
-        	    options.setNoReset(false);
+            options.setCapability("appWaitActivity", "*");
+
+            // Preserve app data, login state and granted permissions
+            options.setNoReset(true);
+
+            // But still launch the app when the Appium session starts
+            options.setCapability("forceAppLaunch", true);
         }
         else
         {
