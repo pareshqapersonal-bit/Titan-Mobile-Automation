@@ -10,26 +10,36 @@ import models.CartProduct;
 
 public class FrameCart extends CommonUtils {
 
-    private AndroidDriver driver;
+    AndroidDriver driver;
+
+    LoginElements le;
 
     public FrameCart(AndroidDriver driver) {
+
         this.driver = driver;
+
         PageFactory.initElements(driver, this);
+
+        le = new LoginElements(driver);
     }
 
-    // Frame Only CTA
-    @FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_lens_add_dialog_buy']")
+    @FindBy(id="com.titan.eyecare:id/txt_btn_title")
+    WebElement buyNowCTA;
+
+    @FindBy(id="com.titan.eyecare:id/txt_lens_add_dialog_buy")
     WebElement onlyFrameCTA;
 
-    /**
-     * Adds Frame Only product to cart.
-     */
     public void addToCart(CartProduct product) {
 
-        test.info("Adding Frame Only product to cart");
+        click(buyNowCTA);
+
+        if(le.isLoginPageDisplayed()) {
+
+            le.shortLogin("8586565656","254265");
+
+            click(buyNowCTA);
+        }
 
         click(onlyFrameCTA);
-
-        test.pass("Frame added to cart successfully");
     }
 }

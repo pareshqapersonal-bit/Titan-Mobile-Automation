@@ -9,39 +9,37 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 
 public class EyeglassCart extends CommonUtils {
-  AndroidDriver driver;
-	public EyeglassCart(AndroidDriver driver) {
-		
-		this.driver = driver;
-		 PageFactory.initElements(driver, this);
-	}
-	
-	
-	//elements for lens add dialog
-	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_btn_title\"]")
-	WebElement lensAddCTA;
-	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
-	WebElement buyLensCTA;
-	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_skip\"]")
-	WebElement skipCTA;
 
-	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_skip\"]")
-	WebElement buyNowCTA;
-	
-	 /**
-     * Adds Frame Only product to cart.
-     */
+    AndroidDriver driver;
+
+    LoginElements le;
+
+    public EyeglassCart(AndroidDriver driver) {
+
+        this.driver = driver;
+
+        PageFactory.initElements(driver, this);
+
+        le = new LoginElements(driver);
+    }
+
+    @FindBy(id="com.titan.eyecare:id/txt_btn_title")
+    WebElement buyNowCTA;
+
+    @FindBy(id="com.titan.eyecare:id/txt_btn_title")
+    WebElement lensAddCTA;
+
     public void addToCart(CartProduct product) {
 
-        test.info("Adding Frame Only product to cart");
+        click(buyNowCTA);
+
+        if(le.isLoginPageDisplayed()) {
+
+            le.shortLogin("8586565656","254265");
+
+            click(buyNowCTA);
+        }
 
         click(lensAddCTA);
-        click(buyLensCTA);
-        //click(skipCTA);
-        click(buyNowCTA);
-        test.pass("Frame added to cart successfully");
     }
-	
-	}
-
-
+}

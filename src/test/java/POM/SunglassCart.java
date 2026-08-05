@@ -4,6 +4,7 @@ import org.openqa.selenium.support.PageFactory;
 
 import Utilities.CommonUtils;
 import io.appium.java_client.android.AndroidDriver;
+import models.CartProduct;
 
 public class SunglassCart extends  CommonUtils {
 
@@ -15,7 +16,7 @@ public class SunglassCart extends  CommonUtils {
 		 PageFactory.initElements(driver, this);
 	}
 	
-	public void addToCart() {
+	public void addToCart(CartProduct product) {
 		
 		test.info("Adding Sunglass product to cart");
 		
