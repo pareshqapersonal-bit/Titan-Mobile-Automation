@@ -28,25 +28,15 @@ public class AddToCartJourney extends Base {
 
         int rowCount = excel.getRowCount("TestData");
 
-        System.out.println("Total Test Cases : " + rowCount);
-
-        for (int row = 1; row <= rowCount; row++) {
-
-            System.out.println("==================================");
-            System.out.println("Executing Test Case : " + row);
-            System.out.println("==================================");
+        for(int row=1; row<=rowCount; row++) {
 
             List<CartProduct> products = CartDataMapper.getProducts(row);
 
-            // Add all products for this test case
             cart.addProductsToCart(products);
 
-            // Complete purchase
             purchase.proceedToCheckout();
             purchase.proceedToPay();
             purchase.payment();
-
-            System.out.println("Test Case Completed");
         }
 
         excel.closeWorkbook();

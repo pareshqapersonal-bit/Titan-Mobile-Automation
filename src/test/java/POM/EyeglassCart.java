@@ -20,7 +20,7 @@ public class EyeglassCart extends CommonUtils {
 	//elements for lens add dialog
 	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_btn_title\"]")
 	WebElement lensAddCTA;
-	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_btn_title\"]")
+	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement buyLensCTA;
 	@FindBy(xpath="//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_skip\"]")
 	WebElement skipCTA;
@@ -37,7 +37,7 @@ public class EyeglassCart extends CommonUtils {
 
         click(lensAddCTA);
         click(buyLensCTA);
-        click(skipCTA);
+        //click(skipCTA);
         click(buyNowCTA);
         test.pass("Frame added to cart successfully");
     }

@@ -63,6 +63,10 @@ public class LoginElements extends CommonUtils  {
 	@FindBy(id="com.android.permissioncontroller:id/permission_deny_button")
 	WebElement notPerm;
 	
+	 @FindBy(id = "com.titan.eyecare:id/txt_btn_title")
+	    WebElement buyNowCTA;
+	    
+	
 	
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 	
@@ -198,5 +202,7 @@ public class LoginElements extends CommonUtils  {
 
 			    return count > 0;
 			}
+			
+			
 		}
 
