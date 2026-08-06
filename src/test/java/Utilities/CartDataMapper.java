@@ -47,6 +47,18 @@
 	                products,
 	                "ReadingGlass",
 	                excel.getCellData(SHEET_NAME, rowNum, "ReadingGlassSKU"));
+	        
+	       //Computer Glass
+	        addProductIfPresent(
+	                products,
+	                "ComputerGlass",
+	                excel.getCellData(SHEET_NAME, rowNum, "ComputerGlassSKU"));
+	        
+	        // Accessories
+	        addProductIfPresent(
+	                products,
+	                "Accessories",
+	                excel.getCellData(SHEET_NAME, rowNum, "AccessoriesSKU"));
 	
 	        return products;
 	    }

@@ -21,6 +21,8 @@ public class CartPageElements extends CommonUtils {
     RxSunglassCart rxSunglassCart;
     SunglassCart sunglassCart;
     ReadingGlasssesCart readingGlasssesCart;
+    ComputerGlassesCart computerGlassesCart;
+    AccessoriesCart accessoriesCart;
 
     public CartPageElements(AndroidDriver driver) {
 
@@ -34,6 +36,8 @@ public class CartPageElements extends CommonUtils {
         rxSunglassCart = new RxSunglassCart(driver);
         sunglassCart = new SunglassCart(driver);
         readingGlasssesCart = new ReadingGlasssesCart(driver);
+        computerGlassesCart = new ComputerGlassesCart(driver);
+        accessoriesCart = new AccessoriesCart(driver);
     }
 
     @FindBy(id="com.titan.eyecare:id/rl_toolbar_search")
@@ -111,6 +115,18 @@ public class CartPageElements extends CommonUtils {
         	System.out.println("Adding Reading Glass Product to Cart");
 			readingGlasssesCart.addToCart();
 			break;
+		
+	    case "ComputerGlass":
+	         System.out.println("Adding Computer Glass Product to Cart");
+	         computerGlassesCart.addToCart();
+	         break;
+	        
+	    case "Accessories":
+	         System.out.println("Adding Accessories Product to Cart");
+	         accessoriesCart.addToCart();
+	         break;
+	         
+
 
         default:
             throw new RuntimeException("Unknown Category : " + product.getCategory());

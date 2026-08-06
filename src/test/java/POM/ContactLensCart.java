@@ -1,7 +1,13 @@
 package POM;
 
+import java.time.Duration;
+import java.util.List;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
@@ -19,15 +25,10 @@ public class ContactLensCart extends CommonUtils {
 
         this.driver = driver;
         PageFactory.initElements(driver, this);
-
         le = new LoginElements(driver);
     }
 
-    // Headers
-    @FindBy(id = "com.titan.eyecare:id/txt_pdp_right_eye_header")
-    WebElement rightEyeHeader;
-
-    // Right Eye Dropdowns
+    // Right Eye
     @FindBy(id = "com.titan.eyecare:id/edt_sph_right")
     WebElement rightSPH;
 
@@ -37,10 +38,10 @@ public class ContactLensCart extends CommonUtils {
     @FindBy(id = "com.titan.eyecare:id/edt_axis_right")
     WebElement rightAXIS;
 
-    @FindBy(id = "com.titan.eyecare:id/edt_quantity_right")
+    @FindBy(id = "com.titan.eyecare:id/rl_quantity_right")
     WebElement rightQty;
 
-    // Left Eye Dropdowns
+    // Left Eye
     @FindBy(id = "com.titan.eyecare:id/edt_sph_left")
     WebElement leftSPH;
 
@@ -55,54 +56,74 @@ public class ContactLensCart extends CommonUtils {
 
     @FindBy(id = "com.titan.eyecare:id/txt_btn_title")
     WebElement buyNowCTA;
+    
+    @FindBy(id = "com.titan.eyecare:id/txt_subscription_skip")
+    WebElement skipOption;
 
     public void addToCart(CartProduct product) {
 
-    	System.out.println("Inside Adding Contact Lens Product to Cart");
+        System.out.println("Inside Adding Contact Lens Product");
+
         test.info("Adding Contact Lens Product");
 
-        scrollToText("Power(SPH)");
-
-        // Right Eye
+		/*
+		 * if (!rightSPH.isDisplayed()) { System.out.println("Before Scroll");
+		 * smallSwipeUp(); // scrollToText("Power(SPH)");
+		 * 
+		 * System.out.println("After Scroll");
+		 * 
+		 * }
+		 */
+        smallSwipeUp();
+      
+        System.out.println("Before SPH");
         selectIfPresent(rightSPH, "-0.75");
-        // selectIfPresent(rightCYL, "-0.75");
-        // selectIfPresent(rightAXIS, "180");
-        scrollToText("Quantity");
-         selectIfPresent(rightQty, "1");
+        System.out.println("After SPH");
 
+        // Uncomment one by one later
+        // System.out.println("Before CYL");
+        // selectIfPresent(rightCYL, "-0.75");
+        // System.out.println("After CYL");
+
+        // System.out.println("Before AXIS");
+        // selectIfPresent(rightAXIS, "180");
+        // System.out.println("After AXIS");
+        smallSwipeUp();
+
+         System.out.println("Before Quantity");
+         selectIfPresent(rightQty, "1");
+         System.out.println("After Quantity");
+
+        System.out.println("Before Buy Now");
         click(buyNowCTA);
+        System.out.println("After Buy Now");
 
         if (le.isLoginPageDisplayed()) {
 
+            System.out.println("Login Required");
+
             le.shortLogin("8586565656", "254265");
 
-            // Need to reselect values after login
+            System.out.println("Login Done");
 
-          
             scrollToText("Power(SPH)");
 
-            selectIfPresent(rightSPH, "-0.25");
+
+            System.out.println("Before SPH");
+            selectIfPresent(rightSPH, "-0.75");
+            System.out.println("After SPH");
+
             // selectIfPresent(rightCYL, "-0.75");
             // selectIfPresent(rightAXIS, "180");
-            scrollToText("Quantity");
-             selectIfPresent(rightQty, "1");
+            // selectIfPresent(rightQty, "1");
 
             click(buyNowCTA);
         }
-
+     click(skipOption);
         test.pass("Contact Lens added successfully");
     }
 
-	/*
-	 * private void scrollToRightEye() {
-	 * System.out.println("Scrolling to Right Eye Section");
-	 * visibilityOf(buyNowCTA); driver.findElement( AppiumBy.androidUIAutomator(
-	 * "new UiScrollable(new UiSelector().scrollable(true))" +
-	 * ".scrollIntoView(new UiSelector().text(\"Right Eye\"))" )).click(); }
-	 */
-    
-    //scroll function 
-    public void scrollToText(String text) {
+    private void scrollToText(String text) {
 
         driver.findElement(
             AppiumBy.androidUIAutomator(
@@ -112,24 +133,50 @@ public class ContactLensCart extends CommonUtils {
         );
     }
 
-    /**
-     * Generic helper.
-     */
     private void selectIfPresent(WebElement dropdown, String value) {
+
+        System.out.println("Inside selectIfPresent");
 
         if (value == null || value.trim().isEmpty())
             return;
 
         if (driver.findElements(By.id(dropdown.getAttribute("resource-id"))).size() > 0) {
 
+            System.out.println("Clicking Dropdown");
             click(dropdown);
+
+            System.out.println("Selecting Value : " + value);
 
             click(driver.findElement(
                     AppiumBy.androidUIAutomator(
                             "new UiSelector().text(\"" + value + "\")")));
 
+            System.out.println("Value Selected");
+
             test.info("Selected : " + value);
         }
-    }
 
+        System.out.println("Exiting selectIfPresent");
+    }
+    
+    
+    public void smallSwipeUp() {
+
+        Dimension size = driver.manage().window().getSize();
+
+        int x = size.width / 2;
+
+        int startY = (int) (size.height * 0.65);   // Middle-lower
+        int endY   = (int) (size.height * 0.50);   // Small upward swipe
+
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+        Sequence swipe = new Sequence(finger, 1);
+
+        swipe.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, startY));
+        swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(250), PointerInput.Origin.viewport(), x, endY));
+        swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+
+        driver.perform(List.of(swipe));
+    }
 }
