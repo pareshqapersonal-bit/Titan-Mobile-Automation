@@ -2,6 +2,7 @@ package POM;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -19,6 +20,7 @@ public class CartPageElements extends CommonUtils {
     ContactLensCart contactLensCart;
     RxSunglassCart rxSunglassCart;
     SunglassCart sunglassCart;
+    ReadingGlasssesCart readingGlasssesCart;
 
     public CartPageElements(AndroidDriver driver) {
 
@@ -31,6 +33,7 @@ public class CartPageElements extends CommonUtils {
         contactLensCart = new ContactLensCart(driver);
         rxSunglassCart = new RxSunglassCart(driver);
         sunglassCart = new SunglassCart(driver);
+        readingGlasssesCart = new ReadingGlasssesCart(driver);
     }
 
     @FindBy(id="com.titan.eyecare:id/rl_toolbar_search")
@@ -44,6 +47,12 @@ public class CartPageElements extends CommonUtils {
 
     @FindBy(xpath="//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
     WebElement backButton;
+    
+    @FindBy(id="com.titan.eyecare:id/img_toolbar_back")
+    WebElement pdpBackButton;
+    
+    @FindBy(id="com.titan.eyecare:id/img_back")
+    WebElement searchBackButton;
 
     public void addProductsToCart(List<CartProduct> products) {
 
@@ -56,6 +65,7 @@ public class CartPageElements extends CommonUtils {
             dispatchProduct(product);
 
             if(i < products.size()-1) {
+            	System.out.println("Navigating back to search page for next product");
                 backToSearch();
             }
         }
@@ -73,34 +83,59 @@ public class CartPageElements extends CommonUtils {
         switch(product.getCategory()) {
 
         case "Frame":
+        	System.out.println("Adding Frame Product to Cart");
             frameCart.addToCart(product);
             break;
 
         case "Eyeglass":
+        	System.out.println("Adding Eyeglass Product to Cart");
             eyeglassCart.addToCart(product);
             break;
 
         case "ContactLens":
+        	System.out.println("Adding Contact Lens Product to Cart");
             contactLensCart.addToCart(product);
             break;
 
         case "PoweredSunglass":
+        	System.out.println("Adding Powered Sunglass Product to Cart");
             rxSunglassCart.addToCart(product);
             break;
 
         case "Sunglass":
+        	System.out.println("Adding Sunglass Product to Cart");
             sunglassCart.addToCart(product);
             break;
+            
+        case "ReadingGlass":
+        	System.out.println("Adding Reading Glass Product to Cart");
+			readingGlasssesCart.addToCart();
+			break;
 
         default:
             throw new RuntimeException("Unknown Category : " + product.getCategory());
         }
     }
 
+    /**
+	 * Navigates back to the search page after adding a product to the cart.
+	 * This method clicks the back button on the Product Detail Page (PDP) and then
+	 * clicks the back button on the search page to return to the search results.
+	 */
     public void backToSearch() {
 
-        driver.navigate().back();
-        driver.navigate().back();
-        click(backButton);
+        System.out.println("Clicking PDP Back");
+
+        click(pdpBackButton);
+
+        System.out.println("Clicked PDP Back");
+
+        click(pdpBackButton);
+
+        System.out.println("Clicking Search Back");
+
+        click(searchBackButton);
+
+        System.out.println("Clicked Search Back");
     }
 }

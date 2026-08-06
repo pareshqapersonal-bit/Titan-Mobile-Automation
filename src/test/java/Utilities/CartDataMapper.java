@@ -42,6 +42,11 @@
 	                products,
 	                "PoweredSunglass",
 	                excel.getCellData(SHEET_NAME, rowNum, "PoweredSunglassSKU"));
+	        // Reading Glass
+	        addProductIfPresent(
+	                products,
+	                "ReadingGlass",
+	                excel.getCellData(SHEET_NAME, rowNum, "ReadingGlassSKU"));
 	
 	        return products;
 	    }
