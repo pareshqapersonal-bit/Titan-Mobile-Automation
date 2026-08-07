@@ -48,6 +48,10 @@ public class CartPageElements extends CommonUtils {
 
     @FindBy(id="com.titan.eyecare:id/txt_product_name")
     WebElement productSelection;
+    
+    @FindBy(id="com.titan.eyecare:id/txt_btn_title")
+    WebElement buyNowCTA;
+
 
     @FindBy(xpath="//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
     WebElement backButton;
@@ -65,7 +69,7 @@ public class CartPageElements extends CommonUtils {
             CartProduct product = products.get(i);
 
             searchProduct(product.getSku());
-
+              visibilityOf(buyNowCTA);
             dispatchProduct(product);
 
             if(i < products.size()-1) {
