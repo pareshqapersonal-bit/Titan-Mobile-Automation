@@ -172,22 +172,37 @@ public class LoginElements extends CommonUtils  {
 			}*/
 			
 		
-		public void permissionPopup()
-		{try {
+		public void permissionPopup() {
 
-	        List<WebElement> allowButtons =
-	                driver.findElements(
-	                    AppiumBy.id(
-	                        "com.android.permissioncontroller:id/permission_allow_button"));
+		    try {
 
-	        if (!allowButtons.isEmpty()) {
-	            allowButtons.get(0).click();
-	            test.info("Permission popup handled.");
-	        }
+		        String[] ids = {
+		            "com.android.permissioncontroller:id/permission_allow_button",
+		            "com.android.permissioncontroller:id/permission_allow_foreground_only_button",
+		            "com.android.permissioncontroller:id/permission_allow_one_time_button"
+		        };
 
-	    } catch (Exception e) {
-	        test.info("Permission popup not displayed.");
-	    }
+		        for (String id : ids) {
+
+		            List<WebElement> buttons = driver.findElements(AppiumBy.id(id));
+
+		            if (!buttons.isEmpty()) {
+
+		                buttons.get(0).click();
+
+		                System.out.println("Clicked : " + id);
+		               // test.info("Permission popup handled.");
+
+		                return;
+		            }
+		        }
+
+		        System.out.println("No permission popup found.");
+
+		    } catch (Exception e) {
+
+		        e.printStackTrace();
+		    }
 		}
 			
 			public boolean isLoginPageDisplayed()

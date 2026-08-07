@@ -19,7 +19,7 @@ import models.CartProduct;
 public class AddToCartJourney extends Base {
 
     @Test
-    public void steps() throws IOException {
+    public void steps() throws IOException, InterruptedException {
 
         ExcelReader excel = new ExcelReader();
 
@@ -37,6 +37,7 @@ public class AddToCartJourney extends Base {
             purchase.proceedToCheckout();
             purchase.proceedToPay();
             purchase.payment();
+            purchase.razorPay();
         }
 
         excel.closeWorkbook();

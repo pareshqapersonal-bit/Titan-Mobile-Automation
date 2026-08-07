@@ -81,6 +81,8 @@ public class CartPageElements extends CommonUtils {
 
     public void searchProduct(String sku) {
 
+    	System.out.println("Current Package = " + driver.getCurrentPackage());
+    	System.out.println("Current Activity = " + driver.currentActivity());
         click(searchClick);
         sendKeys(searchField, sku);
         click(productSelection);

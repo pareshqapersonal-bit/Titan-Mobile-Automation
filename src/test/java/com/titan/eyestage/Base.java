@@ -55,7 +55,7 @@ public class Base{
 		 * options.setCapability( "appActivity", config.getProperty("appActivity"));
 		 */
         
-        if (env.equalsIgnoreCase("stage")) {
+        if (env.equalsIgnoreCase("stage")&& executionMode.equalsIgnoreCase("local")) {
 
             options.setApp(config.getProperty("apkPath"));
 
@@ -87,12 +87,7 @@ public class Base{
 
             options.setCapability("dontStopAppOnReset", true);
         }
-        options.setAutoGrantPermissions(true);
        
-        options.setAppWaitDuration(Duration.ofSeconds(30));
-        options.setCapability("chromedriverAutodownload", true);
-        options.setCapability("ensureWebviewsHavePages", true);
-        options.setCapability("webviewConnectTimeout", 20000);
 //
 //        AppiumDriver driver = new AppiumDriver(
 //                new URL("http://127.0.0.1:4723"),
@@ -104,8 +99,14 @@ public class Base{
                 ? "BrowserStack"
                 : config.getProperty("appiumURL")));
         
+        
         if ("local".equalsIgnoreCase(executionMode)) {
-
+        	 options.setAutoGrantPermissions(true);
+             
+             options.setAppWaitDuration(Duration.ofSeconds(30));
+             options.setCapability("chromedriverAutodownload", true);
+             options.setCapability("ensureWebviewsHavePages", true);
+             options.setCapability("webviewConnectTimeout", 20000);
             driver = new AndroidDriver(
                     new URL(config.getProperty("appiumURL")),
                     options);
@@ -113,6 +114,8 @@ public class Base{
         }
         else if ("browserstack".equalsIgnoreCase(executionMode)) {
 
+        	
+        	
         	Map<String, Object> bstackOptions = new HashMap<>();
 
             bstackOptions.put("userName",
@@ -165,6 +168,8 @@ public class Base{
   driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
   LoginElements le = new LoginElements(driver);
   le.permissionPopup();
+  System.out.println("Package = " + driver.getCurrentPackage());
+  System.out.println("Activity = " + driver.currentActivity());
     }
     
   
