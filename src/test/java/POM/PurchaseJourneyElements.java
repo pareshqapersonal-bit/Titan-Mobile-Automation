@@ -49,7 +49,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(xpath = "//android.widget.LinearLayout[@resource-id=\"com.titan.eyecare:id/ll_checkout_payment_method_banking_list\"]/android.widget.LinearLayout[2]")
 	WebElement bankSelection;
 	
-	@FindBy(id="com.titan.eyecare:id/layout_checkout_button")
+	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and starts-with(@text,'Proceed to Pay')]")
 	WebElement proceedToPay;
 	
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
@@ -143,6 +143,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 	//Address section
 	public void proceedToPay() throws IOException
 	{
+		System.out.println("Proceeding to pay");
 		test.info("Selecting Addresses");
 		click(proceedToPay);
 		test.pass("Selected  Addresses");

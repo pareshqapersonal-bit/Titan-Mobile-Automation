@@ -174,34 +174,39 @@ public class LoginElements extends CommonUtils  {
 		
 		public void permissionPopup() {
 
+		    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
 		    try {
 
-		        String[] ids = {
-		            "com.android.permissioncontroller:id/permission_allow_button",
-		            "com.android.permissioncontroller:id/permission_allow_foreground_only_button",
-		            "com.android.permissioncontroller:id/permission_allow_one_time_button"
-		        };
+		        // Location permission
+		        List<WebElement> foregroundAllow = driver.findElements(
+		                AppiumBy.id(
+		                    "com.android.permissioncontroller:id/permission_allow_foreground_only_button"));
 
-		        for (String id : ids) {
+		        if (!foregroundAllow.isEmpty()) {
 
-		            List<WebElement> buttons = driver.findElements(AppiumBy.id(id));
+		            wait.until(ExpectedConditions.elementToBeClickable(
+		                    foregroundAllow.get(0))).click();
 
-		            if (!buttons.isEmpty()) {
-
-		                buttons.get(0).click();
-
-		                System.out.println("Clicked : " + id);
-		               // test.info("Permission popup handled.");
-
-		                return;
-		            }
+		            System.out.println("Clicked: While using the app");
 		        }
 
-		        System.out.println("No permission popup found.");
+		        // Notification permission
+		        List<WebElement> notificationAllow = driver.findElements(
+		                AppiumBy.id(
+		                    "com.android.permissioncontroller:id/permission_allow_button"));
+
+		        if (!notificationAllow.isEmpty()) {
+
+		            wait.until(ExpectedConditions.elementToBeClickable(
+		                    notificationAllow.get(0))).click();
+
+		            System.out.println("Clicked: Allow notification");
+		        }
 
 		    } catch (Exception e) {
 
-		        e.printStackTrace();
+		        System.out.println("Permission popup handling completed.");
 		    }
 		}
 			

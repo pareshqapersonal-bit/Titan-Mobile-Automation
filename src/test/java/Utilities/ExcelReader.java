@@ -73,8 +73,25 @@ public class ExcelReader {
 
     public int getRowCount(String sheetName) {
 
-        return workbook.getSheet(sheetName)
-                .getLastRowNum();
+        XSSFSheet sheet = workbook.getSheet(sheetName);
+
+        for (int rowNum = sheet.getLastRowNum(); rowNum >= 1; rowNum--) {
+
+            Row row = sheet.getRow(rowNum);
+
+            if (row != null) {
+
+                Cell testCaseCell = row.getCell(0);
+
+                if (testCaseCell != null &&
+                    !formatter.formatCellValue(testCaseCell).trim().isEmpty()) {
+
+                    return rowNum;
+                }
+            }
+        }
+
+        return 0;
     }
 
     public int getColumnCount(String sheetName) {

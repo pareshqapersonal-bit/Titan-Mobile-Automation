@@ -12,6 +12,8 @@
 	    public static List<CartProduct> getProducts(int rowNum) {
 	
 	        ExcelReader excel = new ExcelReader();
+	        
+	        try {
 	        List<CartProduct> products = new ArrayList<>();
 	
 	        // Frame
@@ -61,7 +63,12 @@
 	                excel.getCellData(SHEET_NAME, rowNum, "AccessoriesSKU"));
 	
 	        return products;
+	        } finally {
+	            excel.closeWorkbook();
+	        }
 	    }
+	    
+	   
 	
 	    private static void addProductIfPresent(List<CartProduct> products,
 	                                            String category,

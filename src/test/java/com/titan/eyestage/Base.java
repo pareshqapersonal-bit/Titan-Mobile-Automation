@@ -158,7 +158,7 @@ public class Base{
             driver.activateApp(config.getProperty("appPackage"));
         }
 
-       
+        System.out.println("Session ID = " + driver.getSessionId());
     
         System.out.println("Package = " + driver.getCurrentPackage());
         System.out.println("Activity = " + driver.currentActivity());

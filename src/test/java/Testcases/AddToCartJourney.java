@@ -18,7 +18,7 @@ import models.CartProduct;
 @Listeners(TestListener.class)
 public class AddToCartJourney extends Base {
 
-    @Test
+    @Test(description = "Complete Place Order Journey", priority = 1)
     public void steps() throws IOException, InterruptedException {
 
         ExcelReader excel = new ExcelReader();
@@ -34,11 +34,14 @@ public class AddToCartJourney extends Base {
 
             cart.addProductsToCart(products);
 
-            purchase.proceedToCheckout();
-            purchase.proceedToPay();
-            purchase.payment();
-            purchase.razorPay();
+            
         }
+        
+        purchase.proceedToCheckout();
+        System.out.println("Proceeding to checkout...");
+        purchase.proceedToPay();
+        purchase.payment();
+        purchase.razorPay();
 
         excel.closeWorkbook();
     }
