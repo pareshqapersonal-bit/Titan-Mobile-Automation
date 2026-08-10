@@ -12,6 +12,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import Utilities.CommonUtils;
@@ -58,8 +59,27 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement paymentConfirmation;
 	
-	@FindBy(id="com.titan.eyecare:id/txt_title")
-	WebElement cartTitle;
+	
+	  @FindBy(id="com.titan.eyecare:id/txt_title") WebElement cartTitle;
+	 
+	
+	
+	private final By cartTitleLocator =
+	        AppiumBy.xpath(
+	            "//android.widget.TextView[" +
+	            "@resource-id='com.titan.eyecare:id/txt_title' " +
+	            "and @text='Shopping Cart']"
+	        );
+	
+	public WebElement waitForCartTitle() {
+
+	    WebDriverWait wait =
+	            new WebDriverWait(driver, Duration.ofSeconds(30));
+
+	    return wait.until(
+	        ExpectedConditions.visibilityOfElementLocated(cartTitleLocator)
+	    );
+	}
 	
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement OrderSuccess;
@@ -113,47 +133,67 @@ public class PurchaseJourneyElements extends CommonUtils {
 		    }
 
 		test.pass("Product added to cart");
-		
-		visibilityOf(cartTitle);
-		visibilityOf(proceedToCheckout);
-		
+		WebElement cartTitleElement = waitForCartTitle();
+
+		System.out.println("Cart page loaded");
+
 		path = captureScreenshot("Cart_Page");
 		test.info("Cart Page Displayed");
 		test.addScreenCaptureFromPath(path);
-		assertTrue(cartTitle.isDisplayed(), "Cart page not displayed"); 
+
+		assertTrue(
+		    cartTitleElement.isDisplayed(),
+		    "Cart page not displayed"
+		);
 	}
 	
 	//Proceed to checkout flow
 	public void proceedToCheckout() throws IOException
 	{
-		test.info("Proceeding to checkout");
-		click(proceedToCheckout);
-		 test.pass("Address page opened");
-		
-		 visibilityOf(cartTitle);
-		 visibilityOf(proceedToPay);
-		 path = captureScreenshot("Address page");
-		 test.info("Address page displayed");
-		 test.addScreenCaptureFromPath(path);
-			assertTrue(cartTitle.isDisplayed(), "Address page not displayed"); 
+	    test.info("Proceeding to checkout");
 
-		 
+	    click(proceedToCheckout);
+
+	    test.pass("Address page opened");
+
+	    // Wait for Address page to load
+	    visibilityOf(proceedToPay);
+
+	    System.out.println("Address page loaded");
+
+	    path = captureScreenshot("Address page");
+	    test.info("Address page displayed");
+	    test.addScreenCaptureFromPath(path);
+
+	    assertTrue(
+	        proceedToPay.isDisplayed(),
+	        "Address page not displayed"
+	    );
 	}
 	
 	//Address section
 	public void proceedToPay() throws IOException
 	{
-		System.out.println("Proceeding to pay");
-		test.info("Selecting Addresses");
-		click(proceedToPay);
-		test.pass("Selected  Addresses");
-		visibilityOf(cartTitle);
-		visibilityOf(continuePaymentCTA);
-		path = captureScreenshot("Payment page");
-		 test.info("Payment page displayed");
-		 test.addScreenCaptureFromPath(path);
-			assertTrue(cartTitle.isDisplayed(), "Payment page not displayed"); 
+	    System.out.println("Proceeding to pay");
+	    test.info("Selecting Addresses");
 
+	    click(proceedToPay);
+
+	    test.pass("Selected Addresses");
+
+	    // Wait for Payment page
+	    visibilityOf(continuePaymentCTA);
+
+	    System.out.println("Payment page loaded");
+
+	    path = captureScreenshot("Payment page");
+	    test.info("Payment page displayed");
+	    test.addScreenCaptureFromPath(path);
+
+	    assertTrue(
+	        continuePaymentCTA.isDisplayed(),
+	        "Payment page not displayed"
+	    );
 	}
 	
 	//Payment section

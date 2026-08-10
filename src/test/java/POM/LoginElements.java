@@ -145,16 +145,25 @@ public class LoginElements extends CommonUtils  {
 
 		public void shortLogin(String number, String pass)
 		{
-			sendKeys(MobileTextField, number);
-			click(loginCTA);
-			List<WebElement> edits =
-			        driver.findElements(AppiumBy.className("android.widget.EditText"));
+		    sendKeys(MobileTextField, number);
 
-			System.out.println("EditText count = " + edits.size());
+		    click(loginCTA);
 
-			edits.get(0).sendKeys(pass);
-			
-			click(loginsubmission);
+		    By editTextLocator =
+		            AppiumBy.className("android.widget.EditText");
+
+		    WebDriverWait wait =
+		            new WebDriverWait(driver, Duration.ofSeconds(30));
+
+		    WebElement passwordField = wait.until(
+		            ExpectedConditions.visibilityOfElementLocated(editTextLocator)
+		    );
+
+		    System.out.println("Password EditText is visible");
+
+		    passwordField.sendKeys(pass);
+
+		    click(loginsubmission);
 		}
 		
 		
