@@ -4,6 +4,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import Utilities.CommonUtils;
+import Utilities.PaymentMethodMapper.PaymentMethod;
 import io.appium.java_client.android.AndroidDriver;
 
 public class PaymentPageElements extends CommonUtils {
@@ -17,7 +18,8 @@ public class PaymentPageElements extends CommonUtils {
     @FindBy(xpath = "(//android.widget.ImageView[@resource-id=\"com.titan.eyecare:id/img_checkout_payment_method_selector\"])[1]")
     private WebElement GPayCheckbox;
     
-    
+    @FindBy(xpath = "(//android.widget.ImageView[@resource-id=\"com.titan.eyecare:id/img_checkout_payment_method_selector\"])[2]")
+    private WebElement NetBankingCheckbox;
 
     public void selectPaymentMethod(String paymentMethod) {
 
