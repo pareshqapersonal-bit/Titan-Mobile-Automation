@@ -8,7 +8,10 @@ public class PaymentMethodMapper {
 	    PHONEPE("Phonepe"),
 	    PAYTM("Paytm"),
 	    OTHER_UPI("Other UPI"),
-	    NET_BANKING("Net Banking");
+	    NET_BANKING("Net Banking"),
+		CREDIT_DEBIT_CARD("Credit / Debit Card"),
+		CASH_ON_DELIVERY("Cash on Delivery"),
+		WALLLET("Wallet");
 
 	    private final String excelValue;
 

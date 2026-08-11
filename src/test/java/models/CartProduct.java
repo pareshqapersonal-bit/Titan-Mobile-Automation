@@ -5,6 +5,7 @@ public class CartProduct {
     private String category;
     private String sku;
     private String paymentMethod;
+    
 
     public CartProduct(String category, String sku) {
         this.category = category;

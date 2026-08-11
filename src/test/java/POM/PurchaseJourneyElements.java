@@ -53,8 +53,8 @@ public class PurchaseJourneyElements extends CommonUtils {
 	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and starts-with(@text,'Proceed to Pay')]")
 	WebElement proceedToPay;
 	
-	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
-	WebElement continuePaymentCTA;;
+	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Continue to Payment']")
+	private WebElement continuePaymentCTA;
 	
 	@FindBy(id="com.titan.eyecare:id/txt_btn_title")
 	WebElement paymentConfirmation;
@@ -218,6 +218,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 	public void razorPay() throws InterruptedException, IOException
 	{
 		 test.info("Initiating Razorpay payment");
+		 System.out.println("RazorPay Context"+driver.getContextHandles());
 		Thread.sleep(1000);
 		Set<String> context = driver.getContextHandles();
 		System.out.println("Context is"+context);
