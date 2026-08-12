@@ -1,7 +1,11 @@
 package POM;
 
-import java.util.List;
+import static org.testng.Assert.assertEquals;
 
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -20,7 +24,8 @@ public class PaymentPageElements extends CommonUtils {
         PageFactory.initElements(driver, this);
     }
     
-    @FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_checkout_payment_method_title' and @text='Google Pay']")
+    // Use a more flexible locator: text may vary or include extra whitespace/locale changes
+    @FindBy(xpath = "//android.widget.TextView[contains(@resource-id,'txt_checkout_payment_method_title') and contains(@text,'Google')]")
     private WebElement GPay;
 
     @FindBy(xpath = "//android.widget.TextView[@text=\"Net Banking\"]")
@@ -62,8 +67,11 @@ public class PaymentPageElements extends CommonUtils {
     
     @FindBy(id = "com.titan.eyecare:id/txt_cart_total_price")
     private WebElement totalAmount;
+    
+    @FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Wohoo!']")
+    WebElement paymentConfirmation;
 
-    public void selectPaymentMethod(String paymentMethod) {
+    public void selectPaymentMethod(String paymentMethod) throws InterruptedException {
 
         PaymentMethod method =
                 PaymentMethod.fromExcel(paymentMethod);
@@ -72,9 +80,49 @@ public class PaymentPageElements extends CommonUtils {
 
         case GOOGLE_PAY:
             // Google Pay locator - we'll add after Inspector
-        	 visibilityOf(GPay);
-             click(GPay);
-             System.out.println("Selected payment method: Google Pay");
+            // Try a scroll-into-view first (handles off-screen items) then click.
+            try {
+                clickPaymentMethodByText("Google Pay");
+            } catch (Exception e) {
+                // fallback to the @FindBy element if UIAutomator didn't find it
+                try {
+                    visibilityOf(GPay);
+                    click(GPay);
+                } catch (Exception ex) {
+                    System.out.println("Failed to select Google Pay: " + ex.getMessage());
+                    throw ex;
+                }
+            }
+            System.out.println("Selected payment method: Google Pay");
+            
+            
+            click(continuePaymentCTA);
+            //razorpay flow
+            
+            test.info("Initiating Razorpay payment");
+   		 System.out.println("RazorPay Context"+driver.getContextHandles());
+   		Thread.sleep(1000);
+   		Set<String> context = driver.getContextHandles();
+   		System.out.println("Context is"+context);
+   		
+   		for(String ctext : context)
+   	    {
+   	        System.out.println(ctext);
+   	        if(ctext.contains("WEBVIEW"))
+   	        {
+   	        	List<WebElement> buttons =
+   	        		    driver.findElements(By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"));
+
+   	        		System.out.println("Count = " + buttons.size());
+   	        		driver.findElement(By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]")).click();
+   	        
+   	        	break;
+   	        }
+   	    }
+   		Thread.sleep(1000);
+   		
+   		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+   		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
              
             break;
 
@@ -96,6 +144,33 @@ public class PaymentPageElements extends CommonUtils {
     		sendKeys(cardCVVField, "123");
     		sendKeys(cardHolderNameField, "Test User");
     		click(continuePaymentCTA);
+    		
+    		 test.info("Initiating Razorpay payment");
+    		 System.out.println("RazorPay Context"+driver.getContextHandles());
+    		Thread.sleep(200);
+    		 context = driver.getContextHandles();
+    		System.out.println("Context is"+context);
+    		
+    		for(String ctext : context)
+    	    {
+    	        System.out.println(ctext);
+    	        if(ctext.contains("WEBVIEW"))
+    	        {
+    	        	List<WebElement> buttons =
+    	        		    driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
+
+    	        		System.out.println("Count = " + buttons.size());
+    	        		driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+    	        
+    	        	break;
+    	        }
+    	    }
+    		Thread.sleep(200);
+    		
+    		
+    		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+       		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+    		
             break;
 
         case OTHER_UPI:
@@ -104,6 +179,7 @@ public class PaymentPageElements extends CommonUtils {
 
         case NET_BANKING:
             // Net Banking locator
+        	System.out.println("Selecting payment method: Net Banking");
         	test.info("Selecting payment method");
     		driver.findElement(
     			    AppiumBy.androidUIAutomator(
@@ -114,6 +190,32 @@ public class PaymentPageElements extends CommonUtils {
     		
     		click(bankSelection);
     		click(continuePaymentCTA);
+    		
+    		 test.info("Initiating Razorpay payment");
+    		 System.out.println("RazorPay Context"+driver.getContextHandles());
+    		Thread.sleep(200);
+    		 context = driver.getContextHandles();
+    		System.out.println("Context is"+context);
+    		
+    		for(String ctext : context)
+    	    {
+    	        System.out.println(ctext);
+    	        if(ctext.contains("WEBVIEW"))
+    	        {
+    	        	List<WebElement> buttons =
+    	        		    driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
+
+    	        		System.out.println("Count = " + buttons.size());
+    	        		driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+    	        
+    	        	break;
+    	        }
+    	    }
+    		Thread.sleep(200);
+    		
+    		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+       		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+    		
             break;
             
          case CASH_ON_DELIVERY:
@@ -124,6 +226,9 @@ public class PaymentPageElements extends CommonUtils {
      			    )
      			).click();
         	 click(confirmOrder);
+        	 
+        	 System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+        		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
 			 break;
 			 
 	   case WALLLET:
@@ -131,15 +236,23 @@ public class PaymentPageElements extends CommonUtils {
 			  driver.findElement( AppiumBy.androidUIAutomator(
 			  "new UiScrollable(new UiSelector().scrollable(true))" +
 			  ".scrollIntoView(new UiSelector().text(\"Total Amount\"))" ) ); 
-			  String amount=totalAmount.getText();
-			  
+			  String amount = totalAmount.getText()
+				        .replace("₹", "")
+				        .replace(",", "")
+				        .replace(".00", "")
+				        .trim();
+
+			  System.out.println(amount);
 			  System.out.println("amount is"+ amount);
 			  
 			  driver.findElement( AppiumBy.androidUIAutomator(
 			  "new UiScrollable(new UiSelector().scrollable(true))" +
 			  ".scrollIntoView(new UiSelector().text(\"Titan Wallet\"))" ) );
-			  click(walletCheckbox); sendKeys(walletAmountField, "100");
+			  click(walletCheckbox); sendKeys(walletAmountField, amount);
 			  click(walletRedeemButton);
+			  click(confirmOrder);
+			  System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+	       		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
 			 
 		   
 	 
@@ -156,6 +269,29 @@ public class PaymentPageElements extends CommonUtils {
         }
         
         
+    }
+    
+    /**
+     * Scrolls to a payment method by visible text (uses UiScrollable) and clicks it.
+     * Falls back to finding an element containing the text if UiScrollable fails.
+     */
+    private void clickPaymentMethodByText(String visibleText) {
+        try {
+            driver.findElement(
+                AppiumBy.androidUIAutomator(
+                    "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().textContains(\"" + visibleText + "\"))"
+                )
+            ).click();
+            return;
+        } catch (Exception e) {
+            // fallback: try xpath contains text
+            List<WebElement> elems = driver.findElements(AppiumBy.xpath("//*[contains(@text,'" + visibleText + "')]") );
+            if (!elems.isEmpty()) {
+                click(elems.get(0));
+                return;
+            }
+            throw e;
+        }
     }
     
     public void continueToPayment() {

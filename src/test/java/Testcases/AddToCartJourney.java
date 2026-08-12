@@ -44,9 +44,10 @@ public class AddToCartJourney extends Base {
 
             payment.selectPaymentMethod(paymentMethod);
 
-            payment.continueToPayment();
-
-            purchase.razorPay();
+//            payment.continueToPayment();
+//            
+//
+//            purchase.razorPay();
 
             
         }
