@@ -2,6 +2,7 @@ package POM;
 
 import static org.testng.Assert.assertEquals;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -9,6 +10,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import Utilities.CommonUtils;
 import Utilities.PaymentMethodMapper.PaymentMethod;
@@ -70,6 +73,17 @@ public class PaymentPageElements extends CommonUtils {
     
     @FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Wohoo!']")
     WebElement paymentConfirmation;
+    
+    @FindBy(id = "com.titan.eyecare:id/txt_app_rate_btn_later")
+    private WebElement mayBLater;
+    
+    @FindBy(xpath =
+    	    "//android.widget.LinearLayout[@resource-id='com.titan.eyecare:id/ll_search_bar']" +
+    	    "//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
+    	WebElement searchBackButton;
+    
+    private final By backButtonLocator =
+    	    AppiumBy.id("com.titan.eyecare:id/img_toolbar_back");
 
     public void selectPaymentMethod(String paymentMethod) throws InterruptedException {
 
@@ -123,6 +137,10 @@ public class PaymentPageElements extends CommonUtils {
    		
    		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
    		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+   		
+   		click(paymentConfirmation);
+   		click(mayBLater);
+   		clickBackFromOrderPage();
              
             break;
 
@@ -324,5 +342,18 @@ public class PaymentPageElements extends CommonUtils {
         }
 
         System.out.println("========== CONTINUE PAYMENT END ==========");
+    }
+    
+    
+    public void clickBackFromOrderPage() {
+
+        WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(30));
+
+        WebElement backButton =
+            wait.until(ExpectedConditions.elementToBeClickable(backButtonLocator));
+
+        backButton.click();
+        click(searchBackButton);
     }
 }
