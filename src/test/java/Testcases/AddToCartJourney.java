@@ -31,6 +31,14 @@ public class AddToCartJourney extends Base {
         int rowCount = excel.getRowCount("TestData");
 
         for(int row=1; row<=rowCount; row++) {
+        	
+
+        	    System.out.println("\n================================");
+        	    System.out.println("STARTING EXCEL ROW = " + row);
+        	    System.out.println("Payment Method = " + CartDataMapper.getPaymentMethod(row));
+        	    System.out.println("================================");
+
+        	   
 
             List<CartProduct> products = CartDataMapper.getProducts(row);
             String paymentMethod = CartDataMapper.getPaymentMethod(row);

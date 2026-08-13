@@ -88,7 +88,11 @@ public class EyeglassCart extends CommonUtils {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             WebElement buyNow = wait.until(driver ->
             driver.findElements(
-                    AppiumBy.id("com.titan.eyecare:id/txt_btn_title")
+            		AppiumBy.xpath(
+            		        "//android.widget.TextView[" +
+            		        "@resource-id='com.titan.eyecare:id/txt_btn_title' " +
+            		        "and @text='Buy Now']"
+            		    )
             ).stream()
             .filter(WebElement::isDisplayed)
             .findFirst()

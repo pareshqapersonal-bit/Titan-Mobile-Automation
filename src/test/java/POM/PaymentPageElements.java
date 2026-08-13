@@ -138,6 +138,7 @@ public class PaymentPageElements extends CommonUtils {
    		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
    		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
    		
+   		//post payment confirmation actions
    		click(paymentConfirmation);
    		click(mayBLater);
    		clickBackFromOrderPage();
@@ -179,6 +180,7 @@ public class PaymentPageElements extends CommonUtils {
 
     	        		System.out.println("Count = " + buttons.size());
     	        		driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+    	        		
     	        
     	        	break;
     	        }
@@ -188,6 +190,10 @@ public class PaymentPageElements extends CommonUtils {
     		
     		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
        		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+       	//post payment confirmation actions
+       		click(paymentConfirmation);
+       		click(mayBLater);
+       		clickBackFromOrderPage();
     		
             break;
 
@@ -233,6 +239,10 @@ public class PaymentPageElements extends CommonUtils {
     		
     		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
        		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+       	//post payment confirmation actions
+       		click(paymentConfirmation);
+       		click(mayBLater);
+       		clickBackFromOrderPage();
     		
             break;
             
@@ -247,6 +257,10 @@ public class PaymentPageElements extends CommonUtils {
         	 
         	 System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
         		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+        		//post payment confirmation actions
+           		click(paymentConfirmation);
+           		click(mayBLater);
+           		clickBackFromOrderPage();
 			 break;
 			 
 	   case WALLLET:
@@ -271,6 +285,10 @@ public class PaymentPageElements extends CommonUtils {
 			  click(confirmOrder);
 			  System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 	       		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+	       	//post payment confirmation actions
+	       		click(paymentConfirmation);
+	       		click(mayBLater);
+	       		clickBackFromOrderPage();
 			 
 		   
 	 
