@@ -39,4 +39,30 @@ public class DataProviderUtil {
 		  {"Sunglasses","36","20","130"}
 		  };
   }
+
+
+//Excel DataProvider
+@DataProvider(name = "purchaseData")
+public Object[][] purchaseData() {
+
+    ExcelReader excel = new ExcelReader();
+
+    int rowCount = excel.getRowCount("TestData");
+
+    Object[][] data = new Object[rowCount][2];
+
+    for (int row = 1; row <= rowCount; row++) {
+
+        data[row - 1][0] =
+                CartDataMapper.getProducts(row);
+
+        data[row - 1][1] =
+                CartDataMapper.getPaymentMethod(row);
+    }
+
+    excel.closeWorkbook();
+
+    return data;
+}
+
 }

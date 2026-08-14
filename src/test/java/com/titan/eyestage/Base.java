@@ -132,6 +132,9 @@ public class Base{
 
             bstackOptions.put("sessionName",
                     config.getProperty("browserstack.session"));
+            
+         // BrowserStack idle timeout
+            bstackOptions.put("idleTimeout", 300);
 
             options.setCapability("bstack:options", bstackOptions);
 
