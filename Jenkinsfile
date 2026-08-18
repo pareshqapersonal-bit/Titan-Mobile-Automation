@@ -2,6 +2,11 @@ pipeline {
 
     agent any
 
+    tools {
+        jdk 'JDK-21'
+        maven 'Maven-3.9.16'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -75,7 +80,9 @@ pipeline {
                 subject: "Titan Mobile Automation | ${currentBuild.currentResult} | Build #${env.BUILD_NUMBER}",
 
                 body: """
+
 <html>
+
 <body>
 
 <h2>Titan Mobile Automation - Test Execution Report</h2>
@@ -125,7 +132,9 @@ The detailed Extent Report is attached to this email.
 </p>
 
 </body>
+
 </html>
+
                 """,
 
                 to: "pareshqa@yopmail.com",
