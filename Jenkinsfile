@@ -137,11 +137,11 @@ The detailed Extent Report is attached to this email.
 
                 """,
 
-                to: "pareshqa@yopmail.com",
+                to: "Paresh.p@fortune4.in",
 
                 mimeType: 'text/html',
 
-                attachmentsPattern: 'Reports/ExtentReport.html'
+                attachmentsPattern: 'Reports/*.html'
 
             )
 
