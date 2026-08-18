@@ -17,7 +17,7 @@ public class DataProviderUtil {
 	}
 
 	
-@DataProvider(name="Categories")
+@DataProvider(name="Categories")	
 	
 	public Object[][] testData1	()
 	{
@@ -49,20 +49,25 @@ public Object[][] purchaseData() {
 
     int rowCount = excel.getRowCount("TestData");
 
-    Object[][] data = new Object[rowCount][2];
+    Object[][] data = new Object[rowCount][4];
 
     for (int row = 1; row <= rowCount; row++) {
 
         data[row - 1][0] =
-                CartDataMapper.getProducts(row);
+                excel.getCellData("TestData", row, "TestCaseID");
 
         data[row - 1][1] =
+                CartDataMapper.getProducts(row);
+
+        data[row - 1][2] =
                 CartDataMapper.getPaymentMethod(row);
+
+        data[row - 1][3] =
+                CartDataMapper.getLoginUser(row);
     }
 
     excel.closeWorkbook();
 
     return data;
 }
-
 }

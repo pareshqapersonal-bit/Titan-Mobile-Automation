@@ -12,15 +12,65 @@ import com.titan.eyestage.Base;
 
 public class TestListener extends Base implements ITestListener {
 	
-	public void onTestStart(ITestResult result)
-	{
-		String testName = result.getMethod().getDescription();
+	/*
+	 * public void onTestStart(ITestResult result) { String testName =
+	 * result.getMethod().getDescription();
+	 * 
+	 * if (testName == null || testName.isEmpty()) { testName =
+	 * result.getMethod().getMethodName(); } test = extent.createTest(testName +
+	 * CommonUtils.getTestData(result));
+	 * System.out.println(result.getName()+"Started"); }
+	 */
+	
+	@Override
+	public void onTestStart(ITestResult result) {
 
-		if (testName == null || testName.isEmpty()) {
-		    testName = result.getMethod().getMethodName();
-		}
-		test = extent.createTest(testName + CommonUtils.getTestData(result));	
-		System.out.println(result.getName()+"Started");
+	    String testName = result.getMethod().getDescription();
+
+	    if (testName == null || testName.isEmpty()) {
+	        testName = result.getMethod().getMethodName();
+	    }
+
+	    test = extent.createTest(
+	            testName + CommonUtils.getTestData(result)
+	    );
+
+	    // Purchase Journey DataProvider
+	    Object[] parameters = result.getParameters();
+
+	    if (parameters.length == 4
+	            && parameters[1] instanceof java.util.List<?>) {
+
+	        String testCaseId =
+	                String.valueOf(parameters[0]);
+
+	        String paymentMethod =
+	                String.valueOf(parameters[2]);
+
+	        String loginUser =
+	                String.valueOf(parameters[3]);
+
+	        @SuppressWarnings("unchecked")
+	        java.util.List<models.CartProduct> products =
+	                (java.util.List<models.CartProduct>) parameters[1];
+
+	        test.info("Test Case: " + testCaseId);
+	        test.info("Payment Method: " + paymentMethod);
+	        test.info("Login User: " + loginUser);
+
+	        StringBuilder categories =
+	                new StringBuilder("Categories: ");
+
+	        for (models.CartProduct product : products) {
+
+	            categories.append(product.getCategory())
+	                      .append(" | ");
+	        }
+
+	        test.info(categories.toString());
+	    }
+
+	    System.out.println(result.getName() + " Started");
 	}
 
 	@Override
@@ -34,20 +84,39 @@ public class TestListener extends Base implements ITestListener {
 
 	@Override
 	public void onTestFailure(ITestResult result) {
-		String screenshotPath = null;
-		try {
-			screenshotPath = captureScreenshot(result.getName());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		test.fail(result.getThrowable());
-		test.addScreenCaptureFromPath(screenshotPath);
-		ITestListener.super.onTestFailure(result);
-		System.out.println(
-                result.getName() +
-                " Failed");
+	    test.fail(result.getThrowable());
+
+	    try {
+
+	        if (driver != null && driver.getSessionId() != null) {
+
+	            String screenshotPath =
+	                    captureScreenshot(result.getName());
+
+	            test.addScreenCaptureFromPath(screenshotPath);
+
+	            System.out.println(
+	                    "Failure screenshot captured: " + screenshotPath);
+
+	        } else {
+
+	            System.out.println(
+	                    "Screenshot skipped: Appium session is not available.");
+
+	        }
+
+	    } catch (Exception e) {
+
+	        System.out.println(
+	                "Could not capture failure screenshot: "
+	                + e.getMessage());
+	    }
+
+	    System.out.println(
+	            result.getName() + " Failed");
+
+	    ITestListener.super.onTestFailure(result);
 	}
 
 	@Override

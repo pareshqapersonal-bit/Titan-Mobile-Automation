@@ -1,7 +1,9 @@
 package POM;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -81,11 +83,15 @@ public class PaymentPageElements extends CommonUtils {
     	    "//android.widget.LinearLayout[@resource-id='com.titan.eyecare:id/ll_search_bar']" +
     	    "//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
     	WebElement searchBackButton;
+    @FindBy(id="com.titan.eyecare:id/txt_payment_success_id")
+	WebElement OrderIDText;
+    
+    String path = null;
     
     private final By backButtonLocator =
     	    AppiumBy.id("com.titan.eyecare:id/img_toolbar_back");
 
-    public void selectPaymentMethod(String paymentMethod) throws InterruptedException {
+    public void selectPaymentMethod(String paymentMethod) throws InterruptedException, IOException {
 
         PaymentMethod method =
                 PaymentMethod.fromExcel(paymentMethod);
@@ -137,10 +143,16 @@ public class PaymentPageElements extends CommonUtils {
    		
    		System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
    		assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+   
    		
    		//post payment confirmation actions
    		click(paymentConfirmation);
    		click(mayBLater);
+		visibilityOf(OrderIDText);
+	   	 path = captureScreenshot("Order ID");
+		 test.info(getText(OrderIDText)+" is the OrderID");
+		 test.addScreenCaptureFromPath(path);
+		 assertTrue(OrderIDText.isDisplayed());
    		clickBackFromOrderPage();
              
             break;
@@ -193,6 +205,11 @@ public class PaymentPageElements extends CommonUtils {
        	//post payment confirmation actions
        		click(paymentConfirmation);
        		click(mayBLater);
+       		visibilityOf(OrderIDText);
+   	   	 path = captureScreenshot("Order ID");
+   		 test.info(getText(OrderIDText)+" is the OrderID");
+   		 test.addScreenCaptureFromPath(path);
+   		 assertTrue(OrderIDText.isDisplayed());
        		clickBackFromOrderPage();
     		
             break;
@@ -242,6 +259,11 @@ public class PaymentPageElements extends CommonUtils {
        	//post payment confirmation actions
        		click(paymentConfirmation);
        		click(mayBLater);
+       		visibilityOf(OrderIDText);
+   	   	 path = captureScreenshot("Order ID");
+   		 test.info(getText(OrderIDText)+" is the OrderID");
+   		 test.addScreenCaptureFromPath(path);
+   		 assertTrue(OrderIDText.isDisplayed());
        		clickBackFromOrderPage();
     		
             break;
@@ -260,6 +282,11 @@ public class PaymentPageElements extends CommonUtils {
         		//post payment confirmation actions
            		click(paymentConfirmation);
            		click(mayBLater);
+           		visibilityOf(OrderIDText);
+       	   	 path = captureScreenshot("Order ID");
+       		 test.info(getText(OrderIDText)+" is the OrderID");
+       		 test.addScreenCaptureFromPath(path);
+       		 assertTrue(OrderIDText.isDisplayed());
            		clickBackFromOrderPage();
 			 break;
 			 
@@ -288,6 +315,12 @@ public class PaymentPageElements extends CommonUtils {
 	       	//post payment confirmation actions
 	       		click(paymentConfirmation);
 	       		click(mayBLater);
+	       		
+	       		visibilityOf(OrderIDText);
+	   	   	 path = captureScreenshot("Order ID");
+	   		 test.info(getText(OrderIDText)+" is the OrderID");
+	   		 test.addScreenCaptureFromPath(path);
+	   		 assertTrue(OrderIDText.isDisplayed());
 	       		clickBackFromOrderPage();
 			 
 		   

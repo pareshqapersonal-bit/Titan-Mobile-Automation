@@ -9,20 +9,22 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import Utilities.CommonUtils;
+import Utilities.CredentialManager;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
+import models.LoginCredentials;
 
 public class EyeglassCart extends CommonUtils {
 
     AndroidDriver driver;
-
+     private final String logiUser;
     LoginElements le;
 
-    public EyeglassCart(AndroidDriver driver) {
+    public EyeglassCart(AndroidDriver driver, String logiUser) {
 
         this.driver = driver;
-
+        this.logiUser = logiUser;
         PageFactory.initElements(driver, this);
 
         le = new LoginElements(driver);
@@ -55,7 +57,10 @@ public class EyeglassCart extends CommonUtils {
 
         if(le.isLoginPageDisplayed()) {
 
-            le.shortLogin("8586565656","254265");
+        	LoginCredentials credentials =
+                    CredentialManager.getCredentials(logiUser);
+
+            le.shortLogin(credentials);
 
             click(buyNowCTA);
         }

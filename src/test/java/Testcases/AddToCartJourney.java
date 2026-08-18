@@ -12,56 +12,103 @@ import POM.CartPageElements;
 import POM.PaymentPageElements;
 import POM.PurchaseJourneyElements;
 import Utilities.CartDataMapper;
+import Utilities.DataProviderUtil;
 import Utilities.ExcelReader;
 import Utilities.TestListener;
 import models.CartProduct;
 
 @Listeners(TestListener.class)
 public class AddToCartJourney extends Base {
+	
+	@Test(
+		    description = "Complete Place Order Journey",
+		    priority = 1,
+		    dataProvider = "purchaseData",
+		    dataProviderClass = DataProviderUtil.class
+		)
+		public void steps(
+		        String testCaseId,
+		        List<CartProduct> products,
+		        String paymentMethod,
+		        String loginUser)
+		        throws IOException, InterruptedException {
 
-    @Test(description = "Complete Place Order Journey", priority = 1)
-    public void steps() throws IOException, InterruptedException {
+		    System.out.println("\n================================");
+		    System.out.println("STARTING TEST CASE = " + testCaseId);
+		    System.out.println("Payment Method = " + paymentMethod);
+		    System.out.println("Login User = " + loginUser);
+		    System.out.println("================================");
 
-        ExcelReader excel = new ExcelReader();
+		    CartPageElements cart =
+		            new CartPageElements(driver, loginUser);
 
-        CartPageElements cart = new CartPageElements(driver);
-        PurchaseJourneyElements purchase = new PurchaseJourneyElements(driver);
-        PaymentPageElements payment = new PaymentPageElements(driver);
+		    PurchaseJourneyElements purchase =
+		            new PurchaseJourneyElements(driver);
 
-        int rowCount = excel.getRowCount("TestData");
+		    PaymentPageElements payment =
+		            new PaymentPageElements(driver);
 
-        for(int row=1; row<=rowCount; row++) {
-        	
+		    cart.addProductsToCart(products);
 
-        	    System.out.println("\n================================");
-        	    System.out.println("STARTING EXCEL ROW = " + row);
-        	    System.out.println("Payment Method = " + CartDataMapper.getPaymentMethod(row));
-        	    System.out.println("================================");
+		    purchase.proceedToCheckout();
 
-        	   
+		    System.out.println("Proceeding to checkout...");
 
-            List<CartProduct> products = CartDataMapper.getProducts(row);
-            String paymentMethod = CartDataMapper.getPaymentMethod(row);
+		    purchase.proceedToPay();
 
-            cart.addProductsToCart(products);
-            purchase.proceedToCheckout();
+		    payment.selectPaymentMethod(paymentMethod);
+		}
+	
+	
+	
+	
 
-            System.out.println("Proceeding to checkout...");
-
-            purchase.proceedToPay();
-
-            payment.selectPaymentMethod(paymentMethod);
-
-//            payment.continueToPayment();
-//            
-//
-//            purchase.razorPay();
-
-            
-        }
-        
-       
-
-        excel.closeWorkbook();
-    }
+	/*
+	 * @Test( description = "Complete Place Order Journey", priority = 1,
+	 * dataProvider = "purchaseData", dataProviderClass = DataProviderUtil.class )
+	 * public void steps( String testCaseId, List<CartProduct> products, String
+	 * paymentMethod, String loginUser) throws IOException, InterruptedException {
+	 * 
+	 * ExcelReader excel = new ExcelReader();
+	 * 
+	 * CartPageElements cart = new CartPageElements(driver); PurchaseJourneyElements
+	 * purchase = new PurchaseJourneyElements(driver); PaymentPageElements payment =
+	 * new PaymentPageElements(driver);
+	 * 
+	 * int rowCount = excel.getRowCount("TestData");
+	 * 
+	 * for(int row=1; row<=rowCount; row++) {
+	 * 
+	 * 
+	 * System.out.println("\n================================");
+	 * System.out.println("STARTING EXCEL ROW = " + row);
+	 * System.out.println("Payment Method = " +
+	 * CartDataMapper.getPaymentMethod(row));
+	 * System.out.println("================================");
+	 * 
+	 * 
+	 * 
+	 * List<CartProduct> products = CartDataMapper.getProducts(row); String
+	 * paymentMethod = CartDataMapper.getPaymentMethod(row);
+	 * 
+	 * cart.addProductsToCart(products); purchase.proceedToCheckout();
+	 * 
+	 * System.out.println("Proceeding to checkout...");
+	 * 
+	 * purchase.proceedToPay();
+	 * 
+	 * payment.selectPaymentMethod(paymentMethod);
+	 * 
+	 * // payment.continueToPayment(); // // // purchase.razorPay();
+	 * 
+	 * 
+	 * }
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * excel.closeWorkbook(); }
+	 */
 }

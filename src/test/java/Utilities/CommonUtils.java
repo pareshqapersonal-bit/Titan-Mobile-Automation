@@ -77,13 +77,52 @@ public class CommonUtils extends Base {
     }
     
     //Testcase details
+
+ // Testcase details
+ // Testcase details
     public static String getTestData(ITestResult result) {
 
-        if (result.getParameters().length == 0) {
+        Object[] parameters = result.getParameters();
+
+        if (parameters.length == 0) {
             return "";
         }
 
-        return " | " + Arrays.toString(result.getParameters());
+        /*
+         * purchaseData:
+         *
+         * [0] TestCaseID
+         * [1] List<CartProduct>
+         * [2] PaymentMethod
+         * [3] LoginUser
+         */
+        if (parameters.length == 4
+                && parameters[1] instanceof java.util.List<?>) {
+
+            String testCaseId =
+                    String.valueOf(parameters[0]);
+
+            String paymentMethod =
+                    String.valueOf(parameters[2]);
+
+            @SuppressWarnings("unchecked")
+            java.util.List<models.CartProduct> products =
+                    (java.util.List<models.CartProduct>) parameters[1];
+
+            int categoryCount = products.size();
+
+            String categoryText =
+                    categoryCount == 1
+                            ? "1 Category"
+                            : categoryCount + " Categories";
+
+            return " - TC" + testCaseId
+                    + " - " + paymentMethod
+                    + " - " + categoryText;
+        }
+
+        // Existing behavior for other DataProviders
+        return " | " + Arrays.toString(parameters);
     }
     
     //swipe function

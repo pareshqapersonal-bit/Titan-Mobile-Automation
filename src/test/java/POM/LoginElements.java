@@ -19,6 +19,7 @@ import org.testng.Assert;
 import Utilities.CommonUtils;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
+import models.LoginCredentials;
 
 public class LoginElements extends CommonUtils  {
 	
@@ -164,6 +165,15 @@ public class LoginElements extends CommonUtils  {
 		    passwordField.sendKeys(pass);
 
 		    click(loginsubmission);
+		}
+		
+		public void shortLogin(LoginCredentials credentials)
+		{
+			System.out.println("Logging in with credentials: " + credentials.getMobileNumber());
+		    shortLogin(
+		            credentials.getMobileNumber(),
+		            credentials.getPassword()
+		    );
 		}
 		
 		

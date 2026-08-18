@@ -23,7 +23,7 @@ public class OrderPlaceTest extends Base {
 		public void steps(List<CartProduct> products, String paymentMethod)
 		        throws IOException, InterruptedException {
 
-		    CartPageElements cart = new CartPageElements(driver);
+		    CartPageElements cart = new CartPageElements(driver,"");
 		    PurchaseJourneyElements purchase =
 		            new PurchaseJourneyElements(driver);
 		    PaymentPageElements payment =

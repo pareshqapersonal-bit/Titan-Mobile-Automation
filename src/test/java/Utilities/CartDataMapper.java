@@ -86,6 +86,25 @@
 	            excel.closeWorkbook();
 	        }
 	    }
+	    
+	    
+	    public static String getLoginUser(int rowNum) {
+
+	        ExcelReader excel = new ExcelReader();
+
+	        try {
+
+	            return excel.getCellData(
+	                    SHEET_NAME,
+	                    rowNum,
+	                    "LoginUser"
+	            ).trim();
+
+	        } finally {
+
+	            excel.closeWorkbook();
+	        }
+	    }
 	    private static void addProductIfPresent(List<CartProduct> products,
 	                                            String category,
 	                                            String sku) {

@@ -41,7 +41,8 @@ public class Base{
     public void opn_app() throws MalformedURLException {
 
         UiAutomator2Options options = new UiAutomator2Options();
-        ConfigReader config = new ConfigReader();
+       // ConfigReader config = new ConfigReader();
+        ConfigManager config = new ConfigManager();
         String env = config.getProperty("environment");
         
         String executionMode = config.getProperty("executionMode");
@@ -177,13 +178,13 @@ public class Base{
     
   
     
-    @AfterSuite
-    public void tearDownReport() {
-
-        extent.flush();
-
-        System.out.println("Extent Report Generated");
-    }
+	/*
+	 * @AfterSuite public void tearDownReport() {
+	 * 
+	 * extent.flush();
+	 * 
+	 * System.out.println("Extent Report Generated"); }
+	 */
     
     //Screenshot function
     public String captureScreenshot(String testName) throws IOException {

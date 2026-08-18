@@ -38,21 +38,39 @@ public class CartPageElements extends CommonUtils {
     ReadingGlasssesCart readingGlasssesCart;
     ComputerGlassesCart computerGlassesCart;
     AccessoriesCart accessoriesCart;
-
-    public CartPageElements(AndroidDriver driver) {
+    private final String loginUser;
+    public CartPageElements(
+            AndroidDriver driver,
+            String loginUser) {
 
         this.driver = driver;
+        this.loginUser = loginUser;
 
         PageFactory.initElements(driver, this);
 
-        frameCart = new FrameCart(driver);
-        eyeglassCart = new EyeglassCart(driver);
-        contactLensCart = new ContactLensCart(driver);
-        rxSunglassCart = new RxSunglassCart(driver);
-        sunglassCart = new SunglassCart(driver);
-        readingGlasssesCart = new ReadingGlasssesCart(driver);
-        computerGlassesCart = new ComputerGlassesCart(driver);
-        accessoriesCart = new AccessoriesCart(driver);
+        frameCart =
+                new FrameCart(driver, loginUser);
+
+        eyeglassCart =
+                new EyeglassCart(driver, loginUser);
+
+        contactLensCart =
+                new ContactLensCart(driver, loginUser);
+
+        rxSunglassCart =
+                new RxSunglassCart(driver, loginUser);
+
+        sunglassCart =
+                new SunglassCart(driver, loginUser);
+
+        readingGlasssesCart =
+                new ReadingGlasssesCart(driver, loginUser);
+
+        computerGlassesCart =
+                new ComputerGlassesCart(driver, loginUser);
+
+        accessoriesCart =
+                new AccessoriesCart(driver, loginUser);
     }
 
     @FindBy(id="com.titan.eyecare:id/rl_toolbar_search")

@@ -5,16 +5,20 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import Utilities.CommonUtils;
+import Utilities.CredentialManager;
 import io.appium.java_client.android.AndroidDriver;
+import models.LoginCredentials;
 
 public class ReadingGlasssesCart extends CommonUtils {
 
 	AndroidDriver driver;
+	private final String loginUser;
 	LoginElements le;
 
-	public ReadingGlasssesCart(AndroidDriver driver) {
+	public ReadingGlasssesCart(AndroidDriver driver, String loginUser) {
 
 		this.driver = driver;
+		this.loginUser = loginUser;
 		PageFactory.initElements(driver, this);
 
 		le = new LoginElements(driver);
@@ -31,7 +35,10 @@ public class ReadingGlasssesCart extends CommonUtils {
 		click(buyNowCTA);
 		 if(le.isLoginPageDisplayed()) {
 
-	            le.shortLogin("8586565656","254265");
+			 LoginCredentials credentials =
+			            CredentialManager.getCredentials(loginUser);
+
+			    le.shortLogin(credentials);
 	            click(Power);
 	            click(buyNowCTA);
 	        }
