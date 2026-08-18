@@ -3,6 +3,9 @@
   <groupId>Com.titan</groupId>
   <artifactId>com.titan.eyestage</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <properties>
+        <suiteXmlFile>testng.xml</suiteXmlFile>
+    </properties>
   <build>
     <plugins>
         <plugin>
@@ -11,9 +14,9 @@
             <version>3.5.4</version>
 
             <configuration>
-                <suiteXmlFiles>
-                    <suiteXmlFile>testng.xml</suiteXmlFile>
-                </suiteXmlFiles>
+               <suiteXmlFiles>
+    <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+</suiteXmlFiles>
             </configuration>
 
         </plugin>
