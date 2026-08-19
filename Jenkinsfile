@@ -73,11 +73,11 @@ Jenkins Build:
 ${env.BUILD_URL}
 """,
 
-                to: "Paresh.p@fortune4.in",
+                to: "paresh.p@fortune4.in",
 
-                from: "YOUR_GMAIL_ADDRESS",
+                from: "paresh.p@fortune4.in",
 
-                replyTo: "YOUR_GMAIL_ADDRESS"
+                replyTo: "paresh.p@fortune4.in"
             )
         }
     }
