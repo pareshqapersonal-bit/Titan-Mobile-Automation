@@ -65,10 +65,6 @@ pipeline {
                 emailext(
                     to: 'Paresh.p@fortune4.in',
 
-                    from: 'paresh.p@fortune4.in',
-
-                    replyTo: 'paresh.p@fortune4.in',
-
                     subject: "Titan Mobile Automation | ${currentBuild.currentResult} | Build #${env.BUILD_NUMBER}",
 
                     mimeType: 'text/html',
