@@ -30,24 +30,11 @@ pipeline {
         stage('Run Tests') {
             steps {
                 withCredentials([
-                    string(
-                        credentialsId: 'BROWSERSTACK_USERNAME',
-                        variable: 'BROWSERSTACK_USERNAME'
-                    ),
-                    string(
-                        credentialsId: 'BROWSERSTACK_ACCESS_KEY',
-                        variable: 'BROWSERSTACK_ACCESS_KEY'
-                    ),
-                    string(
-                        credentialsId: 'TEST_DEFAULT_USER_MOBILE',
-                        variable: 'TEST_DEFAULT_USER_MOBILE'
-                    ),
-                    string(
-                        credentialsId: 'TEST_DEFAULT_USER_PASSWORD',
-                        variable: 'TEST_DEFAULT_USER_PASSWORD'
-                    )
+                    string(credentialsId: 'BROWSERSTACK_USERNAME', variable: 'BROWSERSTACK_USERNAME'),
+                    string(credentialsId: 'BROWSERSTACK_ACCESS_KEY', variable: 'BROWSERSTACK_ACCESS_KEY'),
+                    string(credentialsId: 'TEST_DEFAULT_USER_MOBILE', variable: 'TEST_DEFAULT_USER_MOBILE'),
+                    string(credentialsId: 'TEST_DEFAULT_USER_PASSWORD', variable: 'TEST_DEFAULT_USER_PASSWORD')
                 ]) {
-
                     bat """
                         mvn clean test -DsuiteXmlFile=%SUITE_FILE%
                     """
@@ -61,72 +48,42 @@ pipeline {
         always {
 
             script {
-
-                emailext(
-                    to: 'Paresh.p@fortune4.in',
-
-                    subject: "Titan Mobile Automation | ${currentBuild.currentResult} | Build #${env.BUILD_NUMBER}",
-
-                    mimeType: 'text/html',
-
-                    body: """
+                try {
+                    emailext(
+                        to: 'Paresh.p@fortune4.in',
+                        subject: "Titan Mobile Automation | ${currentBuild.currentResult} | Build #${env.BUILD_NUMBER}",
+                        mimeType: 'text/html',
+                        body: """
 <html>
 <body>
 
 <h2>Titan Mobile Automation - Test Execution Report</h2>
 
 <table border="1" cellpadding="6" cellspacing="0">
-
-<tr>
-    <td><b>Build</b></td>
-    <td>#${env.BUILD_NUMBER}</td>
-</tr>
-
-<tr>
-    <td><b>Environment</b></td>
-    <td>${params.ENVIRONMENT}</td>
-</tr>
-
-<tr>
-    <td><b>Execution Mode</b></td>
-    <td>${params.EXECUTION_MODE}</td>
-</tr>
-
-<tr>
-    <td><b>Device</b></td>
-    <td>${params.DEVICE}</td>
-</tr>
-
-<tr>
-    <td><b>Test Suite</b></td>
-    <td>${params.TEST_SUITE}</td>
-</tr>
-
-<tr>
-    <td><b>Result</b></td>
-    <td>${currentBuild.currentResult}</td>
-</tr>
-
+<tr><td><b>Build</b></td><td>#${env.BUILD_NUMBER}</td></tr>
+<tr><td><b>Environment</b></td><td>${params.ENVIRONMENT}</td></tr>
+<tr><td><b>Execution Mode</b></td><td>${params.EXECUTION_MODE}</td></tr>
+<tr><td><b>Device</b></td><td>${params.DEVICE}</td></tr>
+<tr><td><b>Test Suite</b></td><td>${params.TEST_SUITE}</td></tr>
+<tr><td><b>Result</b></td><td>${currentBuild.currentResult}</td></tr>
 </table>
 
 <br>
 
-<p>
-The detailed Extent Report is attached to this email.
-</p>
+<p>The detailed Extent Report is attached to this email.</p>
 
-<p>
-<a href="${env.BUILD_URL}">
-Open Jenkins Build
-</a>
-</p>
+<p><a href="${env.BUILD_URL}">Open Jenkins Build</a></p>
 
 </body>
 </html>
 """,
-
-                    attachmentsPattern: 'Reports/ExtentReport.html'
-                )
+                        attachmentsPattern: 'Reports/ExtentReport.html',
+                        debug: true
+                    )
+                    echo "EMAILEXT: send completed"
+                } catch (err) {
+                    echo "EMAILEXT FAILED: ${err}"
+                }
             }
         }
     }
