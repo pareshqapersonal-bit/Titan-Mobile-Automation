@@ -9,13 +9,13 @@ import Utilities.CredentialManager;
 import io.appium.java_client.android.AndroidDriver;
 import models.LoginCredentials;
 
-public class ReadingGlasssesCart extends CommonUtils {
+public class ReadingGlassesCart extends CommonUtils {
 
 	AndroidDriver driver;
 	private final String loginUser;
 	LoginElements le;
 
-	public ReadingGlasssesCart(AndroidDriver driver, String loginUser) {
+	public ReadingGlassesCart(AndroidDriver driver, String loginUser) {
 
 		this.driver = driver;
 		this.loginUser = loginUser;
@@ -23,13 +23,13 @@ public class ReadingGlasssesCart extends CommonUtils {
 
 		le = new LoginElements(driver);
 	}
-	
+
 	//Elements
 	@FindBy(xpath = "//android.widget.TextView[@resource-id=\"com.titan.eyecare:id/txt_lens_power\" and @text=\"+1.25\"]")
 	WebElement Power;
 	@FindBy(id = "com.titan.eyecare:id/txt_btn_title")
     WebElement buyNowCTA;
-	
+
 	public void addToCart() {
 		click(Power);
 		click(buyNowCTA);

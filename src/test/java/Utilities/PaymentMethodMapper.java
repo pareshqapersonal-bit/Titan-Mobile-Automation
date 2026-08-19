@@ -11,7 +11,7 @@ public class PaymentMethodMapper {
 	    NET_BANKING("Net Banking"),
 		CREDIT_DEBIT_CARD("Credit / Debit Card"),
 		CASH_ON_DELIVERY("Cash on Delivery"),
-		WALLLET("Wallet");
+		WALLET("Wallet");
 
 	    private final String excelValue;
 

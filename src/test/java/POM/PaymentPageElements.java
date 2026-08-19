@@ -290,7 +290,7 @@ public class PaymentPageElements extends CommonUtils {
            		clickBackFromOrderPage();
 			 break;
 			 
-	   case WALLLET:
+	   case WALLET:
 			
 			  driver.findElement( AppiumBy.androidUIAutomator(
 			  "new UiScrollable(new UiSelector().scrollable(true))" +

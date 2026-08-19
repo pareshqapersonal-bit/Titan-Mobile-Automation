@@ -35,7 +35,7 @@ public class CartPageElements extends CommonUtils {
     ContactLensCart contactLensCart;
     RxSunglassCart rxSunglassCart;
     SunglassCart sunglassCart;
-    ReadingGlasssesCart readingGlasssesCart;
+    ReadingGlassesCart readingGlassesCart;
     ComputerGlassesCart computerGlassesCart;
     AccessoriesCart accessoriesCart;
     private final String loginUser;
@@ -63,8 +63,8 @@ public class CartPageElements extends CommonUtils {
         sunglassCart =
                 new SunglassCart(driver, loginUser);
 
-        readingGlasssesCart =
-                new ReadingGlasssesCart(driver, loginUser);
+        readingGlassesCart =
+                new ReadingGlassesCart(driver, loginUser);
 
         computerGlassesCart =
                 new ComputerGlassesCart(driver, loginUser);
@@ -232,7 +232,7 @@ public class CartPageElements extends CommonUtils {
             
         case "ReadingGlass":
         	System.out.println("Adding Reading Glass Product to Cart");
-			readingGlasssesCart.addToCart();
+			readingGlassesCart.addToCart();
 			break;
 		
 	    case "ComputerGlass":
