@@ -141,7 +141,7 @@ The detailed Extent Report is attached to this email.
 
                 mimeType: 'text/html',
 
-                attachmentsPattern: 'Reports/*.html'
+                
 
             )
 
