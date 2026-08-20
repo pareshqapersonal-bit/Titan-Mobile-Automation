@@ -10,6 +10,9 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a powered (prescription) Sunglass product to the cart.
+ */
 public class RxSunglassCart extends CommonUtils {
 	
 	AndroidDriver driver;
@@ -45,8 +48,6 @@ public class RxSunglassCart extends CommonUtils {
 	        
 	        click(okSub);
 
-		
-		//click(buyNowCTA);
 		test.pass("Rx Sunglass added to cart successfully");
 	}
 	

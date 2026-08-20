@@ -18,6 +18,10 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a Contact Lens product to the cart, including right-eye
+ * power (SPH/CYL/AXIS) and quantity selection.
+ */
 public class ContactLensCart extends CommonUtils {
 
     AndroidDriver driver;

@@ -9,6 +9,10 @@ import Utilities.CredentialManager;
 import io.appium.java_client.android.AndroidDriver;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a Reading Glasses product to the cart, including the
+ * power selection step this category requires before Buy Now.
+ */
 public class ReadingGlassesCart extends CommonUtils {
 
 	AndroidDriver driver;

@@ -10,6 +10,9 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a Frame-only product to the cart (no lens selection).
+ */
 public class FrameCart extends CommonUtils {
 
     AndroidDriver driver;

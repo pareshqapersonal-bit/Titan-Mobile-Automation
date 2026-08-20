@@ -9,6 +9,9 @@ import Utilities.CredentialManager;
 import io.appium.java_client.android.AndroidDriver;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a Computer Glasses product to the cart.
+ */
 public class ComputerGlassesCart extends CommonUtils {
 
 	AndroidDriver driver;

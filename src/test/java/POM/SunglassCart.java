@@ -10,6 +10,9 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 import models.LoginCredentials;
 
+/**
+ * Handles adding a (non-powered) Sunglass product to the cart.
+ */
 public class SunglassCart extends  CommonUtils {
 
 	AndroidDriver driver;
@@ -31,8 +34,7 @@ public class SunglassCart extends  CommonUtils {
 	public void addToCart(CartProduct product) {
 		
 		test.info("Adding Sunglass product to cart");
-		
-		//click(buyNowCTA);
+
 		   click(buyNowCTA);
 
 		   if (le.isLoginPageDisplayed()) {
@@ -40,10 +42,6 @@ public class SunglassCart extends  CommonUtils {
 			    LoginCredentials credentials =
 			            CredentialManager.getCredentials(loginUser);
 
-				/*
-				 * le.shortLogin( credentials.getMobileNumber(), credentials.getPassword() );
-				 */
-			    
 			    le.shortLogin(credentials);
 
 			    click(buyNowCTA);

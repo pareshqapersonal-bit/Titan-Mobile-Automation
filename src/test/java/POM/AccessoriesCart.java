@@ -9,6 +9,9 @@ import Utilities.CredentialManager;
 import io.appium.java_client.android.AndroidDriver;
 import models.LoginCredentials;
 
+/**
+ * Handles adding an Accessories product to the cart.
+ */
 public class AccessoriesCart extends CommonUtils {
 
 	AndroidDriver driver;

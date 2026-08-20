@@ -15,16 +15,20 @@ import io.appium.java_client.android.AndroidDriver;
 import models.CartProduct;
 import models.LoginCredentials;
 
+/**
+ * Handles adding an Eyeglass product to the cart, including the optional
+ * lens-upgrade dialog and lens-add page that this category presents.
+ */
 public class EyeglassCart extends CommonUtils {
 
     AndroidDriver driver;
-     private final String logiUser;
+     private final String loginUser;
     LoginElements le;
 
-    public EyeglassCart(AndroidDriver driver, String logiUser) {
+    public EyeglassCart(AndroidDriver driver, String loginUser) {
 
         this.driver = driver;
-        this.logiUser = logiUser;
+        this.loginUser = loginUser;
         PageFactory.initElements(driver, this);
 
         le = new LoginElements(driver);
@@ -58,7 +62,7 @@ public class EyeglassCart extends CommonUtils {
         if(le.isLoginPageDisplayed()) {
 
         	LoginCredentials credentials =
-                    CredentialManager.getCredentials(logiUser);
+                    CredentialManager.getCredentials(loginUser);
 
             le.shortLogin(credentials);
 
@@ -72,7 +76,6 @@ public class EyeglassCart extends CommonUtils {
         click(lensAddCTA);
        
         handleLensUpgradePage();
-        //click(buyNowCTA);
         click(okSub);
     }
     
