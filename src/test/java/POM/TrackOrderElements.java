@@ -50,7 +50,7 @@ public class TrackOrderElements extends CommonUtils {
 		
 		System.out.println(getText(trackOrderTitleText));
 		assertTrue(trackOrderTitleText.isDisplayed(), "Order tracking fialed");
-		test.addScreenCaptureFromPath(path);
+		test.addScreenCaptureFromBase64String(path);
 		test.info("Order has been tracked successfully");
 	}
 }

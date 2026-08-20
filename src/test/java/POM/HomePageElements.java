@@ -140,7 +140,7 @@ public class HomePageElements extends CommonUtils {
 
 	            verifyLandingPage();
 	            path=captureScreenshot("Banner"+(i+1));
-	            test.addScreenCaptureFromPath(path);
+	            test.addScreenCaptureFromBase64String(path);
 
 	            driver.navigate().back();
 
@@ -190,7 +190,7 @@ public class HomePageElements extends CommonUtils {
 	    	System.out.println(gameView.getRect());
 	    	Thread.sleep(1500);
 	    	path = captureScreenshot("VTO Page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    }
 	    
 	    //Find my fit
@@ -222,7 +222,7 @@ public class HomePageElements extends CommonUtils {
 	    	visibilityOf(messurementText);
 	    	assertTrue(messurementText.isDisplayed());
 	    	path=captureScreenshot("PLP page with find my fit");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    }
 	    
 	    
@@ -239,7 +239,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(whatsAppPage.isDisplayed());
 	    	sa.assertTrue(whatsAppPage.isDisplayed(), "Whats app page is not loaded");
 	    	path = captureScreenshot("WhatsApp Page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	click(phoneCallElement);
 	    	test.info("Dail page is Loading");
@@ -247,7 +247,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(dialPage.isDisplayed());
 	    	sa.assertTrue(dialPage.isDisplayed(), "Dial Page is not loaded");
 	    	path= captureScreenshot("Dial page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	driver.navigate().back();
 	    	
@@ -257,7 +257,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(findAStore.isDisplayed());
 	    	sa.assertTrue(findAStore.isDisplayed(), "Store Page os not Loaded");
 	    	path=captureScreenshot("Find A Store Page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	click(takeAQuizElement);
 	    	test.info("Quiz page is loading");
@@ -265,7 +265,7 @@ public class HomePageElements extends CommonUtils {
 	    //	assertTrue(getStartedQuiz.isDisplayed());
 	    	sa.assertTrue(getStartedQuiz.isDisplayed(), "Quiz page is not loaded");
 	    	path= captureScreenshot("Quiz Page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	
 	    }
@@ -283,7 +283,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(dialPage.isDisplayed());
 	    	sa.assertTrue(dialPage.isDisplayed(), "Dial Page is not loaded");
 	    	path= captureScreenshot("Dial page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	driver.navigate().back();
 	    	
@@ -293,7 +293,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(whatsAppPage.isDisplayed());
 	    	sa.assertTrue(whatsAppPage.isDisplayed(), "Whats app page is not loaded");
 	    	path = captureScreenshot("WhatsApp Page");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	
 	    	click(mailIcon);
@@ -301,7 +301,7 @@ public class HomePageElements extends CommonUtils {
 	    	visibilityOf(mailPopup);
 	    	sa.assertTrue(mailPopup.isDisplayed(), "Mail options are not displayed");
 	    	path = captureScreenshot("Mail options");
-	    	test.addScreenCaptureFromPath(path);
+	    	test.addScreenCaptureFromBase64String(path);
 	    	driver.navigate().back();
 	    	
 	    	

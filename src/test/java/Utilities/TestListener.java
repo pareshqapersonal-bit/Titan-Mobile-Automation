@@ -94,7 +94,7 @@ public class TestListener extends Base implements ITestListener {
 	            String screenshotPath =
 	                    captureScreenshot(result.getName());
 
-	            test.addScreenCaptureFromPath(screenshotPath);
+	            test.addScreenCaptureFromBase64String(screenshotPath);
 
 	            System.out.println(
 	                    "Failure screenshot captured: " + screenshotPath);

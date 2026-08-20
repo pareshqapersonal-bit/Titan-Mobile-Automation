@@ -151,7 +151,7 @@ public class PaymentPageElements extends CommonUtils {
 		visibilityOf(OrderIDText);
 	   	 path = captureScreenshot("Order ID");
 		 test.info(getText(OrderIDText)+" is the OrderID");
-		 test.addScreenCaptureFromPath(path);
+		 test.addScreenCaptureFromBase64String(path);
 		 assertTrue(OrderIDText.isDisplayed());
    		clickBackFromOrderPage();
              
@@ -208,7 +208,7 @@ public class PaymentPageElements extends CommonUtils {
        		visibilityOf(OrderIDText);
    	   	 path = captureScreenshot("Order ID");
    		 test.info(getText(OrderIDText)+" is the OrderID");
-   		 test.addScreenCaptureFromPath(path);
+   		 test.addScreenCaptureFromBase64String(path);
    		 assertTrue(OrderIDText.isDisplayed());
        		clickBackFromOrderPage();
     		
@@ -262,7 +262,7 @@ public class PaymentPageElements extends CommonUtils {
        		visibilityOf(OrderIDText);
    	   	 path = captureScreenshot("Order ID");
    		 test.info(getText(OrderIDText)+" is the OrderID");
-   		 test.addScreenCaptureFromPath(path);
+   		 test.addScreenCaptureFromBase64String(path);
    		 assertTrue(OrderIDText.isDisplayed());
        		clickBackFromOrderPage();
     		
@@ -285,7 +285,7 @@ public class PaymentPageElements extends CommonUtils {
            		visibilityOf(OrderIDText);
        	   	 path = captureScreenshot("Order ID");
        		 test.info(getText(OrderIDText)+" is the OrderID");
-       		 test.addScreenCaptureFromPath(path);
+       		 test.addScreenCaptureFromBase64String(path);
        		 assertTrue(OrderIDText.isDisplayed());
            		clickBackFromOrderPage();
 			 break;
@@ -319,7 +319,7 @@ public class PaymentPageElements extends CommonUtils {
 	       		visibilityOf(OrderIDText);
 	   	   	 path = captureScreenshot("Order ID");
 	   		 test.info(getText(OrderIDText)+" is the OrderID");
-	   		 test.addScreenCaptureFromPath(path);
+	   		 test.addScreenCaptureFromBase64String(path);
 	   		 assertTrue(OrderIDText.isDisplayed());
 	       		clickBackFromOrderPage();
 			 

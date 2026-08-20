@@ -139,7 +139,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 
 		path = captureScreenshot("Cart_Page");
 		test.info("Cart Page Displayed");
-		test.addScreenCaptureFromPath(path);
+		test.addScreenCaptureFromBase64String(path);
 
 		assertTrue(
 		    cartTitleElement.isDisplayed(),
@@ -163,7 +163,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 
 	    path = captureScreenshot("Address page");
 	    test.info("Address page displayed");
-	    test.addScreenCaptureFromPath(path);
+	    test.addScreenCaptureFromBase64String(path);
 
 	    assertTrue(
 	        proceedToPay.isDisplayed(),
@@ -188,7 +188,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 
 	    path = captureScreenshot("Payment page");
 	    test.info("Payment page displayed");
-	    test.addScreenCaptureFromPath(path);
+	    test.addScreenCaptureFromBase64String(path);
 
 	    assertTrue(
 	        continuePaymentCTA.isDisplayed(),
@@ -247,7 +247,7 @@ public class PurchaseJourneyElements extends CommonUtils {
 		 visibilityOf(OrderIDText);
 		 path = captureScreenshot("Order ID");
 		 test.info(getText(OrderIDText)+" is the OrderID");
-		 test.addScreenCaptureFromPath(path);
+		 test.addScreenCaptureFromBase64String(path);
 		 assertTrue(OrderIDText.isDisplayed());
 		
 	}

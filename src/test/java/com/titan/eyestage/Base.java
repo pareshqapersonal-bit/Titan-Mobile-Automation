@@ -1,11 +1,8 @@
 package com.titan.eyestage;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 
 import org.openqa.selenium.OutputType;
@@ -186,25 +183,9 @@ public class Base{
 	 * System.out.println("Extent Report Generated"); }
 	 */
     
-    //Screenshot function
+    //Screenshot function - returns a Base64-encoded PNG string for direct embedding into the Extent report
     public String captureScreenshot(String testName) throws IOException {
-    	File folder = new File("Screenshots");
-    	if (!folder.exists()) {
-    	    folder.mkdirs();
-    	}
-        File src = ((TakesScreenshot) driver)
-                .getScreenshotAs(OutputType.FILE);
-
-        String path = System.getProperty("user.dir")
-                + "\\Screenshots\\"
-                + testName + ".png";
-
-        File dest = new File(path);
-
-        Files.copy(src.toPath(), dest.toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
-
-        return path;
+    	return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BASE64);
     }
     
     //after method

@@ -114,7 +114,7 @@ public class LoginElements extends CommonUtils  {
 	System.out.println("My name is"+userPRofileName);
 	test.info(userPRofileName+ "has successfully logged in");
 	visibilityOf(profileName);
-	test.addScreenCaptureFromPath(path);
+	test.addScreenCaptureFromBase64String(path);
 	assertTrue(profileName.isDisplayed(), "User login failed"); 
 	
 	
@@ -137,7 +137,7 @@ public class LoginElements extends CommonUtils  {
 			click(logoutConfirmation);
 			path = captureScreenshot("User_Details");
 			test.info("User has successfully logged out");
-			test.addScreenCaptureFromPath(path);
+			test.addScreenCaptureFromBase64String(path);
 			
 		}
 		
