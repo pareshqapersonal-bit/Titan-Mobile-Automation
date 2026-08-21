@@ -96,7 +96,7 @@ public class TestListener extends Base implements ITestListener {
 
 	            test.info(
 	                    "<a href='data:image/png;base64," + screenshotPath
-	                            + "' target='_blank'><img src='data:image/png;base64,"
+	                            + "' data-featherlight='image'><img src='data:image/png;base64,"
 	                            + screenshotPath
 	                            + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 

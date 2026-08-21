@@ -140,7 +140,7 @@ public class HomePageElements extends CommonUtils {
 
 	            verifyLandingPage();
 	            path=captureScreenshot("Banner"+(i+1));
-	            test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	            test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 
 	            driver.navigate().back();
 
@@ -190,7 +190,7 @@ public class HomePageElements extends CommonUtils {
 	    	System.out.println(gameView.getRect());
 	    	Thread.sleep(1500);
 	    	path = captureScreenshot("VTO Page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    }
 	    
 	    //Find my fit
@@ -222,7 +222,7 @@ public class HomePageElements extends CommonUtils {
 	    	visibilityOf(messurementText);
 	    	assertTrue(messurementText.isDisplayed());
 	    	path=captureScreenshot("PLP page with find my fit");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    }
 	    
 	    
@@ -239,7 +239,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(whatsAppPage.isDisplayed());
 	    	sa.assertTrue(whatsAppPage.isDisplayed(), "Whats app page is not loaded");
 	    	path = captureScreenshot("WhatsApp Page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	click(phoneCallElement);
 	    	test.info("Dail page is Loading");
@@ -247,7 +247,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(dialPage.isDisplayed());
 	    	sa.assertTrue(dialPage.isDisplayed(), "Dial Page is not loaded");
 	    	path= captureScreenshot("Dial page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	driver.navigate().back();
 	    	
@@ -257,7 +257,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(findAStore.isDisplayed());
 	    	sa.assertTrue(findAStore.isDisplayed(), "Store Page os not Loaded");
 	    	path=captureScreenshot("Find A Store Page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	click(takeAQuizElement);
 	    	test.info("Quiz page is loading");
@@ -265,7 +265,7 @@ public class HomePageElements extends CommonUtils {
 	    //	assertTrue(getStartedQuiz.isDisplayed());
 	    	sa.assertTrue(getStartedQuiz.isDisplayed(), "Quiz page is not loaded");
 	    	path= captureScreenshot("Quiz Page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	
 	    }
@@ -283,7 +283,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(dialPage.isDisplayed());
 	    	sa.assertTrue(dialPage.isDisplayed(), "Dial Page is not loaded");
 	    	path= captureScreenshot("Dial page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	driver.navigate().back();
 	    	
@@ -293,7 +293,7 @@ public class HomePageElements extends CommonUtils {
 	    	//assertTrue(whatsAppPage.isDisplayed());
 	    	sa.assertTrue(whatsAppPage.isDisplayed(), "Whats app page is not loaded");
 	    	path = captureScreenshot("WhatsApp Page");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	
 	    	click(mailIcon);
@@ -301,7 +301,7 @@ public class HomePageElements extends CommonUtils {
 	    	visibilityOf(mailPopup);
 	    	sa.assertTrue(mailPopup.isDisplayed(), "Mail options are not displayed");
 	    	path = captureScreenshot("Mail options");
-	    	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	    	test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	    	driver.navigate().back();
 	    	
 	    	

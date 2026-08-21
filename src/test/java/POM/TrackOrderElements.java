@@ -50,7 +50,7 @@ public class TrackOrderElements extends CommonUtils {
 		
 		System.out.println(getText(trackOrderTitleText));
 		assertTrue(trackOrderTitleText.isDisplayed(), "Order tracking fialed");
-		test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+		test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 		test.info("Order has been tracked successfully");
 	}
 }

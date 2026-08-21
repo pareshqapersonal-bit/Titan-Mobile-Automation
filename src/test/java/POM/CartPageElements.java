@@ -184,7 +184,7 @@ public class CartPageElements extends CommonUtils {
         path = captureScreenshot("Cart_Page");
 
         test.info("Cart Page Displayed");
-        test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+        test.info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 
         assertTrue(
             cartTitle.isDisplayed(),
