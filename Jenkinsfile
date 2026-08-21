@@ -50,7 +50,7 @@ pipeline {
             script {
                 try {
                     emailext(
-                        to: 'Paresh.p@fortune4.in',
+                        to: 'Paresh.p@fortune4.in, nikita.wagh@fortune4.in, pragati.naik@fortune4.in',
                         subject: "Titan Mobile Automation | ${currentBuild.currentResult} | Build #${env.BUILD_NUMBER}",
                         mimeType: 'text/html',
                         body: """
