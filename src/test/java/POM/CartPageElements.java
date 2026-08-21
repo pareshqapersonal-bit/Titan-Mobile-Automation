@@ -184,7 +184,7 @@ public class CartPageElements extends CommonUtils {
         path = captureScreenshot("Cart_Page");
 
         test.info("Cart Page Displayed");
-        test.addScreenCaptureFromBase64String(path);
+        test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 
         assertTrue(
             cartTitle.isDisplayed(),

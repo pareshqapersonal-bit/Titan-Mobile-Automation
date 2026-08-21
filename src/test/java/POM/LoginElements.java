@@ -114,7 +114,7 @@ public class LoginElements extends CommonUtils  {
 	System.out.println("My name is"+userPRofileName);
 	test.info(userPRofileName+ "has successfully logged in");
 	visibilityOf(profileName);
-	test.addScreenCaptureFromBase64String(path);
+	test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 	assertTrue(profileName.isDisplayed(), "User login failed"); 
 	
 	
@@ -137,7 +137,7 @@ public class LoginElements extends CommonUtils  {
 			click(logoutConfirmation);
 			path = captureScreenshot("User_Details");
 			test.info("User has successfully logged out");
-			test.addScreenCaptureFromBase64String(path);
+			test.info("<a href='data:image/png;base64," + path + "' target='_blank'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 			
 		}
 		

@@ -94,7 +94,11 @@ public class TestListener extends Base implements ITestListener {
 	            String screenshotPath =
 	                    captureScreenshot(result.getName());
 
-	            test.addScreenCaptureFromBase64String(screenshotPath);
+	            test.info(
+	                    "<a href='data:image/png;base64," + screenshotPath
+	                            + "' target='_blank'><img src='data:image/png;base64,"
+	                            + screenshotPath
+	                            + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 
 	            System.out.println(
 	                    "Failure screenshot captured: " + screenshotPath);
