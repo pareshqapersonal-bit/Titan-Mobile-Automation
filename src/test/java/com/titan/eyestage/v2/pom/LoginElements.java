@@ -183,9 +183,22 @@ public class LoginElements extends CommonUtils {
 	public boolean isLoginPageDisplayed() {
 	    System.out.println("Checking Login Page");
 
-	    int count = driver.findElements(
-	            AppiumBy.id("com.titan.eyecare:id/txt_login_label"))
-	            .size();
+	    // findElements() otherwise inherits the driver's 30s implicit wait (set in
+	    // Base.opn_app), so every "not showing" check - the common case, since this is
+	    // called after most add-to-cart steps just to see whether a mid-flow login
+	    // popped up - would silently cost 30s. Drop it to near-zero for this one
+	    // lookup, then restore it so nothing else in the flow loses its implicit wait.
+	    driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+	    int count;
+
+	    try {
+	        count = driver.findElements(
+	                AppiumBy.id("com.titan.eyecare:id/txt_login_label"))
+	                .size();
+	    } finally {
+	        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+	    }
 
 	    System.out.println("Count = " + count);
 

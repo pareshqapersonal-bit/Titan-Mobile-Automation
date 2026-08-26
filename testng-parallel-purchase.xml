@@ -1,0 +1,20 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  Purchase-journey rows come from TestData/PurchaseData-v2.xlsx (sheet "PurchaseData",
+  one row per payment method, Execute=Y). Devices/logins stay in the separate
+  TestData/DeviceConfig.xlsx (sheet "Devices") used by the login flow - add/remove rows
+  there to change which devices the purchase rows run on; no XML edits needed.
+
+  data-provider-thread-count controls how many devices run at once; keep it
+  <= your BrowserStack account's parallel session limit.
+-->
+<suite name="Titan Mobile Automation - Parallel Purchase Journey (v2)" data-provider-thread-count="2">
+
+    <test name="V2 Purchase - Payment Method Matrix">
+        <classes>
+            <class name="com.titan.eyestage.v2.PurchaseTest"/>
+        </classes>
+    </test>
+
+</suite>

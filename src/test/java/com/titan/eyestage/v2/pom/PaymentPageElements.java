@@ -1,0 +1,346 @@
+package com.titan.eyestage.v2.pom;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.titan.eyestage.v2.utils.CommonUtils;
+import com.titan.eyestage.v2.utils.PaymentMethodMapper.PaymentMethod;
+import io.appium.java_client.AppiumBy;
+import io.appium.java_client.android.AndroidDriver;
+
+public class PaymentPageElements extends CommonUtils {
+
+	AndroidDriver driver;
+
+	public PaymentPageElements(AndroidDriver driver) {
+		this.driver = driver;
+		PageFactory.initElements(driver, this);
+	}
+
+	// Use a more flexible locator: text may vary or include extra whitespace/locale changes
+	@FindBy(xpath = "//android.widget.TextView[contains(@resource-id,'txt_checkout_payment_method_title') and contains(@text,'Google')]")
+	private WebElement GPay;
+
+	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Continue to Payment']")
+	private WebElement continuePaymentCTA;
+
+	@FindBy(xpath = "//android.widget.LinearLayout[@resource-id=\"com.titan.eyecare:id/ll_checkout_payment_method_banking_list\"]/android.widget.LinearLayout[2]")
+	WebElement bankSelection;
+
+	// Credit Card, Debit Card
+	@FindBy(id = "com.titan.eyecare:id/edt_payment_methods_cardnumber")
+	WebElement cardNumberField;
+
+	@FindBy(id = "com.titan.eyecare:id/edt_payment_methods_carddate")
+	WebElement cardExpiryField;
+
+	@FindBy(id = "com.titan.eyecare:id/edt_payment_methods_cardcvv")
+	WebElement cardCVVField;
+
+	@FindBy(id = "com.titan.eyecare:id/edt_payment_methods_cardholdername")
+	WebElement cardHolderNameField;
+
+	// Cash on delivery
+	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Confirm Order']")
+	private WebElement confirmOrder;
+
+	// Wallet
+	@FindBy(id = "com.titan.eyecare:id/chk_cart_wallet")
+	WebElement walletCheckbox;
+
+	@FindBy(id = "com.titan.eyecare:id/edt_wallet_amount")
+	WebElement walletAmountField;
+
+	@FindBy(id = "com.titan.eyecare:id/txt_wallet_amount_redeem")
+	WebElement walletRedeemButton;
+
+	@FindBy(id = "com.titan.eyecare:id/txt_cart_total_price")
+	private WebElement totalAmount;
+
+	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Wohoo!']")
+	WebElement paymentConfirmation;
+
+	@FindBy(id = "com.titan.eyecare:id/txt_app_rate_btn_later")
+	private WebElement mayBLater;
+
+	@FindBy(xpath = "//android.widget.LinearLayout[@resource-id='com.titan.eyecare:id/ll_search_bar']"
+			+ "//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
+	WebElement searchBackButton;
+
+	@FindBy(id = "com.titan.eyecare:id/txt_payment_success_id")
+	WebElement OrderIDText;
+
+	String path = null;
+
+	private final By backButtonLocator = AppiumBy.id("com.titan.eyecare:id/img_toolbar_back");
+
+	public void selectPaymentMethod(String paymentMethod) throws InterruptedException, IOException {
+
+		PaymentMethod method = PaymentMethod.fromExcel(paymentMethod);
+
+		switch (method) {
+
+		case GOOGLE_PAY:
+
+			try {
+				clickPaymentMethodByText("Google Pay");
+			} catch (Exception e) {
+				try {
+					visibilityOf(GPay);
+					click(GPay);
+				} catch (Exception ex) {
+					System.out.println("Failed to select Google Pay: " + ex.getMessage());
+					throw ex;
+				}
+			}
+
+			System.out.println("Selected payment method: Google Pay");
+
+			click(continuePaymentCTA);
+
+			test().info("Initiating Razorpay payment");
+			System.out.println("RazorPay Context" + driver.getContextHandles());
+			Thread.sleep(1000);
+
+			Set<String> context = driver.getContextHandles();
+			System.out.println("Context is" + context);
+
+			for (String ctext : context) {
+				System.out.println(ctext);
+				if (ctext.contains("WEBVIEW")) {
+					List<WebElement> buttons = driver.findElements(
+							By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"));
+					System.out.println("Count = " + buttons.size());
+					driver.findElement(By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]")).click();
+					break;
+				}
+			}
+
+			Thread.sleep(1000);
+
+			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+
+			click(paymentConfirmation);
+			click(mayBLater);
+			visibilityOf(OrderIDText);
+			path = captureScreenshot("Order ID");
+			test().info(getText(OrderIDText) + " is the OrderID");
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			assertTrue(OrderIDText.isDisplayed());
+			clickBackFromOrderPage();
+
+			break;
+
+		case PHONEPE:
+			// PhonePe locator not implemented yet
+			break;
+
+		case CREDIT_DEBIT_CARD:
+
+			test().info("Selecting payment method");
+			driver.findElement(
+					AppiumBy.androidUIAutomator(
+							"new UiScrollable(new UiSelector().scrollable(true))"
+									+ ".scrollIntoView(new UiSelector().text(\"Credit / Debit Card\"))"))
+					.click();
+
+			sendKeys(cardNumberField, "4100280000001007");
+			sendKeys(cardExpiryField, "12/35");
+			sendKeys(cardCVVField, "123");
+			sendKeys(cardHolderNameField, "Test User");
+			click(continuePaymentCTA);
+
+			test().info("Initiating Razorpay payment");
+			System.out.println("RazorPay Context" + driver.getContextHandles());
+			Thread.sleep(200);
+
+			context = driver.getContextHandles();
+			System.out.println("Context is" + context);
+
+			for (String ctext : context) {
+				System.out.println(ctext);
+				if (ctext.contains("WEBVIEW")) {
+					List<WebElement> buttons = driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
+					System.out.println("Count = " + buttons.size());
+					driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+					break;
+				}
+			}
+
+			Thread.sleep(200);
+
+			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+
+			click(paymentConfirmation);
+			click(mayBLater);
+			visibilityOf(OrderIDText);
+			path = captureScreenshot("Order ID");
+			test().info(getText(OrderIDText) + " is the OrderID");
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			assertTrue(OrderIDText.isDisplayed());
+			clickBackFromOrderPage();
+
+			break;
+
+		case OTHER_UPI:
+			// Other UPI locator not implemented yet
+			break;
+
+		case NET_BANKING:
+
+			System.out.println("Selecting payment method: Net Banking");
+			test().info("Selecting payment method");
+			driver.findElement(
+					AppiumBy.androidUIAutomator(
+							"new UiScrollable(new UiSelector().scrollable(true))"
+									+ ".scrollIntoView(new UiSelector().text(\"Net Banking\"))"))
+					.click();
+
+			click(bankSelection);
+			click(continuePaymentCTA);
+
+			test().info("Initiating Razorpay payment");
+			System.out.println("RazorPay Context" + driver.getContextHandles());
+			Thread.sleep(200);
+
+			context = driver.getContextHandles();
+			System.out.println("Context is" + context);
+
+			for (String ctext : context) {
+				System.out.println(ctext);
+				if (ctext.contains("WEBVIEW")) {
+					List<WebElement> buttons = driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
+					System.out.println("Count = " + buttons.size());
+					driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
+					break;
+				}
+			}
+
+			Thread.sleep(200);
+
+			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+
+			click(paymentConfirmation);
+			click(mayBLater);
+			visibilityOf(OrderIDText);
+			path = captureScreenshot("Order ID");
+			test().info(getText(OrderIDText) + " is the OrderID");
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			assertTrue(OrderIDText.isDisplayed());
+			clickBackFromOrderPage();
+
+			break;
+
+		case CASH_ON_DELIVERY:
+
+			driver.findElement(
+					AppiumBy.androidUIAutomator(
+							"new UiScrollable(new UiSelector().scrollable(true))"
+									+ ".scrollIntoView(new UiSelector().text(\"Cash on Delivery\"))"))
+					.click();
+
+			click(confirmOrder);
+
+			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+
+			click(paymentConfirmation);
+			click(mayBLater);
+			visibilityOf(OrderIDText);
+			path = captureScreenshot("Order ID");
+			test().info(getText(OrderIDText) + " is the OrderID");
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			assertTrue(OrderIDText.isDisplayed());
+			clickBackFromOrderPage();
+
+			break;
+
+		case WALLET:
+
+			driver.findElement(AppiumBy.androidUIAutomator(
+					"new UiScrollable(new UiSelector().scrollable(true))"
+							+ ".scrollIntoView(new UiSelector().text(\"Total Amount\"))"));
+
+			String amount = totalAmount.getText()
+					.replace("₹", "")
+					.replace(",", "")
+					.replace(".00", "")
+					.trim();
+
+			System.out.println(amount);
+			System.out.println("amount is" + amount);
+
+			driver.findElement(AppiumBy.androidUIAutomator(
+					"new UiScrollable(new UiSelector().scrollable(true))"
+							+ ".scrollIntoView(new UiSelector().text(\"Titan Wallet\"))"));
+
+			click(walletCheckbox);
+			sendKeys(walletAmountField, amount);
+			click(walletRedeemButton);
+			click(confirmOrder);
+
+			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
+			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
+
+			click(paymentConfirmation);
+			click(mayBLater);
+			visibilityOf(OrderIDText);
+			path = captureScreenshot("Order ID");
+			test().info(getText(OrderIDText) + " is the OrderID");
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			assertTrue(OrderIDText.isDisplayed());
+			clickBackFromOrderPage();
+
+			break;
+
+		default:
+			throw new IllegalArgumentException(
+					"Unsupported payment method: " + paymentMethod);
+		}
+	}
+
+	// Scrolls to a payment method by visible text (uses UiScrollable) and clicks it.
+	// Falls back to finding an element containing the text if UiScrollable fails.
+	private void clickPaymentMethodByText(String visibleText) {
+		try {
+			driver.findElement(
+					AppiumBy.androidUIAutomator(
+							"new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().textContains(\""
+									+ visibleText + "\"))"))
+					.click();
+			return;
+		} catch (Exception e) {
+			List<WebElement> elems = driver.findElements(AppiumBy.xpath("//*[contains(@text,'" + visibleText + "')]"));
+			if (!elems.isEmpty()) {
+				click(elems.get(0));
+				return;
+			}
+			throw e;
+		}
+	}
+
+	public void clickBackFromOrderPage() {
+
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+		WebElement backButton = wait.until(ExpectedConditions.elementToBeClickable(backButtonLocator));
+
+		backButton.click();
+		click(searchBackButton);
+	}
+}

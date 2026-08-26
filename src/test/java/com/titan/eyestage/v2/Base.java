@@ -177,6 +177,14 @@ public class Base {
 			options.setApp(
 					config.getProperty("browserstack.app"));
 
+			// Same webview-stabilization capabilities as the local branch above -
+			// without these, a WebView getting torn down mid-flow (e.g. the Razorpay
+			// payment webview) can leave the driver's webview context bookkeeping
+			// stale on BrowserStack's shared real devices.
+			options.setCapability("chromedriverAutodownload", true);
+			options.setCapability("ensureWebviewsHavePages", true);
+			options.setCapability("webviewConnectTimeout", 20000);
+
 			localDriver = new AndroidDriver(
 					new URL("https://hub-cloud.browserstack.com/wd/hub"),
 					options);
