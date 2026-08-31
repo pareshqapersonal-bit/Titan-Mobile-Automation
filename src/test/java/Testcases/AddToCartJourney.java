@@ -14,15 +14,17 @@ import POM.PurchaseJourneyElements;
 import Utilities.CartDataMapper;
 import Utilities.DataProviderUtil;
 import Utilities.ExcelReader;
+import Utilities.RetryAnalyzer;
 import Utilities.TestListener;
 import models.CartProduct;
 
 @Listeners(TestListener.class)
 public class AddToCartJourney extends Base {
-	
+
 	@Test(
 		    description = "Complete Place Order Journey",
 		    priority = 1,
+		    retryAnalyzer = RetryAnalyzer.class,
 		    dataProvider = "purchaseData",
 		    dataProviderClass = DataProviderUtil.class
 		)

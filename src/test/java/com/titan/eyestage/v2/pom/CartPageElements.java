@@ -237,18 +237,30 @@ public class CartPageElements extends CommonUtils {
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
-		return wait.until(driver -> {
+		// findElements() otherwise inherits the driver's 30s implicit wait (set in
+		// Base.opn_app), so each empty lookup below can silently block up to 30s -
+		// two lookups per poll means a single poll can blow past this wait's own
+		// 30s budget before it ever gets a real retry. Drop it to near-zero for the
+		// duration of this poll loop, then restore it (same fix as
+		// LoginElements.isLoginPageDisplayed()).
+		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
 
-			if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/txt_btn_title")).isEmpty()) {
-				return true;
-			}
+		try {
+			return wait.until(driver -> {
 
-			if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")).isEmpty()) {
-				return false;
-			}
+				if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/txt_btn_title")).isEmpty()) {
+					return true;
+				}
 
-			return null;
-		});
+				if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")).isEmpty()) {
+					return false;
+				}
+
+				return null;
+			});
+		} finally {
+			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		}
 	}
 
 	private void tapPdpBack() {

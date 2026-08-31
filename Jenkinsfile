@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     if (params.TEST_SUITE == 'purchase') {
-                        env.SUITE_FILE = 'testng-purchase.xml'
+                        env.SUITE_FILE = 'testng-parallel-purchase.xml'
                     } else {
                         env.SUITE_FILE = 'testng.xml'
                     }
