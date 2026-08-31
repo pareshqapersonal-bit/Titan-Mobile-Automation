@@ -6,9 +6,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -111,24 +111,9 @@ public class PaymentPageElements extends CommonUtils {
 			click(continuePaymentCTA);
 
 			test().info("Initiating Razorpay payment");
-			System.out.println("RazorPay Context" + driver.getContextHandles());
-			Thread.sleep(1000);
-
-			Set<String> context = driver.getContextHandles();
-			System.out.println("Context is" + context);
-
-			for (String ctext : context) {
-				System.out.println(ctext);
-				if (ctext.contains("WEBVIEW")) {
-					List<WebElement> buttons = driver.findElements(
-							By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"));
-					System.out.println("Count = " + buttons.size());
-					driver.findElement(By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]")).click();
-					break;
-				}
-			}
-
-			Thread.sleep(1000);
+			clickInWebviewIfPresent(
+					By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"),
+					15);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
@@ -164,23 +149,7 @@ public class PaymentPageElements extends CommonUtils {
 			click(continuePaymentCTA);
 
 			test().info("Initiating Razorpay payment");
-			System.out.println("RazorPay Context" + driver.getContextHandles());
-			Thread.sleep(200);
-
-			context = driver.getContextHandles();
-			System.out.println("Context is" + context);
-
-			for (String ctext : context) {
-				System.out.println(ctext);
-				if (ctext.contains("WEBVIEW")) {
-					List<WebElement> buttons = driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
-					System.out.println("Count = " + buttons.size());
-					driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
-					break;
-				}
-			}
-
-			Thread.sleep(200);
+			clickInWebviewIfPresent(By.xpath("//*[contains(@text,'Success')]"), 15);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
@@ -214,23 +183,7 @@ public class PaymentPageElements extends CommonUtils {
 			click(continuePaymentCTA);
 
 			test().info("Initiating Razorpay payment");
-			System.out.println("RazorPay Context" + driver.getContextHandles());
-			Thread.sleep(200);
-
-			context = driver.getContextHandles();
-			System.out.println("Context is" + context);
-
-			for (String ctext : context) {
-				System.out.println(ctext);
-				if (ctext.contains("WEBVIEW")) {
-					List<WebElement> buttons = driver.findElements(By.xpath("//*[contains(@text,'Success')]"));
-					System.out.println("Count = " + buttons.size());
-					driver.findElement(By.xpath("//*[contains(@text,'Success')]")).click();
-					break;
-				}
-			}
-
-			Thread.sleep(200);
+			clickInWebviewIfPresent(By.xpath("//*[contains(@text,'Success')]"), 15);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
@@ -311,6 +264,46 @@ public class PaymentPageElements extends CommonUtils {
 		default:
 			throw new IllegalArgumentException(
 					"Unsupported payment method: " + paymentMethod);
+		}
+	}
+
+	// Razorpay opens its own WEBVIEW context for card/net-banking/GPay confirmation, but it
+	// doesn't always appear (some flows auto-confirm without it), and how long it takes to
+	// appear varies with BrowserStack's real-device network. Poll for a WEBVIEW context
+	// instead of guessing a fixed sleep, actually switch into it (findElements was
+	// previously being run against whatever context was last set - NATIVE_APP - so it could
+	// never reliably match the webview's html-style resource-id locators), and always switch
+	// back to NATIVE_APP afterward so the rest of the flow isn't left in the wrong context.
+	private void clickInWebviewIfPresent(By locator, int timeoutSeconds) {
+
+		String webviewContext;
+
+		try {
+			webviewContext = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds))
+					.until(ignored -> driver.getContextHandles().stream()
+							.filter(c -> c.contains("WEBVIEW"))
+							.findFirst()
+							.orElse(null));
+		} catch (TimeoutException e) {
+			System.out.println("No WEBVIEW context appeared within " + timeoutSeconds + "s, skipping: " + locator);
+			return;
+		}
+
+		System.out.println("Switching into context: " + webviewContext);
+		driver.context(webviewContext);
+
+		try {
+			List<WebElement> matches = driver.findElements(locator);
+			System.out.println("Count = " + matches.size());
+
+			if (!matches.isEmpty()) {
+				matches.get(0).click();
+				System.out.println("Clicked webview element: " + locator);
+			} else {
+				System.out.println("Webview element not present, skipping click: " + locator);
+			}
+		} finally {
+			driver.context("NATIVE_APP");
 		}
 	}
 
