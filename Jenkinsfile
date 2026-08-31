@@ -18,10 +18,10 @@ pipeline {
         stage('Prepare Test Suite') {
             steps {
                 script {
-                    if (params.TEST_SUITE == 'Titan Mobile Automation - Parallel Purchase Journey (v2)') {
-                        env.SUITE_FILE = 'testng-parallel-purchase.xml'
+                    if (params.TEST_SUITE == 'purchase') {
+                        env.SUITE_FILE = 'testng-purchase.xml'
                     } else {
-                        env.SUITE_FILE = 'testng.xml'
+                        env.SUITE_FILE = 'testng-parallel-purchase.xml'
                     }
                 }
             }
