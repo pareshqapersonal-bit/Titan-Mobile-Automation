@@ -1,5 +1,9 @@
 package com.titan.eyestage.v2.utils;
 
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -8,20 +12,37 @@ import com.titan.eyestage.v2.Base;
 
 public class TestListener extends Base implements ITestListener {
 
+	// Counts invocations per logical case (class#method#params) so a retried case gets a
+	// distinct, labeled node in the report ("Retry Attempt 1") instead of two identically
+	// named entries that are impossible to tell apart.
+	private static final ConcurrentHashMap<String, AtomicInteger> attemptCounts = new ConcurrentHashMap<>();
+
+	private static String caseKey(ITestResult result) {
+		return result.getTestClass().getName()
+				+ "#" + result.getMethod().getMethodName()
+				+ Arrays.toString(result.getParameters());
+	}
+
 	@Override
 	public void onTestStart(ITestResult result) {
 
-	    String testName = result.getMethod().getDescription();
+		String testName = result.getMethod().getDescription();
 
-	    if (testName == null || testName.isEmpty()) {
-	        testName = result.getMethod().getMethodName();
-	    }
+		if (testName == null || testName.isEmpty()) {
+			testName = result.getMethod().getMethodName();
+		}
 
-	    setTest(extent.createTest(
-	            testName + CommonUtils.getTestData(result)
-	    ));
+		int attempt = attemptCounts
+				.computeIfAbsent(caseKey(result), k -> new AtomicInteger(0))
+				.incrementAndGet();
 
-	    System.out.println(result.getName() + " Started");
+		String attemptLabel = attempt > 1 ? " [Retry Attempt " + (attempt - 1) + "]" : "";
+
+		setTest(extent.createTest(
+				testName + CommonUtils.getTestData(result) + attemptLabel
+		));
+
+		System.out.println(result.getName() + " Started" + attemptLabel);
 	}
 
 	@Override
@@ -37,6 +58,36 @@ public class TestListener extends Base implements ITestListener {
 	public void onTestFailure(ITestResult result) {
 
 	    test().fail(result.getThrowable());
+	    attachFailureScreenshot(result);
+
+	    System.out.println(
+                result.getName() + " Failed");
+
+	    ITestListener.super.onTestFailure(result);
+	}
+
+	@Override
+	public void onTestSkipped(ITestResult result) {
+
+		// TestNG reclassifies a failed-but-about-to-be-retried invocation as SKIP rather than
+		// FAIL, but the original exception stays attached to the result - without logging it
+		// here, the actual reason for the retry is silently lost from the report (it used to
+		// just say "Retry Attempt" with no detail). A genuine skip (no retry involved) has no
+		// throwable, so it still falls back to a plain skip note.
+		if (result.getThrowable() != null) {
+			test().skip(result.getThrowable());
+			attachFailureScreenshot(result);
+		} else {
+			test().skip("Skipped");
+		}
+
+		ITestListener.super.onTestSkipped(result);
+		System.out.println(
+	                result.getName() +
+	                " Skipped");
+	}
+
+	private void attachFailureScreenshot(ITestResult result) {
 
 	    try {
 
@@ -67,20 +118,6 @@ public class TestListener extends Base implements ITestListener {
 	                "Could not capture failure screenshot: "
 	                + e.getMessage());
 	    }
-
-	    System.out.println(
-	            result.getName() + " Failed");
-
-	    ITestListener.super.onTestFailure(result);
-	}
-
-	@Override
-	public void onTestSkipped(ITestResult result) {
-		test().skip("Retry Attempt");
-		ITestListener.super.onTestSkipped(result);
-		  System.out.println(
-	                result.getName() +
-	                " Skipped");
 	}
 
 	@Override

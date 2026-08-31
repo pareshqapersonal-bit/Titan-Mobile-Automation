@@ -106,16 +106,28 @@ public class CommonUtils extends Base {
                 .getText();
     }
 
-    // Testcase details
+    // Testcase details - built as named fields rather than a raw Arrays.toString() dump so
+    // every report entry clearly shows which device/case it belongs to. Every v2 data provider
+    // (loginDevices, purchaseDevices) shares the same {mobileNumber, password, deviceName,
+    // osVersion, ...} shape; indices 0/1 are login credentials and are deliberately never
+    // included here - the old raw dump printed the plaintext password into the HTML report.
     public static String getTestData(ITestResult result) {
 
-        Object[] parameters = result.getParameters();
+        Object[] p = result.getParameters();
 
-        if (parameters.length == 0) {
-            return "";
+        if (p.length < 4) {
+            return p.length == 0 ? "" : " | " + Arrays.toString(p);
         }
 
-        return " | " + Arrays.toString(parameters);
+        StringBuilder sb = new StringBuilder(" | Device=").append(p[2]).append(", OS=").append(p[3]);
+
+        if (p.length >= 7) {
+            sb.append(", TestCase=").append(p[4])
+              .append(", Products=").append(p[5])
+              .append(", PaymentMethod=").append(p[6]);
+        }
+
+        return sb.toString();
     }
 
     // swipe function

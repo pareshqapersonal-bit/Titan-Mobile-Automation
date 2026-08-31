@@ -20,8 +20,15 @@ pipeline {
                 script {
                     if (params.TEST_SUITE == 'purchase') {
                         env.SUITE_FILE = 'testng-purchase.xml'
+                        // Old non-parallel flow (Testcases.AddToCartJourney) - written via
+                        // Utilities.ExtentManager.
+                        env.REPORT_FILE = 'Reports/ExtentReport.html'
                     } else {
                         env.SUITE_FILE = 'testng-parallel-purchase.xml'
+                        // v2 parallel flow (com.titan.eyestage.v2.PurchaseTest) - written via
+                        // com.titan.eyestage.v2.utils.ExtentManager to a distinct file so it
+                        // never collides with the v1 report above.
+                        env.REPORT_FILE = 'Reports/ExtentReport_v2.html'
                     }
                 }
             }
@@ -77,7 +84,7 @@ pipeline {
 </body>
 </html>
 """,
-                        attachmentsPattern: 'Reports/ExtentReport.html',
+                        attachmentsPattern: env.REPORT_FILE,
                         debug: true
                     )
                     echo "EMAILEXT: send completed"
