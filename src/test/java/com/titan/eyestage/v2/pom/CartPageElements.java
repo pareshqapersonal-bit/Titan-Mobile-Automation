@@ -95,7 +95,15 @@ public class CartPageElements extends CommonUtils {
 			dispatchProduct(product);
 			System.out.println("Product added to cart: " + product.getSku());
 
-			driver.context("NATIVE_APP");
+			// Just-in-case reset - most add-to-cart flows never leave NATIVE_APP, so this is a
+			// no-op most of the time. Unguarded, a transient device/session hiccup on this one
+			// housekeeping call would abort the whole loop even though the product was already
+			// added successfully above.
+			try {
+				driver.context("NATIVE_APP");
+			} catch (Exception e) {
+				System.out.println("Could not confirm NATIVE_APP context after add-to-cart: " + e.getMessage());
+			}
 
 			List<WebElement> continueButtons = driver.findElements(
 					AppiumBy.xpath(
@@ -231,11 +239,16 @@ public class CartPageElements extends CommonUtils {
 		}
 	}
 
-	// Returns true if the PDP (buyNowCTA) showed up, false if search (searchClick)
-	// showed up first instead.
+	// Returns true if the PDP (buyNowCTA) showed up, false if search (searchClick, or an
+	// already-active Search screen left over from an earlier product) showed up first instead.
 	private boolean waitForPdpOrSearch() {
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		// 30s previously caused this poll to time out on the Computer Glass -> Accessories
+		// transition specifically: a live page-source dump taken immediately after that timeout
+		// fired showed the expected edt_search field already present and correctly identified -
+		// the screen was still settling right at the 30s boundary, not missing/misdetected. 40s
+		// gives that transition the time it actually needs.
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
 
 		// findElements() otherwise inherits the driver's 30s implicit wait (set in
 		// Base.opn_app), so each empty lookup below can silently block up to 30s -
@@ -256,10 +269,35 @@ public class CartPageElements extends CommonUtils {
 					return false;
 				}
 
+				// Cart Back can also restore an earlier product's still-open Search screen
+				// straight from the back stack (the PDP entry in between got trimmed under
+				// memory pressure) instead of landing on the collapsed search bar above - same
+				// destination, but with the previous SKU still typed in and its result still
+				// showing (or, per a live page-source capture, sometimes empty with just the
+				// placeholder hint text - either way rl_toolbar_search doesn't exist on this
+				// screen at all, so neither check above ever matches it). Detect it via the
+				// search field itself and clear the stale query here, so the next
+				// searchProduct(sku) call types into an empty field instead of appending onto
+				// any leftover text.
+				List<WebElement> staleSearchField =
+						driver.findElements(AppiumBy.id("com.titan.eyecare:id/edt_search"));
+
+				if (!staleSearchField.isEmpty()) {
+					staleSearchField.get(0).clear();
+					return false;
+				}
+
 				return null;
 			});
 		} finally {
-			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+			// Restoring the implicit wait is housekeeping, not the actual result of this poll -
+			// if the session is already unstable, this call throwing would replace whatever the
+			// try block above actually found/threw (Java's finally-supersedes-try behavior).
+			try {
+				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+			} catch (Exception e) {
+				System.out.println("Could not restore implicit wait after PDP/search poll: " + e.getMessage());
+			}
 		}
 	}
 

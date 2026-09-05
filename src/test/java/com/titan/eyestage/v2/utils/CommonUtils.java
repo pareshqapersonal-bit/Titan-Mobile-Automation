@@ -7,10 +7,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 
@@ -18,38 +21,37 @@ import com.titan.eyestage.v2.Base;
 
 public class CommonUtils extends Base {
 
+    // A WebDriverWait's polling loop only rides out NotFoundException by default - any other
+    // WebDriverException raised while evaluating the condition (e.g. "Session not started or
+    // terminated" / "unexpected driver response" from a momentarily unready Appium/UIAutomator2
+    // backend, seen right after a context switch or under real-device network hiccups) escapes
+    // the loop immediately instead of being retried within the wait's own budget. Ignoring
+    // WebDriverException here keeps every poll inside FluentWait's existing timeout/interval,
+    // so a transient one clears on a later poll instead of failing the whole step outright; a
+    // truly dead session still surfaces the same way it does today, just as this wait's own
+    // TimeoutException once the 30s budget actually runs out.
+    private FluentWait<WebDriver> newWait() {
+        return new WebDriverWait(driver(), Duration.ofSeconds(30))
+                .ignoring(WebDriverException.class);
+    }
+
     public void click(WebElement element) {
 
-        WebDriverWait wait =
-                new WebDriverWait(driver(),
-                        Duration.ofSeconds(30));
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(element))
+        newWait()
+                .until(ExpectedConditions.elementToBeClickable(element))
                 .click();
     }
 
     // Element visibility utility
     public void visibilityOf(WebElement element) {
 
-        WebDriverWait wait =
-                new WebDriverWait(driver(),
-                        Duration.ofSeconds(30));
-
-        wait.until(
-                ExpectedConditions.visibilityOf(element));
-
+        newWait().until(ExpectedConditions.visibilityOf(element));
     }
 
     public void sendKeys(WebElement element,
                          String value) {
 
-        WebDriverWait wait =
-                new WebDriverWait(driver(),
-                        Duration.ofSeconds(30));
-
-        wait.until(
-                ExpectedConditions.visibilityOf(element));
+        newWait().until(ExpectedConditions.visibilityOf(element));
 
         element.clear();
         element.sendKeys(value);
@@ -61,8 +63,7 @@ public class CommonUtils extends Base {
     // doesn't fail the step outright.
     public void sendKeysToLocator(By locator, String value) {
 
-        WebDriverWait wait =
-                new WebDriverWait(driver(), Duration.ofSeconds(30));
+        FluentWait<WebDriver> wait = newWait();
 
         StaleElementReferenceException lastFailure = null;
 
@@ -87,22 +88,16 @@ public class CommonUtils extends Base {
 
     // Enter
     public void enter(WebElement element) {
-    	 WebDriverWait wait =
-                 new WebDriverWait(driver(),
-                         Duration.ofSeconds(30));
-    	  wait.until(
-                 ExpectedConditions.visibilityOf(element))
-                 .sendKeys(Keys.ENTER);
+
+        newWait()
+                .until(ExpectedConditions.visibilityOf(element))
+                .sendKeys(Keys.ENTER);
     }
 
     public String getText(WebElement element) {
 
-        WebDriverWait wait =
-                new WebDriverWait(driver(),
-                        Duration.ofSeconds(30));
-
-        return wait.until(
-                ExpectedConditions.visibilityOf(element))
+        return newWait()
+                .until(ExpectedConditions.visibilityOf(element))
                 .getText();
     }
 

@@ -9,7 +9,7 @@
   data-provider-thread-count controls how many devices run at once; keep it
   <= your BrowserStack account's parallel session limit.
 -->
-<suite name="Titan Mobile Automation - Parallel Purchase Journey (v2)" data-provider-thread-count="2">
+<suite name="Titan Mobile Automation - Parallel Purchase Journey (v2)" data-provider-thread-count="1">
 
     <test name="V2 Purchase - Payment Method Matrix">
         <classes>

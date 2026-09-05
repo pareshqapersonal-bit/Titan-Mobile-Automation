@@ -289,21 +289,61 @@ public class PaymentPageElements extends CommonUtils {
 			return;
 		}
 
-		System.out.println("Switching into context: " + webviewContext);
-		driver.context(webviewContext);
+		// getContextHandles() lists a WEBVIEW_x handle as soon as Android's devtools bridge
+		// sees the page, but the chromedriver process Appium spins up to actually drive that
+		// context can still be a beat behind - the very first command against a freshly
+		// switched-to context can then die with "Session not started or terminated" even
+		// though the page (and the button we want) is genuinely on screen. Retry the
+		// switch+query a few times with a short pause instead of giving up on that first hit.
+		int attempts = 3;
 
-		try {
-			List<WebElement> matches = driver.findElements(locator);
-			System.out.println("Count = " + matches.size());
+		for (int attempt = 1; attempt <= attempts; attempt++) {
 
-			if (!matches.isEmpty()) {
-				matches.get(0).click();
-				System.out.println("Clicked webview element: " + locator);
-			} else {
-				System.out.println("Webview element not present, skipping click: " + locator);
+			try {
+				System.out.println("Switching into context: " + webviewContext + " (attempt " + attempt + ")");
+				driver.context(webviewContext);
+
+				List<WebElement> matches = driver.findElements(locator);
+				System.out.println("Count = " + matches.size());
+
+				if (!matches.isEmpty()) {
+					matches.get(0).click();
+					System.out.println("Clicked webview element: " + locator);
+				} else {
+					System.out.println("Webview element not present, skipping click: " + locator);
+				}
+
+				break;
+
+			} catch (Exception e) {
+
+				if (attempt == attempts) {
+					System.out.println("Giving up on webview element after " + attempts
+							+ " attempts: " + locator + " - " + e.getMessage());
+					break;
+				}
+
+				System.out.println("Webview not ready yet (attempt " + attempt + "), retrying: " + e.getMessage());
+
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					break;
+				}
+
+			} finally {
+				// The webview click above can succeed and still leave the context switch-back
+				// failing right after - Razorpay often tears its own webview down immediately on
+				// success/redirect. An unguarded call here would both fail an otherwise-successful
+				// step and, if the try block above had itself thrown, silently replace that real
+				// exception with this cleanup one (Java's finally-supersedes-try behavior).
+				try {
+					driver.context("NATIVE_APP");
+				} catch (Exception e) {
+					System.out.println("Could not switch back to NATIVE_APP context (webview likely already closed): " + e.getMessage());
+				}
 			}
-		} finally {
-			driver.context("NATIVE_APP");
 		}
 	}
 

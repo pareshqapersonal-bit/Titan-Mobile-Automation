@@ -197,7 +197,14 @@ public class LoginElements extends CommonUtils {
 	                AppiumBy.id("com.titan.eyecare:id/txt_login_label"))
 	                .size();
 	    } finally {
-	        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+	        // Restoring the implicit wait is housekeeping, not the actual result of this check -
+	        // if the session is already unstable, this call throwing would replace whatever the
+	        // try block above actually found/threw (Java's finally-supersedes-try behavior).
+	        try {
+	            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+	        } catch (Exception e) {
+	            System.out.println("Could not restore implicit wait after login-page check: " + e.getMessage());
+	        }
 	    }
 
 	    System.out.println("Count = " + count);

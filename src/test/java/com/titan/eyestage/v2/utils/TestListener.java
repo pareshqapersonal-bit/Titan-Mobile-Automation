@@ -45,6 +45,10 @@ public class TestListener extends Base implements ITestListener {
 		System.out.println(result.getName() + " Started" + attemptLabel);
 	}
 
+	// BrowserStack session status and failure screenshots are handled in Base.tearDown() now,
+	// not here - TestNG runs @AfterMethod before notifying ITestListener, so by the time these
+	// callbacks fire the driver has already quit and its session id is gone. These callbacks
+	// only build the Extent report entries, which don't need a live driver.
 	@Override
 	public void onTestSuccess(ITestResult result) {
 		test().pass("Passed");
@@ -58,7 +62,6 @@ public class TestListener extends Base implements ITestListener {
 	public void onTestFailure(ITestResult result) {
 
 	    test().fail(result.getThrowable());
-	    attachFailureScreenshot(result);
 
 	    System.out.println(
                 result.getName() + " Failed");
@@ -76,7 +79,6 @@ public class TestListener extends Base implements ITestListener {
 		// throwable, so it still falls back to a plain skip note.
 		if (result.getThrowable() != null) {
 			test().skip(result.getThrowable());
-			attachFailureScreenshot(result);
 		} else {
 			test().skip("Skipped");
 		}
@@ -85,39 +87,6 @@ public class TestListener extends Base implements ITestListener {
 		System.out.println(
 	                result.getName() +
 	                " Skipped");
-	}
-
-	private void attachFailureScreenshot(ITestResult result) {
-
-	    try {
-
-	        if (driver() != null && driver().getSessionId() != null) {
-
-	            String screenshotPath =
-	                    captureScreenshot(result.getName());
-
-	            test().info(
-	                    "<a href='data:image/png;base64," + screenshotPath
-	                            + "' data-featherlight='image'><img src='data:image/png;base64,"
-	                            + screenshotPath
-	                            + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
-
-	            System.out.println(
-	                    "Failure screenshot captured: " + screenshotPath);
-
-	        } else {
-
-	            System.out.println(
-	                    "Screenshot skipped: Appium session is not available.");
-
-	        }
-
-	    } catch (Exception e) {
-
-	        System.out.println(
-	                "Could not capture failure screenshot: "
-	                + e.getMessage());
-	    }
 	}
 
 	@Override
