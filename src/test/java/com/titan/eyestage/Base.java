@@ -7,6 +7,8 @@ import java.time.Duration;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -17,6 +19,7 @@ import com.aventstack.extentreports.ExtentTest;
 
 import POM.LoginElements;
 import Utilities.*;
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import java.util.HashMap;
@@ -171,6 +174,15 @@ public class Base{
   le.permissionPopup();
   System.out.println("Package = " + driver.getCurrentPackage());
   System.out.println("Activity = " + driver.currentActivity());
+
+  // permissionPopup() only waits (briefly) for permission dialogs, not for the app to
+  // actually finish the splash -> home transition after they're dismissed. On some
+  // devices/sessions the app can sit on the splash screen well past that, so the first
+  // real test step fails against a screen that isn't there yet. Wait for the home
+  // screen's own search icon directly before returning.
+  new WebDriverWait(driver, Duration.ofSeconds(60))
+          .until(ExpectedConditions.presenceOfElementLocated(
+                  AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")));
     }
     
   

@@ -15,6 +15,8 @@ import java.lang.reflect.Method;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -25,6 +27,8 @@ import com.aventstack.extentreports.ExtentTest;
 import com.titan.eyestage.v2.pom.LoginElements;
 import com.titan.eyestage.v2.utils.ConfigManager;
 import com.titan.eyestage.v2.utils.ExtentManager;
+import io.appium.java_client.AppiumBy;
+import io.appium.java_client.AppiumClientConfig;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import java.util.HashMap;
@@ -60,6 +64,20 @@ public class Base {
 
 	protected static String sessionId() {
 		return sessionIdHolder.get();
+	}
+
+	// Selenium's default HTTP client read timeout is measured in hours, so a dropped connection
+	// (BrowserStack terminating a session mid-command, a torn-down webview, a real-device network
+	// hiccup) leaves a single Appium command hanging far past any WebDriverWait's own timeout -
+	// CommonUtils.newWait() only re-checks its 30s budget *after* a poll returns, so one hung call
+	// blows straight through it (seen taking 840s in practice instead of failing in ~30s). Capping
+	// the client's own read/connection timeout here means a dead session fails fast and the wait's
+	// budget actually holds, regardless of thread count - this was never a concurrency issue.
+	private static AppiumClientConfig httpClientConfig(URL url) {
+		return AppiumClientConfig.defaultConfig()
+				.baseUrl(url)
+				.connectionTimeout(Duration.ofSeconds(30))
+				.readTimeout(Duration.ofSeconds(45));
 	}
 
 	protected static void setSessionId(String id) {
@@ -152,7 +170,7 @@ public class Base {
 			options.setCapability("ensureWebviewsHavePages", true);
 			options.setCapability("webviewConnectTimeout", 20000);
 			localDriver = new AndroidDriver(
-					new URL(config.getProperty("appiumURL")),
+					httpClientConfig(new URL(config.getProperty("appiumURL"))),
 					options);
 			setDriver(localDriver);
 
@@ -207,7 +225,7 @@ public class Base {
 			options.setCapability("webviewConnectTimeout", 20000);
 
 			localDriver = new AndroidDriver(
-					new URL("https://hub-cloud.browserstack.com/wd/hub"),
+					httpClientConfig(new URL("https://hub-cloud.browserstack.com/wd/hub")),
 					options);
 			setDriver(localDriver);
 
@@ -236,6 +254,19 @@ public class Base {
 		le.permissionPopup();
 		System.out.println("Package = " + driver().getCurrentPackage());
 		System.out.println("Activity = " + driver().currentActivity());
+
+		// permissionPopup() only waits (briefly) for permission dialogs, not for the app to
+		// actually finish the splash -> home transition after they're dismissed. Seen in
+		// practice: on some devices/sessions the app sits on the splash screen for 30s+ (e.g.
+		// a second permission dialog rendering late enough that permissionPopup()'s single,
+		// unwaited check misses it), so the very first test step - clicking the home screen's
+		// search icon - fails immediately with an unhelpful "element null" error instead of a
+		// clear timeout here. Wait for that same search icon directly, before the test body
+		// (and its own, shorter waits) ever gets a chance to run against a screen that isn't
+		// there yet.
+		new WebDriverWait(driver(), Duration.ofSeconds(60))
+				.until(ExpectedConditions.presenceOfElementLocated(
+						AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")));
 	}
 
 	// Screenshot function - returns a Base64-encoded PNG string for direct embedding into the Extent report

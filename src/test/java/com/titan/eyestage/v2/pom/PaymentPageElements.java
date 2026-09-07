@@ -268,12 +268,14 @@ public class PaymentPageElements extends CommonUtils {
 	}
 
 	// Razorpay opens its own WEBVIEW context for card/net-banking/GPay confirmation, but it
-	// doesn't always appear (some flows auto-confirm without it), and how long it takes to
-	// appear varies with BrowserStack's real-device network. Poll for a WEBVIEW context
-	// instead of guessing a fixed sleep, actually switch into it (findElements was
-	// previously being run against whatever context was last set - NATIVE_APP - so it could
-	// never reliably match the webview's html-style resource-id locators), and always switch
-	// back to NATIVE_APP afterward so the rest of the flow isn't left in the wrong context.
+	// doesn't always appear (some flows auto-confirm without it). The legacy (working) flow
+	// confirms this click is never actually required: it probes getContextHandles() the same
+	// way but never switches context, so its find always runs against NATIVE_APP - yet the
+	// purchase still completes, because the real success signal (paymentConfirmation, a native
+	// com.titan.eyecare:id/txt_btn_title element) is rendered natively once Razorpay resolves on
+	// its own. A real driver.context(webviewContext) switch was tried here previously and
+	// correlated with the session dying mid-test (chromedriver bridge on real BrowserStack
+	// devices), so this stays on NATIVE_APP like the working flow instead of crossing into it.
 	private void clickInWebviewIfPresent(By locator, int timeoutSeconds) {
 
 		String webviewContext;
@@ -289,61 +291,16 @@ public class PaymentPageElements extends CommonUtils {
 			return;
 		}
 
-		// getContextHandles() lists a WEBVIEW_x handle as soon as Android's devtools bridge
-		// sees the page, but the chromedriver process Appium spins up to actually drive that
-		// context can still be a beat behind - the very first command against a freshly
-		// switched-to context can then die with "Session not started or terminated" even
-		// though the page (and the button we want) is genuinely on screen. Retry the
-		// switch+query a few times with a short pause instead of giving up on that first hit.
-		int attempts = 3;
+		System.out.println("WEBVIEW context present (" + webviewContext + "), probing from NATIVE_APP: " + locator);
 
-		for (int attempt = 1; attempt <= attempts; attempt++) {
+		List<WebElement> matches = driver.findElements(locator);
+		System.out.println("Count = " + matches.size());
 
-			try {
-				System.out.println("Switching into context: " + webviewContext + " (attempt " + attempt + ")");
-				driver.context(webviewContext);
-
-				List<WebElement> matches = driver.findElements(locator);
-				System.out.println("Count = " + matches.size());
-
-				if (!matches.isEmpty()) {
-					matches.get(0).click();
-					System.out.println("Clicked webview element: " + locator);
-				} else {
-					System.out.println("Webview element not present, skipping click: " + locator);
-				}
-
-				break;
-
-			} catch (Exception e) {
-
-				if (attempt == attempts) {
-					System.out.println("Giving up on webview element after " + attempts
-							+ " attempts: " + locator + " - " + e.getMessage());
-					break;
-				}
-
-				System.out.println("Webview not ready yet (attempt " + attempt + "), retrying: " + e.getMessage());
-
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt();
-					break;
-				}
-
-			} finally {
-				// The webview click above can succeed and still leave the context switch-back
-				// failing right after - Razorpay often tears its own webview down immediately on
-				// success/redirect. An unguarded call here would both fail an otherwise-successful
-				// step and, if the try block above had itself thrown, silently replace that real
-				// exception with this cleanup one (Java's finally-supersedes-try behavior).
-				try {
-					driver.context("NATIVE_APP");
-				} catch (Exception e) {
-					System.out.println("Could not switch back to NATIVE_APP context (webview likely already closed): " + e.getMessage());
-				}
-			}
+		if (!matches.isEmpty()) {
+			matches.get(0).click();
+			System.out.println("Clicked webview element: " + locator);
+		} else {
+			System.out.println("Webview element not present, skipping click: " + locator);
 		}
 	}
 
