@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
@@ -100,8 +101,47 @@ public class Base {
 		System.out.println("Extent Report Started (v2 parallel flow)");
 	}
 
+	// RetryAnalyzer only covers the @Test method (Steps) - TestNG has no equivalent hook for
+	// @BeforeMethod, so a transient driver/infra error here (e.g. BrowserStack returning a
+	// malformed "unexpected driver response" while the app is launching) used to fail this one
+	// config invocation outright, which then skips every remaining data-provider row on this
+	// thread without even attempting to relaunch the app (seen wiping out 4 of 5 payment-method
+	// cases from a single flaky launch). Retry the whole launch once, on a fresh session, before
+	// letting the failure propagate.
+	private static final int LAUNCH_MAX_RETRY = 1;
+
 	@BeforeMethod
 	public void opn_app(Method testMethod, Object[] testData) throws MalformedURLException {
+
+		for (int attempt = 0; ; attempt++) {
+			try {
+				launchApp(testMethod, testData);
+				return;
+			} catch (WebDriverException e) {
+				if (attempt >= LAUNCH_MAX_RETRY) {
+					throw e;
+				}
+
+				System.out.println("App launch failed, retrying (" + (attempt + 1) + "/"
+						+ LAUNCH_MAX_RETRY + "): " + e.getMessage());
+
+				// The half-started session from the failed attempt is likely dead already, but
+				// quit() can itself throw if BrowserStack already tore it down - swallow that the
+				// same way tearDown() does, so the retry below always starts from a clean slate.
+				try {
+					if (driver() != null) {
+						driver().quit();
+					}
+				} catch (Exception quitEx) {
+					System.out.println("Driver quit failed during launch retry cleanup: " + quitEx.getMessage());
+				} finally {
+					removeDriver();
+				}
+			}
+		}
+	}
+
+	private void launchApp(Method testMethod, Object[] testData) throws MalformedURLException {
 
 		// testData is the row TestNG resolved from the @Test's data provider
 		// for the run about to start (e.g. loginDevices -> {number, pass,

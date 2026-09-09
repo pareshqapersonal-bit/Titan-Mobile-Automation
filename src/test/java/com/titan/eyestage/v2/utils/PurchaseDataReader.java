@@ -18,8 +18,9 @@ import com.titan.eyestage.v2.models.CartProduct;
 // an exact copy of the original TestData/AddToCart.xlsx (same "TestData" sheet, same
 // curated SKU/payment-method arrangement per row), so every row is controlled by the
 // sheet, not hardcoded in Java. Devices/logins stay in the separate
-// TestData/DeviceConfig.xlsx (see DeviceReader) - PurchaseDataProviderUtil pairs the two
-// so every purchase row still runs, spread across whatever devices are configured.
+// TestData/DeviceConfig.xlsx (see DeviceReader) - PurchaseTest.createInstances() pairs the
+// two, one PurchaseTest instance per device, so every purchase row still runs, spread
+// across whatever devices are configured.
 public class PurchaseDataReader {
 
 	private static final String SHEET_NAME = "TestData";

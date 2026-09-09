@@ -6,10 +6,22 @@
   TestData/DeviceConfig.xlsx (sheet "Devices") used by the login flow - add/remove rows
   there to change which devices the purchase rows run on; no XML edits needed.
 
-  data-provider-thread-count controls how many devices run at once; keep it
-  <= your BrowserStack account's parallel session limit.
+  PurchaseTest.createInstances() (a @Factory method) creates one PurchaseTest instance per
+  device row, each with its own payment-method data provider - parallel="instances" runs
+  those instances concurrently, one per thread, so a launch failure on one device's
+  instance can never skip test methods on another device's instance (each instance gets
+  its own TestNG config-failure bookkeeping). thread-count controls how many devices run
+  at once; keep it <= your BrowserStack account's parallel session limit.
+
+  Deliberately NOT setting configFailurePolicy="continue" here: under "continue", once
+  opn_app has succeeded at least once for a device's instance, TestNG still invokes Steps
+  for a LATER row even if that row's own opn_app then fails - Steps runs against a null/
+  stale driver instead of being skipped, producing a confusing NullPointerException
+  ("this.driver is null") instead of a clean, honest skip of that one row. Default
+  ("skip") policy correctly skips just the failed row without touching other devices'
+  instances, which is all the isolation this suite actually needs.
 -->
-<suite name="Titan Mobile Automation - Parallel Purchase Journey (v2)" data-provider-thread-count="2">
+<suite name="Titan Mobile Automation - Parallel Purchase Journey (v2)" parallel="instances" thread-count="2">
 
     <test name="V2 Purchase - Payment Method Matrix">
         <classes>
