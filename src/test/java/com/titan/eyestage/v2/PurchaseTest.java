@@ -103,6 +103,12 @@ public class PurchaseTest extends Base {
 				+ " | Payment Method = " + paymentMethod
 				+ " | Device = " + deviceName + " (" + osVersion + ")");
 
+		// Full per-category/SKU breakdown as a report step, not in the ExtentTest node name -
+		// the name only carries the item count (see CommonUtils.getTestData) to keep the
+		// report's test list readable.
+		test().info("TestCase=" + testCaseId + ", PaymentMethod=" + paymentMethod
+				+ ", Products=" + products);
+
 		CartPageElements cart = new CartPageElements(driver(), mobileNumber, password);
 		PurchaseJourneyElements purchase = new PurchaseJourneyElements(driver());
 		PaymentPageElements payment = new PaymentPageElements(driver());

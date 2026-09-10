@@ -106,6 +106,13 @@ public class CommonUtils extends Base {
     // (loginDevices, purchaseDevices) shares the same {mobileNumber, password, deviceName,
     // osVersion, ...} shape; indices 0/1 are login credentials and are deliberately never
     // included here - the old raw dump printed the plaintext password into the HTML report.
+    //
+    // Products (p[5]) is a List<CartProduct> that can carry every category in one row (Frame,
+    // Eyeglass, Sunglass, ContactLens, ...) - dumping its full toString() here made this string
+    // the ExtentTest node NAME (Extent's sidebar/test-list entries), which turned into a single
+    // 250+ char line that wrapped over neighbouring entries in the report. Only the item count
+    // goes into the name; PurchaseTest.Steps logs the full per-category/SKU breakdown as a step
+    // inside the test instead, where verbose detail belongs.
     public static String getTestData(ITestResult result) {
 
         Object[] p = result.getParameters();
@@ -117,8 +124,12 @@ public class CommonUtils extends Base {
         StringBuilder sb = new StringBuilder(" | Device=").append(p[2]).append(", OS=").append(p[3]);
 
         if (p.length >= 7) {
+            String productsSummary = (p[5] instanceof java.util.Collection)
+                    ? ((java.util.Collection<?>) p[5]).size() + " item(s)"
+                    : String.valueOf(p[5]);
+
             sb.append(", TestCase=").append(p[4])
-              .append(", Products=").append(p[5])
+              .append(", Products=").append(productsSummary)
               .append(", PaymentMethod=").append(p[6]);
         }
 
