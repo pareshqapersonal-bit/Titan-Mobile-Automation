@@ -74,11 +74,22 @@ public class Base {
 	// blows straight through it (seen taking 840s in practice instead of failing in ~30s). Capping
 	// the client's own read/connection timeout here means a dead session fails fast and the wait's
 	// budget actually holds, regardless of thread count - this was never a concurrency issue.
+	//
+	// readTimeout also has to cover the very first call this client makes - POST /session - and
+	// that one is a different beast on BrowserStack: it blocks until a physical device is actually
+	// allocated, not just until the app responds. Checked the BrowserStack dashboard for the
+	// 2026-09-10 13:43 IST run where both parallel devices failed with SessionNotCreatedException:
+	// the Appium logs show the session didn't actually get created until ~88s after the request
+	// was queued (device-allocation delay under load), well past the old 45s budget - so the
+	// client gave up, retried, gave up again (2 x 45s ~= the observed ~92s failure), while
+	// BrowserStack kept building both sessions anyway and left them running idle until its own
+	// idleTimeout closed them. 90s gives that allocation step realistic headroom without
+	// reopening the old hours-long hang for a genuinely dead mid-test command.
 	private static AppiumClientConfig httpClientConfig(URL url) {
 		return AppiumClientConfig.defaultConfig()
 				.baseUrl(url)
 				.connectionTimeout(Duration.ofSeconds(30))
-				.readTimeout(Duration.ofSeconds(45));
+				.readTimeout(Duration.ofSeconds(90));
 	}
 
 	protected static void setSessionId(String id) {
@@ -110,6 +121,16 @@ public class Base {
 	// letting the failure propagate.
 	private static final int LAUNCH_MAX_RETRY = 1;
 
+	// BrowserStack's account-level parallel-session cap observed today is exactly 2 - the same as
+	// this suite's thread-count - so there is zero spare capacity. Retrying a launch immediately
+	// re-queues a brand-new session request while the failed attempt's session may still be
+	// spinning up server-side (BrowserStack keeps building it even after this client has given up
+	// and thrown), so an instant retry competes with its own abandoned attempt for the same 1-2
+	// free slots instead of waiting for one to actually open up. A short pause first gives that
+	// slot a real chance to free (either the orphaned session finishes and goes idle, or the other
+	// thread's attempt clears) before spending the retry.
+	private static final Duration LAUNCH_RETRY_BACKOFF = Duration.ofSeconds(10);
+
 	@BeforeMethod
 	public void opn_app(Method testMethod, Object[] testData) throws MalformedURLException {
 
@@ -136,6 +157,13 @@ public class Base {
 					System.out.println("Driver quit failed during launch retry cleanup: " + quitEx.getMessage());
 				} finally {
 					removeDriver();
+				}
+
+				try {
+					Thread.sleep(LAUNCH_RETRY_BACKOFF.toMillis());
+				} catch (InterruptedException interrupted) {
+					Thread.currentThread().interrupt();
+					throw e;
 				}
 			}
 		}
