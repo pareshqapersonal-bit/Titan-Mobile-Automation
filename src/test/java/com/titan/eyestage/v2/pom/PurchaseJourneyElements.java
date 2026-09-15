@@ -55,6 +55,9 @@ public class PurchaseJourneyElements extends CommonUtils {
 
 	private final By addNewAddressLocator =
 			AppiumBy.xpath("//android.widget.TextView[@text=\"Add New Address\"]");
+	
+	private final By landmarkFieldLocator =
+			AppiumBy.id("com.titan.eyecare:id/edt_locality");
 
 	String path = null;
 
@@ -98,6 +101,9 @@ public class PurchaseJourneyElements extends CommonUtils {
 				sendKeys(firstName, "Test");
 				sendKeys(lastName, "User");
 				sendKeys(mobileNumber, "9876543210");
+				if (!driver.findElements(landmarkFieldLocator).isEmpty()) {
+					sendKeys(driver.findElement(landmarkFieldLocator), "Test Landmark");
+				}
 				click(saveAddress);
 				click(continueOnAddress);
 			} else {
