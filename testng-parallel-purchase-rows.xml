@@ -1,0 +1,29 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  Sibling to testng-parallel-purchase.xml: that suite parallelizes across DEVICES (one
+  PurchaseTest instance per TestData/DeviceConfig.xlsx row). This suite instead runs on a
+  single fixed device (the first Execute=Y row of DeviceConfig.xlsx) and parallelizes across
+  the PAYMENT-METHOD ROWS from TestData/PurchaseData-v2.xlsx - data-provider-thread-count
+  below is how many rows run at once (e.g. 2 threads picking up 4 rows two at a time).
+
+  This only works because ParallelRowsPurchaseTest.purchaseCasesParallel() is marked
+  @DataProvider(parallel = true) - that flag is what makes TestNG hand out rows across
+  data-provider-thread-count threads in the first place; this suite's own parallel/
+  thread-count attributes are irrelevant to data-provider-level parallelism and are
+  deliberately left unset here so this suite can't accidentally also parallelize at the
+  instance/method level on top.
+
+  Raise data-provider-thread-count only as high as your BrowserStack account's parallel
+  session limit allows - each concurrent row here opens its own Appium session against the
+  same device/login pair.
+-->
+<suite name="Titan Mobile Automation - Parallel Purchase Rows (v2)" data-provider-thread-count="2">
+
+    <test name="V2 Purchase - Parallel Payment Method Rows">
+        <classes>
+            <class name="com.titan.eyestage.v2.ParallelRowsPurchaseTest"/>
+        </classes>
+    </test>
+
+</suite>
