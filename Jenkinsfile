@@ -24,7 +24,7 @@ pipeline {
                         // Utilities.ExtentManager.
                         env.REPORT_FILE = 'Reports/ExtentReport.html'
                     } else {
-                        env.SUITE_FILE = 'testng-parallel-purchase.xml'
+                        env.SUITE_FILE = 'testng-parallel-purchase-rows.xml'
                         // v2 parallel flow (com.titan.eyestage.v2.PurchaseTest) - written via
                         // com.titan.eyestage.v2.utils.ExtentManager to a distinct file so it
                         // never collides with the v1 report above.
