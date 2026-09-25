@@ -8,6 +8,7 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 
 public class ParallelLoginPage {
@@ -39,7 +40,8 @@ public class ParallelLoginPage {
 
     @FindBy(id = "com.titan.eyecare:id/txt_username")
     private WebElement profileName;
-
+    @FindBy(id="com.titan.eyecare:id/btn_negative")
+	WebElement laterCTA;
 
     public void openLogin() {
 
@@ -75,9 +77,39 @@ public class ParallelLoginPage {
 
 
     public boolean isLoggedIn() {
+    	
+    	if(isEncirclepopupDisplayed())
+		{
+			laterCTA.click();
+		}
 
         return wait.until(
                 ExpectedConditions.visibilityOf(profileName)
         ).isDisplayed();
     }
+    
+    public boolean isEncirclepopupDisplayed()
+	{
+		 int count;
+
+		    try {
+		        count = driver.findElements(
+		                AppiumBy.id("com.titan.eyecare:id/btn_negative"))
+		                .size();
+		    } finally {
+		        // Restoring the implicit wait is housekeeping, not the actual result of this check -
+		        // if the session is already unstable, this call throwing would replace whatever the
+		        // try block above actually found/threw (Java's finally-supersedes-try behavior).
+		        try {
+		            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		        } catch (Exception e) {
+		            System.out.println("Could not restore implicit wait after login-page check: " + e.getMessage());
+		        }
+		    }
+
+		    System.out.println("Count = " + count);
+
+		    return count > 0;
+	}
+
 }

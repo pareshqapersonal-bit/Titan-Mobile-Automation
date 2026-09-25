@@ -62,6 +62,9 @@ public class LoginElements extends CommonUtils {
 
 	@FindBy(id = "com.titan.eyecare:id/txt_btn_title")
 	WebElement buyNowCTA;
+	
+	@FindBy(id="com.titan.eyecare:id/btn_negative")
+	WebElement laterCTA;
 
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
@@ -81,6 +84,10 @@ public class LoginElements extends CommonUtils {
 
 		sendKeysToLocator(passwordFieldLocator, pass);
 		click(loginsubmission);
+		if(isEncirclepopupDisplayed())
+		{
+			laterCTA.click();
+		}
 		click(Drawer);
 		path = captureScreenshot("User_Details");
 
@@ -90,6 +97,9 @@ public class LoginElements extends CommonUtils {
 		visibilityOf(profileName);
 		test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 		assertTrue(profileName.isDisplayed(), "User login failed");
+		
+		
+				
 
 	}
 
@@ -179,6 +189,8 @@ public class LoginElements extends CommonUtils {
 	        System.out.println("Permission popup handling completed.");
 	    }
 	}
+	
+	
 
 	public boolean isLoginPageDisplayed() {
 	    System.out.println("Checking Login Page");
@@ -210,6 +222,30 @@ public class LoginElements extends CommonUtils {
 	    System.out.println("Count = " + count);
 
 	    return count > 0;
+	}
+	
+	public boolean isEncirclepopupDisplayed()
+	{
+		 int count;
+
+		    try {
+		        count = driver.findElements(
+		                AppiumBy.id("com.titan.eyecare:id/btn_negative"))
+		                .size();
+		    } finally {
+		        // Restoring the implicit wait is housekeeping, not the actual result of this check -
+		        // if the session is already unstable, this call throwing would replace whatever the
+		        // try block above actually found/threw (Java's finally-supersedes-try behavior).
+		        try {
+		            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		        } catch (Exception e) {
+		            System.out.println("Could not restore implicit wait after login-page check: " + e.getMessage());
+		        }
+		    }
+
+		    System.out.println("Count = " + count);
+
+		    return count > 0;
 	}
 
 }
