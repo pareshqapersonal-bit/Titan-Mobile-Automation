@@ -81,6 +81,9 @@ public class CartPageElements extends CommonUtils {
 	@FindBy(id = "com.titan.eyecare:id/txt_title")
 	WebElement cartTitle;
 
+	@FindBy(id = "com.titan.eyecare:id/btn_negative")
+	WebElement laterCTA;
+
 	String path = null;
 
 	public void addProductsToCart(List<CartProduct> products) throws InterruptedException, IOException {
@@ -154,9 +157,38 @@ public class CartPageElements extends CommonUtils {
 
 		System.out.println("Current Package = " + driver.getCurrentPackage());
 		System.out.println("Current Activity = " + driver.currentActivity());
+
+		if (isEncirclepopupDisplayed()) {
+			laterCTA.click();
+		}
+
 		click(searchClick);
 		sendKeys(searchField, sku);
 		click(productSelection);
+	}
+
+	// The Encircle enrollment popup can resurface on the home screen mid-session (not just
+	// right after login), covering the search icon and stalling every subsequent
+	// addProductsToCart() call - same fix as LoginElements.isEncirclepopupDisplayed().
+	public boolean isEncirclepopupDisplayed() {
+
+		int count;
+
+		try {
+			count = driver.findElements(
+					AppiumBy.id("com.titan.eyecare:id/btn_negative"))
+					.size();
+		} finally {
+			try {
+				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+			} catch (Exception e) {
+				System.out.println("Could not restore implicit wait after popup check: " + e.getMessage());
+			}
+		}
+
+		System.out.println("Encircle popup count = " + count);
+
+		return count > 0;
 	}
 
 	private void dispatchProduct(CartProduct product) {

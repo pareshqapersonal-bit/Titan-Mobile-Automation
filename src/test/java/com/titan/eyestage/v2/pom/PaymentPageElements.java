@@ -207,6 +207,11 @@ public class PaymentPageElements extends CommonUtils {
 									+ ".scrollIntoView(new UiSelector().text(\"Cash on Delivery\"))"))
 					.click();
 
+			// Selecting a method only marks the radio button - the method-selection screen
+			// stays up under the sticky "Continue to Payment" bar until this is clicked, same
+			// as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING below. Without it, confirmOrder never
+			// appears and this waits the full 30s on a null element.
+			click(continuePaymentCTA);
 			click(confirmOrder);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
@@ -245,6 +250,11 @@ public class PaymentPageElements extends CommonUtils {
 			click(walletCheckbox);
 			sendKeys(walletAmountField, amount);
 			click(walletRedeemButton);
+
+			// Redeeming the wallet balance only updates the total on the method-selection
+			// screen - the sticky "Continue to Payment" bar still needs its own click before
+			// confirmOrder appears, same as the other payment methods above.
+			click(continuePaymentCTA);
 			click(confirmOrder);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
