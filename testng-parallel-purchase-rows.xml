@@ -3,22 +3,19 @@
 <!--
   Sibling to testng-parallel-purchase.xml: that suite parallelizes across DEVICES (one
   PurchaseTest instance per TestData/DeviceConfig.xlsx row). This suite instead runs on a
-  single fixed device (the first Execute=Y row of DeviceConfig.xlsx) and parallelizes across
-  the PAYMENT-METHOD ROWS from TestData/PurchaseData-v2.xlsx - data-provider-thread-count
-  below is how many rows run at once (e.g. 2 threads picking up 4 rows two at a time).
+  single fixed device and parallelizes across that device's two LOGINS (MobileNumber/Password
+  and MobileNumber2/Password2 in DeviceConfig.xlsx).
 
-  This only works because ParallelRowsPurchaseTest.purchaseCasesParallel() is marked
-  @DataProvider(parallel = true) - that flag is what makes TestNG hand out rows across
-  data-provider-thread-count threads in the first place; this suite's own parallel/
-  thread-count attributes are irrelevant to data-provider-level parallelism and are
-  deliberately left unset here so this suite can't accidentally also parallelize at the
-  instance/method level on top.
+  ParallelRowsPurchaseTest.createInstances() (a @Factory method) creates one instance per
+  login: the first login gets the Wallet and Google Pay rows from
+  TestData/PurchaseData-v2.xlsx, the second gets every other payment method. parallel=
+  "instances" runs the two logins side by side, while each login's own rows run one after
+  another - so a login (and its server-side cart) is never used by two rows at once.
 
-  Raise data-provider-thread-count only as high as your BrowserStack account's parallel
-  session limit allows - each concurrent row here opens its own Appium session against the
-  same device/login pair.
+  thread-count is the number of logins running at once; keep it <= your BrowserStack
+  account's parallel session limit.
 -->
-<suite name="Titan Mobile Automation - Parallel Purchase Rows (v2)" data-provider-thread-count="2">
+<suite name="Titan Mobile Automation - Parallel Purchase Rows (v2)" parallel="instances" thread-count="2">
 
     <test name="V2 Purchase - Parallel Payment Method Rows">
         <classes>

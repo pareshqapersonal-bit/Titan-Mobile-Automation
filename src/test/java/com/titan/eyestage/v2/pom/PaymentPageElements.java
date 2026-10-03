@@ -239,6 +239,28 @@ public class PaymentPageElements extends CommonUtils {
 
 		case WALLET:
 
+			// The Encircle popup can resurface here (same as login/search), covering the
+			// wallet card and producing a "element null" timeout on the clicks below.
+			dismissEncirclePopupIfPresent();
+
+			// Wallet redemption can persist on the account's cart server-side across runs
+			// (the session launches with noReset=true and reuses pooled test credentials -
+			// see Base.launchApp), so a prior attempt that got this far before failing later
+			// can leave the wallet already applied here, showing "You saved .../Remove"
+			// instead of a checkbox. That leftover amount belongs to the earlier cart, not
+			// this one - skipping the redeem steps on it left this order only part-covered
+			// (₹1549 against a ₹7745 cart) and stuck on Continue to Payment. Remove it so
+			// the wallet is always re-applied against the current cart total below.
+			By walletRemoveLocator = By.xpath("//android.widget.TextView[@text='Remove']");
+
+			if (isElementPresent(walletRemoveLocator)) {
+				System.out.println("Wallet already applied (Remove link present) - removing before re-applying");
+				click(driver.findElement(walletRemoveLocator));
+				visibilityOf(walletCheckbox);
+			}
+
+			// Read only after any stale redemption is gone, so this is the full cart total
+			// rather than one already reduced by the leftover wallet amount.
 			driver.findElement(AppiumBy.androidUIAutomator(
 					"new UiScrollable(new UiSelector().scrollable(true))"
 							+ ".scrollIntoView(new UiSelector().text(\"Total Amount\"))"));
@@ -251,49 +273,41 @@ public class PaymentPageElements extends CommonUtils {
 
 			System.out.println(amount);
 			System.out.println("amount is" + amount);
+			test().info("Cart total before wallet = " + amount);
 
 			driver.findElement(AppiumBy.androidUIAutomator(
 					"new UiScrollable(new UiSelector().scrollable(true))"
 							+ ".scrollIntoView(new UiSelector().text(\"Titan Wallet\"))"));
 
-			// The Encircle popup can resurface here (same as login/search), covering the
-			// wallet checkbox and producing a "element null" timeout on click(walletCheckbox).
+			click(walletCheckbox);
+			sendKeys(walletAmountField, amount);
+			click(walletRedeemButton);
+
+			// Once the redeemed amount covers the whole cart total, the sticky bottom button
+			// switches from "Continue to Payment" to "Confirm Order" and the UPI/Net Banking
+			// sections collapse - the order is placed straight from here, with no Razorpay
+			// step. Confirmed via BrowserStack failure screenshots ("You saved ₹1549.00" on a
+			// ₹1549 cart, Confirm Order showing) while this test still waited the full 30s on
+			// continuePaymentCTA. The Encircle popup can resurface here too, covering the button.
 			dismissEncirclePopupIfPresent();
 
-			// Wallet redemption can persist on the account's cart server-side across runs
-			// (the session launches with noReset=true and reuses pooled test credentials -
-			// see Base.launchApp), so a prior attempt that got this far before failing later
-			// can leave the wallet already applied here. Confirmed via a BrowserStack failure
-			// screenshot: the screen showed "You saved .../Remove" instead of a checkbox while
-			// this test still waited on walletCheckbox, which doesn't exist once already
-			// applied. Detect that state and skip straight to Continue to Payment.
-			if (isElementPresent(By.xpath("//android.widget.TextView[@text='Remove']"))) {
-				System.out.println("Wallet already applied (Remove link present) - skipping checkbox/redeem steps");
+			if (clickIfPresent(confirmOrder, 10)) {
+				test().info("Wallet covered the full order total - confirmed order directly");
 			} else {
-				click(walletCheckbox);
-				sendKeys(walletAmountField, amount);
-				click(walletRedeemButton);
+
+				// Wallet balance short of the total: the remainder has to go through another
+				// method, so the bar stays on "Continue to Payment" and needs the same
+				// Razorpay-webview confirmation as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING above.
+				click(continuePaymentCTA);
+
+				// Same popup can resurface again after this second screen transition.
+				dismissEncirclePopupIfPresent();
+
+				test().info("Initiating Razorpay payment (Wallet + UPI)");
+				clickInWebviewIfPresent(
+						By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"),
+						15);
 			}
-
-			// Redeeming the wallet balance only updates the total on the method-selection
-			// screen - the sticky "Continue to Payment" bar still needs its own click before
-			// the next step appears, same as the other payment methods above.
-			click(continuePaymentCTA);
-
-			// Same popup can resurface again after this second screen transition.
-			dismissEncirclePopupIfPresent();
-
-			// Wallet is a discount, not a standalone payment method in this app - even when it
-			// covers the order total exactly, the screen still reads "should be paid using
-			// other methods" with UPI Payment pre-selected/expanded, and confirmOrder never
-			// appears. Confirmed across multiple BrowserStack runs (including one where the
-			// wallet balance matched the total 1:1). So this needs the same Razorpay-webview
-			// confirmation as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING above, not a direct
-			// Confirm Order click.
-			test().info("Initiating Razorpay payment (Wallet + UPI)");
-			clickInWebviewIfPresent(
-					By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"),
-					15);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
