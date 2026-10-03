@@ -7,19 +7,29 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 
 import com.titan.eyestage.v2.Base;
+import io.appium.java_client.AppiumBy;
 
 public class CommonUtils extends Base {
+
+    // Shared across every POM (PageFactory.initElements in each subclass's constructor
+    // decorates inherited @FindBy fields too) so isEncirclepopupDisplayed()/
+    // dismissEncirclePopupIfPresent() below can dismiss the popup regardless of which
+    // screen it resurfaces on.
+    @FindBy(id = "com.titan.eyecare:id/btn_negative")
+    protected WebElement laterCTA;
 
     // A WebDriverWait's polling loop only rides out NotFoundException by default - any other
     // WebDriverException raised while evaluating the condition (e.g. "Session not started or
@@ -36,10 +46,70 @@ public class CommonUtils extends Base {
     }
 
     public void click(WebElement element) {
+        clickRetryingPopup(element, true);
+    }
 
-        newWait()
-                .until(ExpectedConditions.elementToBeClickable(element))
-                .click();
+    // The Encircle popup can resurface right before literally any click in the app - login,
+    // search, payment, and (discovered after patching those three individually) inside
+    // category-specific add-to-cart flows too. Patching each call site as it's discovered
+    // doesn't scale, so this is the single choke point every click goes through: on a
+    // timeout, check once for the popup, dismiss it, and retry the click exactly once.
+    // allowPopupRetry=false on the retry (and for laterCTA's own click below) stops this from
+    // recursing if the popup check or its own click ever times out too.
+    private void clickRetryingPopup(WebElement element, boolean allowPopupRetry) {
+
+        try {
+            newWait()
+                    .until(ExpectedConditions.elementToBeClickable(element))
+                    .click();
+        } catch (TimeoutException e) {
+
+            if (!allowPopupRetry || !isEncirclepopupDisplayed()) {
+                throw e;
+            }
+
+            System.out.println("Encircle popup found after click timeout, dismissing and retrying: " + element);
+            clickRetryingPopup(laterCTA, false);
+            clickRetryingPopup(element, false);
+        }
+    }
+
+    // The Encircle enrollment popup can resurface at multiple points in a session (login,
+    // product search, checkout) and silently blocks whatever element the next step expects,
+    // producing a "waiting for element to be clickable, but the element null" timeout instead
+    // of a clear error. Centralized here so every POM checks/dismisses it the same way.
+    //
+    // findElements() otherwise inherits the driver's 30s implicit wait (set in Base.opn_app),
+    // so every "not showing" check - the common case - would silently cost 30s. Drop it to
+    // near-zero for this one lookup, then restore it so nothing else loses its implicit wait.
+    public boolean isEncirclepopupDisplayed() {
+
+        driver().manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+        int count;
+
+        try {
+            count = driver().findElements(
+                    AppiumBy.id("com.titan.eyecare:id/btn_negative"))
+                    .size();
+        } finally {
+            try {
+                driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            } catch (Exception e) {
+                System.out.println("Could not restore implicit wait after popup check: " + e.getMessage());
+            }
+        }
+
+        System.out.println("Encircle popup count = " + count);
+
+        return count > 0;
+    }
+
+    public void dismissEncirclePopupIfPresent() {
+
+        if (isEncirclepopupDisplayed()) {
+            click(laterCTA);
+        }
     }
 
     // Element visibility utility

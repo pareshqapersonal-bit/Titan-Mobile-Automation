@@ -212,6 +212,11 @@ public class PaymentPageElements extends CommonUtils {
 			// as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING below. Without it, confirmOrder never
 			// appears and this waits the full 30s on a null element.
 			click(continuePaymentCTA);
+
+			// The Encircle popup can resurface here too (same as login/search), covering
+			// confirmOrder and producing the same "element null" timeout even after the
+			// Continue to Payment click above.
+			dismissEncirclePopupIfPresent();
 			click(confirmOrder);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
@@ -247,6 +252,9 @@ public class PaymentPageElements extends CommonUtils {
 					"new UiScrollable(new UiSelector().scrollable(true))"
 							+ ".scrollIntoView(new UiSelector().text(\"Titan Wallet\"))"));
 
+			// The Encircle popup can resurface here (same as login/search), covering the
+			// wallet checkbox and producing a "element null" timeout on click(walletCheckbox).
+			dismissEncirclePopupIfPresent();
 			click(walletCheckbox);
 			sendKeys(walletAmountField, amount);
 			click(walletRedeemButton);
@@ -255,6 +263,9 @@ public class PaymentPageElements extends CommonUtils {
 			// screen - the sticky "Continue to Payment" bar still needs its own click before
 			// confirmOrder appears, same as the other payment methods above.
 			click(continuePaymentCTA);
+
+			// Same popup can resurface again after this second screen transition.
+			dismissEncirclePopupIfPresent();
 			click(confirmOrder);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
