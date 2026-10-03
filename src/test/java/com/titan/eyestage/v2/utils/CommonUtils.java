@@ -112,6 +112,47 @@ public class CommonUtils extends Base {
         }
     }
 
+    // Some flows show a CTA conditionally (e.g. Cash on Delivery goes straight to its own
+    // confirm button with no "Continue to Payment" step in between - confirmed via a
+    // BrowserStack failure screenshot where Confirm Order was already the sticky bottom
+    // button while a 30s click() on Continue to Payment was still timing out). Lets a caller
+    // give an optional CTA a short chance without paying/failing on the full click() budget
+    // when it legitimately never appears.
+    public boolean clickIfPresent(WebElement element, int timeoutSeconds) {
+
+        try {
+            new WebDriverWait(driver(), Duration.ofSeconds(timeoutSeconds))
+                    .ignoring(WebDriverException.class)
+                    .until(ExpectedConditions.elementToBeClickable(element))
+                    .click();
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    // Mirrors isEncirclepopupDisplayed()'s pattern for an arbitrary locator: a quick existence
+    // check that skips the driver's 30s implicit wait (set in Base.opn_app) for the common
+    // "not present" case, instead of silently costing 30s every time.
+    public boolean isElementPresent(By locator) {
+
+        driver().manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+        int count;
+
+        try {
+            count = driver().findElements(locator).size();
+        } finally {
+            try {
+                driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            } catch (Exception e) {
+                System.out.println("Could not restore implicit wait after presence check: " + e.getMessage());
+            }
+        }
+
+        return count > 0;
+    }
+
     // Element visibility utility
     public void visibilityOf(WebElement element) {
 

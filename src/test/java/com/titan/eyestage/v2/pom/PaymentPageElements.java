@@ -207,11 +207,15 @@ public class PaymentPageElements extends CommonUtils {
 									+ ".scrollIntoView(new UiSelector().text(\"Cash on Delivery\"))"))
 					.click();
 
-			// Selecting a method only marks the radio button - the method-selection screen
-			// stays up under the sticky "Continue to Payment" bar until this is clicked, same
-			// as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING below. Without it, confirmOrder never
-			// appears and this waits the full 30s on a null element.
-			click(continuePaymentCTA);
+			// Unlike GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING below, selecting Cash on Delivery
+			// goes straight to its own "Confirm Order" CTA - there's no separate "Continue to
+			// Payment" step in between. Confirmed via a BrowserStack failure screenshot:
+			// Confirm Order was already the sticky bottom button while this test still waited
+			// the full 30s on continuePaymentCTA, which never appears for this method. Give it
+			// a short chance in case that ever changes, but don't fail the flow when it's absent.
+			if (!clickIfPresent(continuePaymentCTA, 5)) {
+				System.out.println("Continue to Payment not shown for Cash on Delivery - proceeding directly to Confirm Order");
+			}
 
 			// The Encircle popup can resurface here too (same as login/search), covering
 			// confirmOrder and producing the same "element null" timeout even after the
@@ -255,18 +259,41 @@ public class PaymentPageElements extends CommonUtils {
 			// The Encircle popup can resurface here (same as login/search), covering the
 			// wallet checkbox and producing a "element null" timeout on click(walletCheckbox).
 			dismissEncirclePopupIfPresent();
-			click(walletCheckbox);
-			sendKeys(walletAmountField, amount);
-			click(walletRedeemButton);
+
+			// Wallet redemption can persist on the account's cart server-side across runs
+			// (the session launches with noReset=true and reuses pooled test credentials -
+			// see Base.launchApp), so a prior attempt that got this far before failing later
+			// can leave the wallet already applied here. Confirmed via a BrowserStack failure
+			// screenshot: the screen showed "You saved .../Remove" instead of a checkbox while
+			// this test still waited on walletCheckbox, which doesn't exist once already
+			// applied. Detect that state and skip straight to Continue to Payment.
+			if (isElementPresent(By.xpath("//android.widget.TextView[@text='Remove']"))) {
+				System.out.println("Wallet already applied (Remove link present) - skipping checkbox/redeem steps");
+			} else {
+				click(walletCheckbox);
+				sendKeys(walletAmountField, amount);
+				click(walletRedeemButton);
+			}
 
 			// Redeeming the wallet balance only updates the total on the method-selection
 			// screen - the sticky "Continue to Payment" bar still needs its own click before
-			// confirmOrder appears, same as the other payment methods above.
+			// the next step appears, same as the other payment methods above.
 			click(continuePaymentCTA);
 
 			// Same popup can resurface again after this second screen transition.
 			dismissEncirclePopupIfPresent();
-			click(confirmOrder);
+
+			// Wallet is a discount, not a standalone payment method in this app - even when it
+			// covers the order total exactly, the screen still reads "should be paid using
+			// other methods" with UPI Payment pre-selected/expanded, and confirmOrder never
+			// appears. Confirmed across multiple BrowserStack runs (including one where the
+			// wallet balance matched the total 1:1). So this needs the same Razorpay-webview
+			// confirmation as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING above, not a direct
+			// Confirm Order click.
+			test().info("Initiating Razorpay payment (Wallet + UPI)");
+			clickInWebviewIfPresent(
+					By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"),
+					15);
 
 			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
 			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
