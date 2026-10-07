@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # GitHub cron is always UTC: 03:45 UTC = 09:15 AM IST
+    - cron: '45 3 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,4 +24,10 @@ jobs:
           java-version: '17'
 
       - name: Build Project
-        run: mvn clean test
+        env:
+          EXECUTION_MODE: browserstack
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          TEST_DEFAULT_USER_MOBILE: ${{ secrets.TEST_DEFAULT_USER_MOBILE }}
+          TEST_DEFAULT_USER_PASSWORD: ${{ secrets.TEST_DEFAULT_USER_PASSWORD }}
+        run: mvn clean test -DsuiteXmlFile=testng-parallel-purchase-rows.xml
