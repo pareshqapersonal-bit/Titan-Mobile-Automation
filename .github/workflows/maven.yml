@@ -5,8 +5,8 @@ on:
     branches:
       - main
   schedule:
-    # GitHub cron is always UTC: 03:45 UTC = 09:15 AM IST
-    - cron: '45 3 * * *'
+    # GitHub cron is always UTC: 08:00 UTC = 01:30 PM IST
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 jobs:
