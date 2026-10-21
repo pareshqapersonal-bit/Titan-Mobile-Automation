@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!-- Runs the OTP login flow on the locally connected device (executionMode=local). -->
+<suite name="Titan Mobile Automation - Login New (v2 local)">
+
+    <test name="V2 Login New - Local Device">
+        <classes>
+            <class name="com.titan.eyestage.v2.LoginTestNew"/>
+        </classes>
+    </test>
+
+</suite>

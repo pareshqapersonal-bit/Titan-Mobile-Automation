@@ -194,7 +194,10 @@ public class Base {
 
 		if (env.equalsIgnoreCase("stage") && executionMode.equalsIgnoreCase("local")) {
 
-			options.setApp(config.getProperty("apkPath"));
+			// installApp=false launches the app already on the device instead of installing apkPath
+			if (!"false".equalsIgnoreCase(config.getProperty("installApp"))) {
+				options.setApp(config.getProperty("apkPath"));
+			}
 
 			options.setCapability(
 					"appPackage",
@@ -332,9 +335,14 @@ public class Base {
 		// clear timeout here. Wait for that same search icon directly, before the test body
 		// (and its own, shorter waits) ever gets a chance to run against a screen that isn't
 		// there yet.
+		// rl_toolbar_search is the native (3.x) home screen; the Flutter (4.x) build has no
+		// resource-ids, so its bottom-nav "Home" tab is the equivalent ready signal.
 		new WebDriverWait(driver(), Duration.ofSeconds(60))
-				.until(ExpectedConditions.presenceOfElementLocated(
-						AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")));
+				.until(ExpectedConditions.or(
+						ExpectedConditions.presenceOfElementLocated(
+								AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")),
+						ExpectedConditions.presenceOfElementLocated(
+								AppiumBy.accessibilityId("Home"))));
 	}
 
 	// Screenshot function - returns a Base64-encoded PNG string for direct embedding into the Extent report
