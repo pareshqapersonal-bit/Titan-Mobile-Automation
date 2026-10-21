@@ -1,6 +1,8 @@
 package com.titan.eyestage.v2.pom;
 
 import static org.testng.Assert.assertTrue;
+import io.appium.java_client.AppiumBy;
+import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -17,6 +19,8 @@ import com.titan.eyestage.v2.models.LoginCredentials;
 import com.titan.eyestage.v2.utils.CommonUtils;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.pagefactory.AndroidFindBy;
+import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 public class LoginElementsNew extends CommonUtils {
 
@@ -24,14 +28,19 @@ public class LoginElementsNew extends CommonUtils {
 
 	public LoginElementsNew(AndroidDriver driver) {
 		this.driver = driver;
-		PageFactory.initElements(driver, this);
+		// AppiumFieldDecorator (not plain PageFactory) so @AndroidBy(accessibility = ...)
+		// fields like loginIcon below actually get resolved - plain PageFactory only
+		// understands @FindBy and silently ignores Appium's own locator annotations.
+		PageFactory.initElements(new AppiumFieldDecorator(driver), this);
 	}
 
 	// Flutter app (4.x): bottom-nav tab, replaces the old toolbar drawer
 	@FindBy(xpath="//android.widget.ImageView[@content-desc=\"Account\"]")
 	WebElement accountTab;
-
-	@FindBy(xpath="//android.view.View[@content-desc=\"Login\"]")
+	
+	@FindBy(xpath="//android.widget.ImageView[@content-desc=\"Account\"]")
+    	WebElement myAccountIcon;
+	@AndroidFindBy(accessibility = "Login")
 	WebElement loginIcon;
 
 	@FindBy(xpath="//android.widget.EditText")
@@ -85,17 +94,18 @@ public class LoginElementsNew extends CommonUtils {
 	String path = null;
 
 	public void testexecution(String number, String pass) throws InterruptedException, IOException {
+		System.out.println("Login process started");
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		test().info("Login process started");
 		click(accountTab);
 
-		// noReset keeps the previous session, so log out first if a user is still signed in
-		if (!driver.findElements(AppiumBy.accessibilityId("My Profile")).isEmpty()) {
-			test().info("User already logged in - logging out before login");
-			logoutSteps();
-			click(accountTab);
-		}
-
+//		// noReset keeps the previous session, so log out first if a user is still signed in
+//		if (!driver.findElements(AppiumBy.accessibilityId("My Profile")).isEmpty()) {
+//			test().info("User already logged in - logging out before login");
+//			logoutSteps();
+//			click(accountTab);
+//		}
+//       
 		click(loginIcon);
 
 		sendKeys(MobileTextField, number);
@@ -137,7 +147,7 @@ public class LoginElementsNew extends CommonUtils {
 	// small login function without navigation
 	public void shortLogin(String number, String pass) {
 	    sendKeys(MobileTextField, number);
-
+        click(accountTab);
 	    click(loginCTA);
 
 	    By editTextLocator =
