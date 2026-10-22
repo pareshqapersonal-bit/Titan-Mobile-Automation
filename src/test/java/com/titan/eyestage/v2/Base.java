@@ -322,27 +322,59 @@ public class Base {
 
 		driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
 		LoginElements le = new LoginElements(driver());
-		le.permissionPopup();
+		// le.permissionPopup();
 		System.out.println("Package = " + driver().getCurrentPackage());
 		System.out.println("Activity = " + driver().currentActivity());
 
-		// permissionPopup() only waits (briefly) for permission dialogs, not for the app to
-		// actually finish the splash -> home transition after they're dismissed. Seen in
-		// practice: on some devices/sessions the app sits on the splash screen for 30s+ (e.g.
-		// a second permission dialog rendering late enough that permissionPopup()'s single,
-		// unwaited check misses it), so the very first test step - clicking the home screen's
-		// search icon - fails immediately with an unhelpful "element null" error instead of a
-		// clear timeout here. Wait for that same search icon directly, before the test body
-		// (and its own, shorter waits) ever gets a chance to run against a screen that isn't
-		// there yet.
-		// rl_toolbar_search is the native (3.x) home screen; the Flutter (4.x) build has no
-		// resource-ids, so its bottom-nav "Home" tab is the equivalent ready signal.
-		new WebDriverWait(driver(), Duration.ofSeconds(60))
-				.until(ExpectedConditions.or(
-						ExpectedConditions.presenceOfElementLocated(
-								AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")),
-						ExpectedConditions.presenceOfElementLocated(
-								AppiumBy.accessibilityId("Home"))));
+		// waitForHomeScreenReady(le);
+	}
+
+	// rl_toolbar_search is the native (3.x) home screen; the Flutter (4.x) build has no
+	// resource-ids, so its bottom-nav "Account" tab (same locator LoginElementsNew.accountTab
+	// uses) is the equivalent ready signal - present whether the session is logged in or out,
+	// unlike "Login"/"Home" which only exist in one of those two states. Re-runs
+	// permissionPopup() on every poll (not just once) so a late-rendering permission
+	// dialog gets dismissed as soon as it appears instead of silently blocking every tap
+	// underneath it until this wait's budget runs out.
+	private void waitForHomeScreenReady(LoginElements le) {
+
+		long deadlineMillis = System.currentTimeMillis() + Duration.ofSeconds(30).toMillis();
+
+		// Checked every poll below, so each findElements() call must not itself eat the
+		// 30s implicit wait set just before this method runs - drop it for the duration
+		// of polling, then restore it once the home screen is confirmed ready.
+		driver().manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+		try {
+			while (true) {
+
+				// le.permissionPopup();
+
+				boolean homeReady =
+						!driver().findElements(AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")).isEmpty()
+						|| !driver().findElements(AppiumBy.accessibilityId("Account")).isEmpty();
+
+				if (homeReady) {
+					return;
+				}
+
+				if (System.currentTimeMillis() >= deadlineMillis) {
+					throw new org.openqa.selenium.TimeoutException(
+							"Home screen not ready within 30s (rl_toolbar_search / Account tab not found, "
+									+ "and no permission popup left to dismiss)");
+				}
+
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException interrupted) {
+					Thread.currentThread().interrupt();
+					throw new org.openqa.selenium.TimeoutException(
+							"Interrupted while waiting for home screen to be ready", interrupted);
+				}
+			}
+		} finally {
+			driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		}
 	}
 
 	// Screenshot function - returns a Base64-encoded PNG string for direct embedding into the Extent report
