@@ -40,11 +40,17 @@ public class PurchaseDataReader {
 	// Returns one row per purchase case marked Execute=Y:
 	// {testCaseId(String), products(List<CartProduct>), paymentMethod(String)}
 	public static Object[][] getPurchaseCases() {
+		return getPurchaseCases("PurchaseData-v2.xlsx");
+	}
+
+	// Same layout read from any workbook under TestData/ (e.g. AddToCartNew.xlsx for
+	// AddToCartTestNew), so new-UI suites can keep their own sheet.
+	public static Object[][] getPurchaseCases(String fileName) {
 
 		String path = Paths.get(
 				System.getProperty("user.dir"),
 				"TestData",
-				"PurchaseData-v2.xlsx")
+				fileName)
 				.toString();
 
 		List<Object[]> cases = new ArrayList<>();
@@ -58,13 +64,13 @@ public class PurchaseDataReader {
 
 			if (sheet == null) {
 				throw new RuntimeException(
-						"Sheet not found in PurchaseData-v2.xlsx: " + SHEET_NAME);
+						"Sheet not found in " + fileName + ": " + SHEET_NAME);
 			}
 
 			Row headerRow = sheet.getRow(0);
 
-			int testCaseIdCol = findColumn(headerRow, formatter, "TestCaseID");
-			int paymentMethodCol = findColumn(headerRow, formatter, "PaymentMethod");
+			int testCaseIdCol = findColumn(fileName, headerRow, formatter, "TestCaseID");
+			int paymentMethodCol = findColumn(fileName, headerRow, formatter, "PaymentMethod");
 
 			// AddToCart.xlsx (the sheet this file is a copy of) has no Execute column,
 			// so treat it as optional - present means filter, absent means run every row.
@@ -73,7 +79,7 @@ public class PurchaseDataReader {
 			int[] categoryCols = new int[CATEGORY_COLUMNS.length];
 
 			for (int i = 0; i < CATEGORY_COLUMNS.length; i++) {
-				categoryCols[i] = findColumn(headerRow, formatter, CATEGORY_COLUMNS[i][0]);
+				categoryCols[i] = findColumn(fileName, headerRow, formatter, CATEGORY_COLUMNS[i][0]);
 			}
 
 			for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
@@ -126,23 +132,23 @@ public class PurchaseDataReader {
 			}
 
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to read PurchaseData-v2.xlsx", e);
+			throw new RuntimeException("Failed to read " + fileName, e);
 		}
 
 		if (cases.isEmpty()) {
 			throw new RuntimeException(
-					"No purchase cases with Execute=Y found in TestData/PurchaseData-v2.xlsx");
+					"No purchase cases with Execute=Y found in TestData/" + fileName);
 		}
 
 		return cases.toArray(new Object[0][]);
 	}
 
-	private static int findColumn(Row headerRow, DataFormatter formatter, String columnName) {
+	private static int findColumn(String fileName, Row headerRow, DataFormatter formatter, String columnName) {
 
 		int col = findColumnOptional(headerRow, formatter, columnName);
 
 		if (col < 0) {
-			throw new RuntimeException("Column not found in PurchaseData-v2.xlsx: " + columnName);
+			throw new RuntimeException("Column not found in " + fileName + ": " + columnName);
 		}
 
 		return col;
