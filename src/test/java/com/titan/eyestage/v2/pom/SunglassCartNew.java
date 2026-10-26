@@ -6,6 +6,7 @@ import org.openqa.selenium.support.PageFactory;
 
 import com.titan.eyestage.v2.models.CartProduct;
 import com.titan.eyestage.v2.utils.CommonUtils;
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
@@ -34,6 +35,15 @@ public class SunglassCartNew extends CommonUtils {
 	public void addToCart(CartProduct product) {
 
 		test().info("Adding Sunglass product to cart");
+
+		// Diagnostic: accessibility-id lookups scan the whole view hierarchy rather than
+		// using an indexed id lookup, so if "Add to cart" isn't unique on screen (e.g. a
+		// cross-sell carousel further down the PDP reusing the same label), resolving which
+		// node is clickable gets far more expensive. Logging the match count here confirms
+		// whether that's what's behind the slow click() below.
+		System.out.println(
+				"'Add to cart' accessibility-id match count on screen = "
+						+ driver.findElements(AppiumBy.accessibilityId("Add to cart")).size());
 
 		click(addToCartButton);
 

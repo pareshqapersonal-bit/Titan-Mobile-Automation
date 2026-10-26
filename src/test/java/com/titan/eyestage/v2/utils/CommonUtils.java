@@ -56,21 +56,52 @@ public class CommonUtils extends Base {
     // timeout, check once for the popup, dismiss it, and retry the click exactly once.
     // allowPopupRetry=false on the retry (and for laterCTA's own click below) stops this from
     // recursing if the popup check or its own click ever times out too.
+    // Every ExpectedConditions.elementToBeClickable poll below re-locates the element (it's an
+    // Appium lazy proxy), and that live findElement call inherits whatever implicit wait is
+    // currently set. Left at the driver's global 30s (set in Base.opn_app), a single poll that
+    // doesn't find the element yet can itself block for up to 30s - swallowing the explicit
+    // wait's entire budget in one go instead of the intended 500ms-interval polling. Dropping
+    // implicit wait to 500ms for the duration of this wait (mirrors isEncirclepopupDisplayed()'s
+    // pattern) makes each poll fail fast so the explicit wait actually controls the timeout.
     private void clickRetryingPopup(WebElement element, boolean allowPopupRetry) {
+
+        driver().manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+        long startMillis = System.currentTimeMillis();
 
         try {
             newWait()
                     .until(ExpectedConditions.elementToBeClickable(element))
                     .click();
+
+            System.out.println(
+                    "click() on " + element + " took " + (System.currentTimeMillis() - startMillis) + "ms");
         } catch (TimeoutException e) {
 
-            if (!allowPopupRetry || !isEncirclepopupDisplayed()) {
-                throw e;
-            }
+            System.out.println(
+                    "click() on " + element + " timed out after "
+                            + (System.currentTimeMillis() - startMillis) + "ms");
 
-            System.out.println("Encircle popup found after click timeout, dismissing and retrying: " + element);
-            clickRetryingPopup(laterCTA, false);
-            clickRetryingPopup(element, false);
+            // Encircle-popup auto-retry disabled for now: escalating a single click() timeout
+            // into dismiss-and-retry was stacking up to ~90s (30s original wait + ~30s dismiss
+            // click + ~30s retry click) onto one click() call, which then cascaded into a whole
+            // test retry instead of failing fast. dismissEncirclePopupIfPresent() is still
+            // called explicitly at the known points that need it (see PaymentPageElementsNew/
+            // PaymentPageElements); this just removes the implicit retry-everywhere behavior.
+            // if (!allowPopupRetry || !isEncirclepopupDisplayed()) {
+            //     throw e;
+            // }
+            //
+            // System.out.println("Encircle popup found after click timeout, dismissing and retrying: " + element);
+            // clickRetryingPopup(laterCTA, false);
+            // clickRetryingPopup(element, false);
+            throw e;
+        } finally {
+            try {
+                driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            } catch (Exception e) {
+                System.out.println("Could not restore implicit wait after click: " + e.getMessage());
+            }
         }
     }
 
@@ -120,6 +151,13 @@ public class CommonUtils extends Base {
     // when it legitimately never appears.
     public boolean clickIfPresent(WebElement element, int timeoutSeconds) {
 
+        // Without dropping the implicit wait first, a single internal findElement poll made
+        // by elementToBeClickable() still inherits the driver's global 30s implicit wait (set
+        // in Base), so one poll on a not-yet-present element can block for up to 30s - blowing
+        // straight through this method's own short explicit timeout before it gets a chance to
+        // fire. Same fix as clickRetryingPopup()/isEncirclepopupDisplayed() already apply.
+        driver().manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
         try {
             new WebDriverWait(driver(), Duration.ofSeconds(timeoutSeconds))
                     .ignoring(WebDriverException.class)
@@ -128,6 +166,12 @@ public class CommonUtils extends Base {
             return true;
         } catch (TimeoutException e) {
             return false;
+        } finally {
+            try {
+                driver().manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            } catch (Exception e) {
+                System.out.println("Could not restore implicit wait after clickIfPresent: " + e.getMessage());
+            }
         }
     }
 
@@ -164,6 +208,11 @@ public class CommonUtils extends Base {
 
         newWait().until(ExpectedConditions.visibilityOf(element));
 
+        System.out.println("Displayed: " + element.isDisplayed());
+        System.out.println("Enabled: " + element.isEnabled());
+        System.out.println("Class: " + element.getAttribute("class"));
+
+        element.click();
         element.clear();
         element.sendKeys(value);
     }
@@ -184,6 +233,11 @@ public class CommonUtils extends Base {
                 WebElement element =
                         wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
 
+                // Flutter-rendered fields need an explicit tap to acquire focus before text
+                // input actually commits - without it, clear()/sendKeys() can silently no-op
+                // at the native level (seen on the OTP field: sendKeys returned normally but
+                // the field's text stayed empty).
+                element.click();
                 element.clear();
                 element.sendKeys(value);
                 return;

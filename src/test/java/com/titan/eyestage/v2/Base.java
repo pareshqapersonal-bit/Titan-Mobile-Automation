@@ -209,8 +209,8 @@ public class Base {
 
 			options.setCapability("appWaitActivity", "*");
 
-			// Preserve app data, login state and granted permissions
-			options.setNoReset(true);
+			// Clear app data/login state before each session so the login screen shows every run
+			options.setNoReset(false);
 
 			// But still launch the app when the Appium session starts
 			options.setCapability("forceAppLaunch", true);
@@ -221,7 +221,8 @@ public class Base {
 			options.setCapability("appActivity",
 					config.getProperty("appActivity"));
 
-			options.setNoReset(true);
+			// Clear app data/login state before each session so the login screen shows every run
+			options.setNoReset(false);
 
 			options.setCapability("dontStopAppOnReset", true);
 		}
@@ -305,6 +306,13 @@ public class Base {
 			System.out.println("Device = " + deviceName + " | OS = " + osVersion);
 			System.out.println("Session ID = " + driver().getSessionId());
 		}
+
+		// UiAutomator2's default XPath engine (post XPath-1.0) trips over the deeply chained
+		// generic-View predicates this app's locators rely on (e.g. the search icon's
+		// //android.widget.FrameLayout[...]/android.view.View/android.view.View[...] xpath),
+		// surfacing as an XPath engine error. enforceXPath1 forces the driver back onto the
+		// XPath 1.0 evaluator these locators were written against.
+		driver().setSetting("enforceXPath1", true);
 
 		// For live
 		if (config.getProperty("environment").equalsIgnoreCase("live")) {

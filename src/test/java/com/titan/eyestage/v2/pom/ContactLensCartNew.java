@@ -32,9 +32,16 @@ public class ContactLensCartNew extends CommonUtils {
 		
 	}
 
+	
+	//Left Eye
+	@FindBy(xpath = "//android.view.View[@content-desc='SPH']/following::android.widget.Button[@text='Select'][1]")
+	WebElement leftSPHSelect;
+	
+	
+	
 	// Right Eye
-	@FindBy(xpath = "(//android.widget.ScrollView/android.widget.Button[@text=\"Select\"])[1]")
-	WebElement rightSPH;
+	@FindBy(xpath = "//android.view.View[@content-desc='SPH']/following::android.widget.Button[@text='Select'][2]")
+	WebElement rightSPHSelect;
 
 	@FindBy(id = "com.titan.eyecare:id/edt_cyl_right")
 	WebElement rightCYL;
@@ -73,7 +80,7 @@ public class ContactLensCartNew extends CommonUtils {
 		smallSwipeUp();
 
 		System.out.println("Before SPH");
-		selectIfPresent(rightSPH, "-0.75");
+		selectIfPresent(leftSPHSelect, "-2.25");
 		System.out.println("After SPH");
 
 		smallSwipeUp();
@@ -106,18 +113,33 @@ public class ContactLensCartNew extends CommonUtils {
 
 		if (value == null || value.trim().isEmpty())
 			return;
+		else {
+		/*
+		 * if (driver.findElements(By.id(dropdown.getAttribute("resource-id"))).size() >
+		 * 0) {
+		 * 
+		 * System.out.println("Clicking Dropdown"); click(dropdown);
+		 * 
+		 * System.out.println("Selecting Value : " + value);
+		 * 
+		 * click(driver.findElement( AppiumBy.androidUIAutomator(
+		 * "new UiSelector().text(\"" + value + "\")")));
+		 */
 
-		if (driver.findElements(By.id(dropdown.getAttribute("resource-id"))).size() > 0) {
+			
+			dropdown.click();
 
-			System.out.println("Clicking Dropdown");
-			click(dropdown);
+			WebElement option = driver.findElement(
+			    AppiumBy.androidUIAutomator(
+			        "new UiScrollable(new UiSelector().className(\"android.widget.ScrollView\").instance(1))" +
+			        ".setAsVerticalList()" +
+			        ".scrollToEnd(13)" 
+			    )
+			);
+		
 
-			System.out.println("Selecting Value : " + value);
-
-			click(driver.findElement(
-					AppiumBy.androidUIAutomator(
-							"new UiSelector().text(\"" + value + "\")")));
-
+			//option.click();
+		
 			System.out.println("Value Selected");
 
 			test().info("Selected : " + value);

@@ -32,6 +32,7 @@ public class CartPageElementsNew extends CommonUtils {
 	ReadingGlassesCartNew readingGlassesCart;
 	ComputerGlassesCartNew computerGlassesCart;
 	AccessoriesCartNew accessoriesCart;
+	RemoveProductsFromCartPAge removeProductsFromCartPage;
 
 	public CartPageElementsNew(
 			AndroidDriver driver
@@ -49,6 +50,8 @@ public class CartPageElementsNew extends CommonUtils {
 		readingGlassesCart = new ReadingGlassesCartNew(driver);
 		computerGlassesCart = new ComputerGlassesCartNew(driver);
 		accessoriesCart = new AccessoriesCartNew(driver);
+		 removeProductsFromCartPage = new RemoveProductsFromCartPAge(driver);
+		
 	}
 
 	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.widget.ImageView[3]")
@@ -56,22 +59,34 @@ public class CartPageElementsNew extends CommonUtils {
 
 	@FindBy(xpath = "//android.widget.EditText")
 	WebElement searchField;
+	
+	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.widget.ImageView")
+	WebElement cartBack;
 
-	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[2]")
+	// Before the real results render, the search panel shows the default category chips
+	// (Frame, Sunglass, Computer Glasses, ...) at this same screen position. "Related
+	// Products" turned out to be the wrong target entirely - it's a loosely-related list
+	// (confirmed when searching RxP222GR1, a Powered Sunglass, surfaced a plain Sunglass
+	// card), not reliably tied to the exact SKU typed. The actual SKU match is the single
+	// "SUGGESTIONS" row, which redirects straight to that product's PDP. Its heading and
+	// value are combined into one node's content-desc ("SUGGESTIONS\n<product name>"), not
+	// a separate heading + following card, so starts-with on that single node is both the
+	// wait condition and the click target - no following:: axis needed. Wildcard element
+	// type (*) rather than a specific widget class, since widget types have been
+	// inconsistent across this app's cards.
+	@FindBy(xpath = "//*[starts-with(@content-desc,'SUGGESTIONS')]")
 	WebElement productSelection;
 
 	@FindBy(xpath = "//android.view.View[@content-desc=\"Add to cart\"]")
 	WebElement buyNowCTA;
 
-	@FindBy(xpath = "//android.widget.TextView[@resource-id='com.titan.eyecare:id/txt_btn_title' and @text='Continue Shopping']")
+	@FindBy(xpath = "//android.view.View[@content-desc=\"Continue Shopping\"]")
 	WebElement continueShoppingButton;
 
-	@FindBy(xpath = "//android.view.ViewGroup[@resource-id='com.titan.eyecare:id/toolbar_home']"
-			+ "/android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_toolbar_back']")
+	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.widget.ImageView")
 	WebElement cartBackButton;
 
-	@FindBy(xpath = "//android.widget.LinearLayout[@resource-id='com.titan.eyecare:id/ll_search_bar']"
-			+ "//android.widget.ImageView[@resource-id='com.titan.eyecare:id/img_back']")
+	@FindBy(xpath = "//android.widget.Button")
 	WebElement searchBackButton;
 
 	@FindBy(xpath = "//android.view.View[@content-desc=\"Proceed to checkout\"]")
@@ -83,6 +98,14 @@ public class CartPageElementsNew extends CommonUtils {
 	String path = null;
 
 	public void addProductsToCart(List<CartProduct> products) throws InterruptedException, IOException {
+
+		// Continue Shopping popup dismissal now lives inside removeProductFromCart() itself -
+		// it was popping up right on entering the cart, before a check placed here (after
+		// already leaving the cart) ever got a chance to see it.
+		removeProductsFromCartPage.removeProductFromCart();
+		click(cartBackButton);
+
+		List<WebElement> continueButtons;
 
 		for (int i = 0; i < products.size(); i++) {
 
@@ -104,11 +127,9 @@ public class CartPageElementsNew extends CommonUtils {
 				System.out.println("Could not confirm NATIVE_APP context after add-to-cart: " + e.getMessage());
 			}
 
-			List<WebElement> continueButtons = driver.findElements(
+			 continueButtons = driver.findElements(
 					AppiumBy.xpath(
-							"//android.widget.TextView["
-									+ "@resource-id='com.titan.eyecare:id/txt_btn_title' "
-									+ "and @text='Continue Shopping']"));
+							"//android.view.View[@content-desc=\"Continue Shopping\"]"));
 
 			System.out.println("Continue Shopping button count = " + continueButtons.size());
 
@@ -154,13 +175,67 @@ public class CartPageElementsNew extends CommonUtils {
 		System.out.println("Current Package = " + driver.getCurrentPackage());
 		System.out.println("Current Activity = " + driver.currentActivity());
 
-		if (isEncirclepopupDisplayed()) {
-			click(laterCTA);
-		}
+		// Encircle check removed here (New-UI class) - same as the other "New" classes.
+		// if (isEncirclepopupDisplayed()) {
+		// 	click(laterCTA);
+		// }
 
 		click(searchClick);
+
+		// The SUGGESTIONS row likely has the same leftover-content risk Related Products
+		// had - it may still show the previous product's suggestion for a moment before
+		// refreshing for the SKU just typed. starts-with(@content-desc,'SUGGESTIONS') alone
+		// only proves *a* suggestion row exists, not that it's the new one, so a leftover
+		// row from the prior SKU could satisfy it immediately. Snapshot whatever's showing
+		// right as the search screen opens, then after typing, wait for that text to
+		// actually change before trusting productSelection.
+		String previousSuggestionText = currentSuggestionText();
+
 		sendKeys(searchField, sku);
+		waitForSuggestionToRefresh(previousSuggestionText);
+
 		click(productSelection);
+	}
+
+	private String currentSuggestionText() {
+
+		List<WebElement> matches = driver.findElements(AppiumBy.xpath("//*[starts-with(@content-desc,'SUGGESTIONS')]"));
+		return matches.isEmpty() ? null : matches.get(0).getAttribute("contentDescription");
+	}
+
+	// Polls for the SUGGESTIONS row's text to differ from whatever was showing before this
+	// SKU was typed. Bounded rather than indefinite - Frame and Eyeglass share a SKU in
+	// this suite's test data, so a legitimately-unchanged suggestion (same product,
+	// searched again) must not block forever; by the time real debounce/network latency
+	// would have settled (observed well under 2s in practice elsewhere), give up waiting
+	// and proceed with whatever's there.
+	private void waitForSuggestionToRefresh(String previousSuggestionText) {
+
+		if (previousSuggestionText == null) {
+			visibilityOf(productSelection);
+			return;
+		}
+
+		long deadlineMillis = System.currentTimeMillis() + Duration.ofSeconds(8).toMillis();
+
+		while (System.currentTimeMillis() < deadlineMillis) {
+
+			String currentSuggestionTextNow = currentSuggestionText();
+
+			if (currentSuggestionTextNow != null && !currentSuggestionTextNow.equals(previousSuggestionText)) {
+				return;
+			}
+
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return;
+			}
+		}
+
+		System.out.println("SUGGESTIONS row text unchanged after 8s settle window - "
+				+ "proceeding (likely a legitimately repeated SKU)");
 	}
 
 	private void dispatchProduct(CartProduct product) {
@@ -265,11 +340,11 @@ public class CartPageElementsNew extends CommonUtils {
 		try {
 			return wait.until(driver -> {
 
-				if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/txt_btn_title")).isEmpty()) {
+				if (!driver.findElements(AppiumBy.className("android.widget.ImageView")).isEmpty()) {
 					return true;
 				}
 
-				if (!driver.findElements(AppiumBy.id("com.titan.eyecare:id/rl_toolbar_search")).isEmpty()) {
+				if (!driver.findElements(AppiumBy.className("android.widget.Button")).isEmpty()) {
 					return false;
 				}
 
@@ -308,7 +383,7 @@ public class CartPageElementsNew extends CommonUtils {
 	private void tapPdpBack() {
 
 		WebElement back = driver.findElement(
-				AppiumBy.id("com.titan.eyecare:id/img_toolbar_back"));
+				AppiumBy.className("android.widget.ImageView"));
 
 		Rectangle rect = back.getRect();
 

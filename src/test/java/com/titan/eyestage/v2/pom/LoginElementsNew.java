@@ -74,6 +74,9 @@ public class LoginElementsNew extends CommonUtils {
 	@FindBy(xpath="//android.view.View[@content-desc=\"Send OTP via SMS\"]")
 	WebElement sendOTPviaSMS;
 	
+	@AndroidFindBy(accessibility = "Login")
+	WebElement loginButtonVisible;
+	
 	/*
 	 * WebElement otpInput = driver.findElement(
 	 * AppiumBy.className("android.widget.EditText") );
@@ -97,6 +100,13 @@ public class LoginElementsNew extends CommonUtils {
 		System.out.println("Login process started");
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 		test().info("Login process started");
+		
+		if(loginButtonVisible.isDisplayed()) {
+			click(loginButtonVisible);
+			System.out.println("Login button is visible");
+			test().info("Login button is visible");
+		}else {
+		
 		click(accountTab);
 
 //		// noReset keeps the previous session, so log out first if a user is still signed in
@@ -105,24 +115,42 @@ public class LoginElementsNew extends CommonUtils {
 //			logoutSteps();
 //			click(accountTab);
 //		}
+		
 //       
 		click(loginIcon);
+		}
 
 		sendKeys(MobileTextField, number);
 		click(sendOTPviaSMS);
 
-		// after "Send OTP" the phone field is no longer an EditText, so this resolves to the OTP box
-		sendKeys(otpInput, pass);
+		// after "Send OTP" the screen re-renders the EditText (sometimes mid-transition), so the
+		// plain @FindBy proxy for otpInput goes stale between the visibility check and the
+		// interaction - re-locate by locator with retry instead of reusing that field.
+		sendKeysToLocator(By.className("android.widget.EditText"), pass);
 		click(verifyCTA);
 
-		  wait.until(ExpectedConditions.visibilityOf(myProfile));
+		  try {
+			  wait.until(ExpectedConditions.visibilityOf(accountTab));
+		  } catch (org.openqa.selenium.TimeoutException e) {
+			  // accountTab never showing up after Verify means the app didn't navigate home -
+			  // most likely the OTP was rejected/expired and it's still sitting on the OTP
+			  // screen, or an extra popup is blocking it. Capture what's actually on screen
+			  // instead of just failing blind, so the next run shows the real cause.
+			  String stuckScreenshot = captureScreenshot("Login_Stuck_After_Verify");
+			  test().info("Login did not reach home screen after Verify - current screen:");
+			  test().info("<a href='data:image/png;base64," + stuckScreenshot
+					  + "' data-featherlight='image'><img src='data:image/png;base64," + stuckScreenshot
+					  + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			  System.out.println("Login stuck after Verify - page source: " + driver.getPageSource());
+			  throw e;
+		  }
 		  System.out.println(number + " has successfully logged in");
 		  test().info(number + " has successfully logged in");
 		  path = captureScreenshot("User_Login");
 		  test().info("<a href='data:image/png;base64," +
 		  path + "' data-featherlight='image'><img src='data:image/png;base64," + path
 		  + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
-		  assertTrue(myProfile.isDisplayed(), "User login failed");	
+		  assertTrue(accountTab.isDisplayed(), "User login failed");	
 
 	}
 
