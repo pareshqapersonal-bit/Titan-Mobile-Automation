@@ -116,7 +116,10 @@ public class PurchaseDataReader {
 
 				for (int i = 0; i < CATEGORY_COLUMNS.length; i++) {
 
-					String sku = formatter.formatCellValue(row.getCell(categoryCols[i])).trim();
+					// trim() leaves non-breaking spaces ( ) from copy-pasted Excel cells,
+					// which would otherwise get typed into the app's search box.
+					String sku = formatter.formatCellValue(row.getCell(categoryCols[i]))
+							.replace(' ', ' ').strip();
 
 					if (!sku.isEmpty()) {
 						products.add(new CartProduct(CATEGORY_COLUMNS[i][1], sku));

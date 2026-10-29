@@ -7,7 +7,10 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
@@ -74,8 +77,7 @@ public class CartPageElementsNew extends CommonUtils {
 	// wait condition and the click target - no following:: axis needed. Wildcard element
 	// type (*) rather than a specific widget class, since widget types have been
 	// inconsistent across this app's cards.
-	@FindBy(xpath = "//*[starts-with(@content-desc,'SUGGESTIONS')]")
-	WebElement productSelection;
+	private static final By SUGGESTION_ROW = AppiumBy.xpath("//*[starts-with(@content-desc,'SUGGESTIONS')]");
 
 	@FindBy(xpath = "//android.view.View[@content-desc=\"Add to cart\"]")
 	WebElement buyNowCTA;
@@ -85,9 +87,6 @@ public class CartPageElementsNew extends CommonUtils {
 
 	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.widget.ImageView")
 	WebElement cartBackButton;
-
-	@FindBy(xpath = "//android.widget.Button")
-	WebElement searchBackButton;
 
 	@FindBy(xpath = "//android.view.View[@content-desc=\"Proceed to checkout\"]")
 	WebElement proceedToCheckout;
@@ -188,54 +187,106 @@ public class CartPageElementsNew extends CommonUtils {
 		// only proves *a* suggestion row exists, not that it's the new one, so a leftover
 		// row from the prior SKU could satisfy it immediately. Snapshot whatever's showing
 		// right as the search screen opens, then after typing, wait for that text to
-		// actually change before trusting productSelection.
+		// actually change before trusting it.
 		String previousSuggestionText = currentSuggestionText();
 
 		sendKeys(searchField, sku);
-		waitForSuggestionToRefresh(previousSuggestionText);
 
-		click(productSelection);
+		WebElement suggestion;
+
+		try {
+			suggestion = waitForSuggestionToRefresh(previousSuggestionText);
+		} catch (TimeoutException e) {
+			try {
+				path = captureScreenshot("Search_No_Suggestion_" + sku);
+				test().fail("No SUGGESTIONS row for SKU '" + sku + "'");
+				test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+			} catch (Exception screenshotError) {
+				System.out.println("Could not capture search failure screenshot: " + screenshotError.getMessage());
+			}
+			throw new TimeoutException("No SUGGESTIONS row for SKU '" + sku + "'", e);
+		}
+
+		click(suggestion);
+	}
+
+	// The hierarchy can hold more than one SUGGESTIONS node - a hidden one left over from an
+	// earlier search screen alongside the one actually on screen. productSelection (and any
+	// findElement) resolves to the first match, which was the hidden one: visibilityOf() then
+	// timed out after 30s with the real suggestion plainly visible in the failure screenshot.
+	// Only ever consider a displayed match.
+	private WebElement displayedSuggestion() {
+
+		for (WebElement match : driver.findElements(SUGGESTION_ROW)) {
+			try {
+				if (match.isDisplayed()) {
+					return match;
+				}
+			} catch (StaleElementReferenceException e) {
+				// Re-rendered mid-check - the next poll re-finds it.
+			}
+		}
+
+		return null;
 	}
 
 	private String currentSuggestionText() {
 
-		List<WebElement> matches = driver.findElements(AppiumBy.xpath("//*[starts-with(@content-desc,'SUGGESTIONS')]"));
-		return matches.isEmpty() ? null : matches.get(0).getAttribute("contentDescription");
+		// Called right as the search screen opens, usually before any suggestion exists -
+		// drop the 30s implicit wait so an empty lookup doesn't stall for 30s.
+		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
+		try {
+			WebElement suggestion = displayedSuggestion();
+			return suggestion == null ? null : suggestion.getAttribute("contentDescription");
+		} finally {
+			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		}
 	}
 
-	// Polls for the SUGGESTIONS row's text to differ from whatever was showing before this
-	// SKU was typed. Bounded rather than indefinite - Frame and Eyeglass share a SKU in
-	// this suite's test data, so a legitimately-unchanged suggestion (same product,
-	// searched again) must not block forever; by the time real debounce/network latency
-	// would have settled (observed well under 2s in practice elsewhere), give up waiting
-	// and proceed with whatever's there.
-	private void waitForSuggestionToRefresh(String previousSuggestionText) {
+	// Waits for a displayed SUGGESTIONS row whose text differs from whatever was showing
+	// before this SKU was typed, and returns it as the click target. The "text changed" part
+	// is bounded rather than indefinite - Frame and Eyeglass share a SKU in this suite's test
+	// data, so a legitimately-unchanged suggestion (same product, searched again) must not
+	// block forever; after an 8s settle window, accept whatever displayed suggestion is there.
+	// Throws TimeoutException if no displayed suggestion shows up at all within 30s.
+	private WebElement waitForSuggestionToRefresh(String previousSuggestionText) {
 
-		if (previousSuggestionText == null) {
-			visibilityOf(productSelection);
-			return;
-		}
+		long settleDeadlineMillis = System.currentTimeMillis() + Duration.ofSeconds(8).toMillis();
 
-		long deadlineMillis = System.currentTimeMillis() + Duration.ofSeconds(8).toMillis();
+		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
 
-		while (System.currentTimeMillis() < deadlineMillis) {
+		try {
+			return new WebDriverWait(driver, Duration.ofSeconds(30))
+					.ignoring(StaleElementReferenceException.class)
+					.until(d -> {
 
-			String currentSuggestionTextNow = currentSuggestionText();
+						WebElement suggestion = displayedSuggestion();
 
-			if (currentSuggestionTextNow != null && !currentSuggestionTextNow.equals(previousSuggestionText)) {
-				return;
-			}
+						if (suggestion == null) {
+							return null;
+						}
 
+						if (previousSuggestionText == null
+								|| !previousSuggestionText.equals(suggestion.getAttribute("contentDescription"))) {
+							return suggestion;
+						}
+
+						if (System.currentTimeMillis() >= settleDeadlineMillis) {
+							System.out.println("SUGGESTIONS row text unchanged after 8s settle window - "
+									+ "proceeding (likely a legitimately repeated SKU)");
+							return suggestion;
+						}
+
+						return null;
+					});
+		} finally {
 			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				return;
+				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+			} catch (Exception e) {
+				System.out.println("Could not restore implicit wait after suggestion poll: " + e.getMessage());
 			}
 		}
-
-		System.out.println("SUGGESTIONS row text unchanged after 8s settle window - "
-				+ "proceeding (likely a legitimately repeated SKU)");
 	}
 
 	private void dispatchProduct(CartProduct product) {
@@ -287,99 +338,117 @@ public class CartPageElementsNew extends CommonUtils {
 		}
 	}
 
-	// Navigates back to the search page after adding a product to the cart. Cart-back
-	// normally lands on the Product Detail Page (PDP), which needs its own back tap to
-	// reach search - but on real BrowserStack devices, after several sequential
-	// add-to-cart cycles the PDP activity can be gone from the back stack (Android
-	// trimming background activities under memory pressure), so cart-back lands
-	// straight on search instead. Wait for whichever one actually shows up instead of
-	// assuming the PDP is always there, or this hangs the full 30s waiting on a PDP
-	// that isn't coming back.
+	private enum Screen { HOME, SEARCH, PDP, CART, UNKNOWN }
+
+	private static final By HOME_TAB = AppiumBy.accessibilityId("Home");
+	private static final By CART_HEADER =
+			AppiumBy.xpath("//android.view.View[starts-with(@content-desc,'Cart') and contains(@content-desc,'product')]");
+	private static final By PDP_ADD_TO_CART = AppiumBy.accessibilityId("Add to cart");
+	private static final By SEARCH_BACK = AppiumBy.className("android.widget.Button");
+	private static final By SEARCH_FIELD = AppiumBy.className("android.widget.EditText");
+
+	// Navigates back to Home after adding a product to the cart, so the next searchProduct()
+	// starts from the home header's search icon. Normally that's cart -> PDP -> search -> home,
+	// but the app doesn't always follow that path: after the Rx Sunglass add, cart-back ended up
+	// on the search screen instead. The old version told PDP apart from search by "any ImageView
+	// on screen" - true on every screen, including search (its Related Products card) - so it
+	// "tapped PDP back" on the search screen, which actually opened that product card, then
+	// failed looking for the search back Button on the PDP it had just opened. Instead, detect
+	// the current screen from markers unique to it (verified via live UI dumps) and take one
+	// back step at a time until Home shows up, whatever screen we start from.
 	public void backToSearch() {
 
-		System.out.println("Clicking Cart Back");
+		long deadlineMillis = System.currentTimeMillis() + Duration.ofSeconds(60).toMillis();
 
-		click(cartBackButton);
+		Screen lastActedOn = null;
+		long lastActionMillis = 0;
 
-		System.out.println("Clicked Cart Back");
-
-		if (waitForPdpOrSearch()) {
-
-			System.out.println("PDP loaded");
-
-			tapPdpBack();
-			click(searchBackButton);
-
-			System.out.println("Clicked PDP Back");
-
-		} else {
-
-			System.out.println("Cart Back landed straight on search page (PDP was skipped)");
-		}
-	}
-
-	// Returns true if the PDP (buyNowCTA) showed up, false if search (searchClick, or an
-	// already-active Search screen left over from an earlier product) showed up first instead.
-	private boolean waitForPdpOrSearch() {
-
-		// 30s previously caused this poll to time out on the Computer Glass -> Accessories
-		// transition specifically: a live page-source dump taken immediately after that timeout
-		// fired showed the expected edt_search field already present and correctly identified -
-		// the screen was still settling right at the 30s boundary, not missing/misdetected. 40s
-		// gives that transition the time it actually needs.
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
-
-		// findElements() otherwise inherits the driver's 30s implicit wait (set in
-		// Base.opn_app), so each empty lookup below can silently block up to 30s -
-		// two lookups per poll means a single poll can blow past this wait's own
-		// 30s budget before it ever gets a real retry. Drop it to near-zero for the
-		// duration of this poll loop, then restore it (same fix as
-		// LoginElements.isLoginPageDisplayed()).
 		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
 
 		try {
-			return wait.until(driver -> {
+			while (System.currentTimeMillis() < deadlineMillis) {
 
-				if (!driver.findElements(AppiumBy.className("android.widget.ImageView")).isEmpty()) {
-					return true;
+				Screen screen = currentScreen();
+
+				if (screen == Screen.HOME) {
+					System.out.println("Back on Home - ready for next search");
+					return;
 				}
 
-				if (!driver.findElements(AppiumBy.className("android.widget.Button")).isEmpty()) {
-					return false;
+				// Give the previous back tap time to take effect before acting on the same
+				// screen again, or a slow transition gets double-tapped.
+				boolean settling = screen == lastActedOn
+						&& System.currentTimeMillis() - lastActionMillis < 5000;
+
+				if (screen != Screen.UNKNOWN && !settling) {
+
+					System.out.println("backToSearch: on " + screen + ", stepping back");
+
+					switch (screen) {
+					case CART:
+						click(cartBackButton);
+						break;
+					case PDP:
+						tapPdpBack();
+						break;
+					case SEARCH:
+						driver.findElement(SEARCH_BACK).click();
+						break;
+					default:
+						break;
+					}
+
+					lastActedOn = screen;
+					lastActionMillis = System.currentTimeMillis();
 				}
 
-				// Cart Back can also restore an earlier product's still-open Search screen
-				// straight from the back stack (the PDP entry in between got trimmed under
-				// memory pressure) instead of landing on the collapsed search bar above - same
-				// destination, but with the previous SKU still typed in and its result still
-				// showing (or, per a live page-source capture, sometimes empty with just the
-				// placeholder hint text - either way rl_toolbar_search doesn't exist on this
-				// screen at all, so neither check above ever matches it). Detect it via the
-				// search field itself and clear the stale query here, so the next
-				// searchProduct(sku) call types into an empty field instead of appending onto
-				// any leftover text.
-				List<WebElement> staleSearchField =
-						driver.findElements(AppiumBy.id("com.titan.eyecare:id/edt_search"));
-
-				if (!staleSearchField.isEmpty()) {
-					staleSearchField.get(0).clear();
-					return false;
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					return;
 				}
-
-				return null;
-			});
+			}
 		} finally {
-			// Restoring the implicit wait is housekeeping, not the actual result of this poll -
-			// if the session is already unstable, this call throwing would replace whatever the
-			// try block above actually found/threw (Java's finally-supersedes-try behavior).
 			try {
 				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
 			} catch (Exception e) {
-				System.out.println("Could not restore implicit wait after PDP/search poll: " + e.getMessage());
+				System.out.println("Could not restore implicit wait after backToSearch: " + e.getMessage());
 			}
 		}
+
+		throw new TimeoutException("Could not get back to Home from cart within 60s (last screen: "
+				+ currentScreen() + ")");
 	}
 
+	// Order matters: the PDP also has an EditText (pincode check), so search is identified by
+	// its back Button plus the field, and the cart is checked before PDP because cross-sell
+	// cards in the cart could reuse an "Add to cart" label.
+	private Screen currentScreen() {
+
+		try {
+			if (!driver.findElements(CART_HEADER).isEmpty()) {
+				return Screen.CART;
+			}
+			if (!driver.findElements(SEARCH_BACK).isEmpty() && !driver.findElements(SEARCH_FIELD).isEmpty()) {
+				return Screen.SEARCH;
+			}
+			if (!driver.findElements(PDP_ADD_TO_CART).isEmpty()) {
+				return Screen.PDP;
+			}
+			if (!driver.findElements(HOME_TAB).isEmpty()) {
+				return Screen.HOME;
+			}
+		} catch (StaleElementReferenceException e) {
+			// Mid-transition re-render - treat as unknown and poll again.
+		}
+
+		return Screen.UNKNOWN;
+	}
+
+	// PDP's back arrow is the first ImageView in the hierarchy (top-left), tapped by
+	// coordinates. Only called once currentScreen() has confirmed we're on the PDP - on other
+	// screens the first ImageView is something else entirely.
 	private void tapPdpBack() {
 
 		WebElement back = driver.findElement(
