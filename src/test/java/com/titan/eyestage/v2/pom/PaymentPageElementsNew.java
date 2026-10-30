@@ -276,25 +276,37 @@ public class PaymentPageElementsNew extends CommonUtils {
 			// Confirm Order was already the sticky bottom button while this test still waited
 			// the full 30s on continuePaymentCTA, which never appears for this method. Give it
 			// a short chance in case that ever changes, but don't fail the flow when it's absent.
-			if (!clickIfPresent(codPlaceOrderCTA, 5)) {
-				System.out.println("Continue to Payment not shown for Cash on Delivery - proceeding directly to Confirm Order");
+			if (clickIfPresent(confirmOrderButton, 10)) {
+				test().info("COD - confirmed order directly");
+			} else {
+
+				// Wallet balance short of the total: the remainder has to go through another
+				// method, so the bar stays on "Continue to Payment" and needs the same
+				// Razorpay-webview confirmation as GOOGLE_PAY/CREDIT_DEBIT_CARD/NET_BANKING above.
+				click(continuePaymentCTA);
+
+				// Encircle check removed here (New-UI class) - same as the other "New" classes.
+				// dismissEncirclePopupIfPresent();
+
+				test().info("Initiating Razorpay payment (Wallet + UPI)");
+				clickInWebviewIfPresent(
+						By.xpath("//android.widget.TextView[@resource-id=\"cancel-btn\"]"),
+						15);
 			}
 
-			// Encircle check removed here (New-UI class) - same as the other "New" classes.
-			// dismissEncirclePopupIfPresent();
-			click(confirmOrderButton);
+			visibilityOf(orderConfirmationText);
+			System.out.println("Payment confirmation text: " + orderConfirmationText.getAttribute("contentDescription")
+					);
+			assertEquals(orderConfirmationText.getAttribute("contentDescription")
+					, "Order Confirmed.");
 
-			System.out.println("Payment confirmation text: " + getText(paymentConfirmation));
-			assertEquals(getText(paymentConfirmation), "Wohoo!", "Payment confirmation text mismatch");
-
-			click(paymentConfirmation);
-			click(mayBLater);
-			visibilityOf(OrderIDText);
+//			click(paymentConfirmation);
+//			click(mayBLater);
+		
 			path = captureScreenshot("Order ID");
 			test().info(getText(OrderIDText) + " is the OrderID");
 			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 			assertTrue(OrderIDText.isDisplayed());
-			clickBackFromOrderPage();
 
 			break;
 

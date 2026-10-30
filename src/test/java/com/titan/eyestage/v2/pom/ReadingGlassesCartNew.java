@@ -1,10 +1,14 @@
 package com.titan.eyestage.v2.pom;
 
+import java.util.List;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import com.titan.eyestage.v2.utils.CommonUtils;
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
@@ -27,16 +31,43 @@ public class ReadingGlassesCartNew extends CommonUtils {
 	}
 
 	
-	@AndroidFindBy(accessibility = "+1")
-	WebElement Power;
+	// Preferred power; used when it's in stock.
+	private static final String PREFERRED_POWER = "+2.25";
+
+	// LENS POWER chips. Out-of-stock powers are still listed but greyed out and report
+	// clickable=false - tapping one (as happened with "+1" for RR21) silently does nothing,
+	// and the following Add to cart is then ignored too, so the item never reaches the cart.
+	private static final By SELECTABLE_POWERS =
+			AppiumBy.xpath("//*[starts-with(@content-desc,'+') and @clickable='true']");
 
 	@AndroidFindBy(accessibility = "Add to cart")
 	WebElement addToCartButton;
-	
+
 	public void addToCart() {
 
-		click(Power);
+		click(selectablePower());
 		click(addToCartButton);
 
+	}
+
+	private WebElement selectablePower() {
+
+		List<WebElement> powers = driver.findElements(SELECTABLE_POWERS);
+
+		if (powers.isEmpty()) {
+			throw new RuntimeException("No selectable LENS POWER for this Reading Glass - all powers out of stock?");
+		}
+
+		for (WebElement power : powers) {
+			if (PREFERRED_POWER.equals(power.getAttribute("contentDescription"))) {
+				return power;
+			}
+		}
+
+		WebElement fallback = powers.get(0);
+		String chosen = fallback.getAttribute("contentDescription");
+		System.out.println("Power " + PREFERRED_POWER + " not selectable - using " + chosen);
+		test().info("Reading Glass power " + PREFERRED_POWER + " unavailable - selected " + chosen);
+		return fallback;
 	}
 }

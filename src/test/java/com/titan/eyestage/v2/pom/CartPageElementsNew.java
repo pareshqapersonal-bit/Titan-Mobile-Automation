@@ -115,6 +115,7 @@ public class CartPageElementsNew extends CommonUtils {
 			System.out.println("Buy Now CTA is visible for product: " + product.getSku());
 			dispatchProduct(product);
 			System.out.println("Product added to cart: " + product.getSku());
+			test().info("Added " + product.getCategory() + " " + product.getSku() + " - next: back to Home");
 
 			// Just-in-case reset - most add-to-cart flows never leave NATIVE_APP, so this is a
 			// no-op most of the time. Unguarded, a transient device/session hiccup on this one
@@ -362,6 +363,7 @@ public class CartPageElementsNew extends CommonUtils {
 
 		Screen lastActedOn = null;
 		long lastActionMillis = 0;
+		Screen lastScreen;
 
 		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
 
@@ -383,6 +385,7 @@ public class CartPageElementsNew extends CommonUtils {
 				if (screen != Screen.UNKNOWN && !settling) {
 
 					System.out.println("backToSearch: on " + screen + ", stepping back");
+					test().info("backToSearch: on " + screen + ", stepping back");
 
 					switch (screen) {
 					case CART:
@@ -398,6 +401,13 @@ public class CartPageElementsNew extends CommonUtils {
 						break;
 					}
 
+					// click() (CommonUtils) restores the global 30s implicit wait when it
+					// finishes. Left there, every currentScreen() lookup for a marker that isn't
+					// on screen blocks for 30s - after the cart-back click, a single poll on the
+					// PDP took 60s (CART + SEARCH misses), exhausting the whole deadline before
+					// the search screen was ever handled. Put the fast-poll wait back each time.
+					driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+
 					lastActedOn = screen;
 					lastActionMillis = System.currentTimeMillis();
 				}
@@ -409,6 +419,10 @@ public class CartPageElementsNew extends CommonUtils {
 					return;
 				}
 			}
+
+			// Still inside the 500ms implicit wait, so these lookups fail fast.
+			lastScreen = currentScreen();
+			logBackToSearchFailure(lastScreen);
 		} finally {
 			try {
 				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
@@ -418,7 +432,32 @@ public class CartPageElementsNew extends CommonUtils {
 		}
 
 		throw new TimeoutException("Could not get back to Home from cart within 60s (last screen: "
-				+ currentScreen() + ")");
+				+ lastScreen + ")");
+	}
+
+	// Records what was actually on screen when backToSearch gives up - the Extent report
+	// previously only had the exception, which wasn't enough to tell why the back never landed.
+	private void logBackToSearchFailure(Screen lastScreen) {
+
+		try {
+			List<WebElement> buttons = driver.findElements(SEARCH_BACK);
+			StringBuilder states = new StringBuilder();
+			for (WebElement button : buttons) {
+				states.append(button.isDisplayed() ? "displayed " : "hidden ")
+						.append(button.getAttribute("bounds")).append("; ");
+			}
+
+			String details = "backToSearch failed on " + lastScreen + " - " + buttons.size()
+					+ " Button(s): " + states;
+			System.out.println(details);
+			System.out.println("Page source at backToSearch failure:\n" + driver.getPageSource());
+
+			path = captureScreenshot("Back_To_Search_Failure");
+			test().info(details);
+			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+		} catch (Exception e) {
+			System.out.println("Could not capture backToSearch diagnostics: " + e.getMessage());
+		}
 	}
 
 	// Order matters: the PDP also has an EditText (pincode check), so search is identified by
