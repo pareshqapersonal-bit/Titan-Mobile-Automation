@@ -27,7 +27,9 @@ public class PurchaseJourneyElementsNew extends CommonUtils {
 
 	@AndroidFindBy(accessibility = "Proceed to checkout")
 	WebElement proceedToCheckout;
-	
+
+	private final By outOfstockPopupLocator = AppiumBy.accessibilityId("Remove all from cart");
+
 	@AndroidFindBy(accessibility = "Change Address")
 	WebElement changeAdddressButton;
 
@@ -74,10 +76,16 @@ public class PurchaseJourneyElementsNew extends CommonUtils {
 		test().info("Proceeding to checkout");
 
 		click(proceedToCheckout);
+		
+		
 
 		test().pass("Address page opened");
 
 		visibilityOf(proceedToPay);
+		if (isElementPresent(outOfstockPopupLocator)) {
+			click(driver.findElement(outOfstockPopupLocator));
+			click(proceedToCheckout);
+		}
 
 		System.out.println("Address page loaded");
 
@@ -93,6 +101,7 @@ public class PurchaseJourneyElementsNew extends CommonUtils {
 	public void proceedToPay() throws IOException {
 
 		System.out.println("Proceeding to pay");
+	
 		test().info("Selecting Addresses");
 		/*
 		 * List<WebElement> selectAddressBtn =

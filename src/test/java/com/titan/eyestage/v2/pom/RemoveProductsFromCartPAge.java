@@ -26,14 +26,25 @@ public class RemoveProductsFromCartPAge extends CommonUtils{
 	// different empty-content-desc clickable nested *inside* each item card (a qty control),
 	// since that one's a descendant, not a direct ScrollView child.
 	//
+	// Out-of-stock rows use a differently-styled icon that, unlike the in-stock one, does carry
+	// a label - content-desc="Remove" - so the second half of this union picks those up too.
+	// Both halves stay scoped to "direct child of the ScrollView" so this never matches the
+	// confirm popup's own button below, which also happens to be labeled "Remove" but lives
+	// outside the ScrollView.
+	//
 	// Kept as a locator (not a WebElement field) so removeProductFromCart() below can capture
 	// the live list fresh every iteration and use list.isEmpty() itself as the "cart is empty"
 	// signal - no separate empty-cart check needed, and no risk of acting on a stale reference
 	// to an item that's already been removed and re-rendered away.
 	private static final By REMOVE_ICON_LOCATOR = AppiumBy.xpath(
-			"//android.widget.ScrollView/android.view.View[@clickable=\"true\" and not(@content-desc)]");
+			"//android.widget.ScrollView/android.view.View[@clickable=\"true\" and not(@content-desc)]"
+			+ " | //android.widget.ScrollView/android.view.View[@content-desc=\"Remove\"]");
 
-	@AndroidFindBy(accessibility = "Remove")
+	// It's an ImageView, not a View - confirmed via Appium Inspector. That tag difference from
+	// the out-of-stock row icon above (android.view.View) is what keeps the two from colliding
+	// even though both carry the same "Remove" content-desc; not(ancestor::ScrollView) is kept
+	// as a second guard in case a future layout ever reuses ImageView inside the row too.
+	@AndroidFindBy(xpath = "//android.widget.ImageView[@content-desc=\"Remove\" and not(ancestor::android.widget.ScrollView)]")
 	WebElement removeButton;
 
 	@FindBy(xpath = "//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.view.View/android.view.View/android.view.View/android.view.View/android.view.View[1]/android.widget.ImageView[5]")
