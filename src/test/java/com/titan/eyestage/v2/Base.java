@@ -279,6 +279,10 @@ public class Base {
 			// BrowserStack idle timeout
 			bstackOptions.put("idleTimeout", 300);
 
+			// Without this BrowserStack picks its own default driver, which rejects enforceXPath1
+			// and crashes on following:: locators with a ClassCastException.
+			bstackOptions.put("appiumVersion", "3.5.2");
+
 			options.setCapability("bstack:options", bstackOptions);
 
 			options.setDeviceName(deviceName);
@@ -295,6 +299,10 @@ public class Base {
 			options.setCapability("chromedriverAutodownload", true);
 			options.setCapability("ensureWebviewsHavePages", true);
 			options.setCapability("webviewConnectTimeout", 20000);
+
+			// Each session installs the app fresh, so without this Android's notification
+			// permission popup covers the login screen.
+			options.setAutoGrantPermissions(true);
 
 			localDriver = new AndroidDriver(
 					httpClientConfig(new URL("https://hub-cloud.browserstack.com/wd/hub")),

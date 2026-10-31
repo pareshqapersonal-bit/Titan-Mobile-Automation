@@ -117,12 +117,15 @@ public class ContactLensCartNew extends CommonUtils {
 		
 		System.out.println("After SPH");
 
+		scrollPowerRowIntoView("CYL");
 		selectIfPresent(leftCYLSelect, "-0.75");
 		selectIfPresent(rightCYLSelect, "-0.75");
-		
+
+		scrollPowerRowIntoView("AXIS");
 		selectIfPresent(leftAxisSelect, "80");
 		selectIfPresent(rightAxisSelect, "80");
 
+		scrollPowerRowIntoView("No of boxes");
 		selectIfPresent(leftBoxesSelect, "1");
 		selectIfPresent(rightBoxesSelect, "1");
 		click(addToCartButton);
@@ -150,6 +153,25 @@ public class ContactLensCartNew extends CommonUtils {
 								+ ".scrollIntoView(new UiSelector().text(\"" + text + "\"))"));
 	}
 
+
+	// Rows below the fold aren't in the hierarchy until they're on screen, and a row can also sit
+	// behind the sticky Add to cart bar (seen on a BrowserStack Galaxy S24), so swipe until the
+	// row's button is clear of the bar.
+	private void scrollPowerRowIntoView(String rowLabel) {
+
+		By rowButton = By.xpath("//android.view.View[@content-desc='" + rowLabel + "']/following::android.widget.Button[1]");
+		int maxBottom = (int) (driver.manage().window().getSize().height * 0.80);
+
+		for (int attempt = 0; attempt < 6; attempt++) {
+			if (isElementPresent(rowButton)) {
+				Rectangle r = driver.findElement(rowButton).getRect();
+				if (r.y + r.height < maxBottom) {
+					return;
+				}
+			}
+			smallSwipeUp();
+		}
+	}
 
 	private void selectIfPresent(WebElement dropdown, String value) {
 	    if (value == null || value.trim().isEmpty()) {

@@ -6,12 +6,13 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -210,8 +211,12 @@ public class PaymentPageElementsNew extends CommonUtils {
 			click(VerifyButton);
 			driver.hideKeyboard();
 			click(continuePaymentCTA);
-			
-			visibilityOf(orderConfirmationText);
+
+			// Other UPI has no Razorpay webview step to absorb the processing time, so this is
+			// the only wait covering it. Confirmed via a failure screenshot: the spinner was
+			// still up on the Payment page when the default 30s ran out.
+			new WebDriverWait(driver, Duration.ofSeconds(90))
+					.until(ExpectedConditions.visibilityOf(orderConfirmationText));
 			System.out.println("Payment confirmation text: " + orderConfirmationText.getAttribute("contentDescription")
 					);
 			assertEquals(orderConfirmationText.getAttribute("contentDescription")
@@ -316,16 +321,8 @@ public class PaymentPageElementsNew extends CommonUtils {
 			// dismissEncirclePopupIfPresent();
 
 
-			Dimension size = driver.manage().window().getSize();
+			scrollToWalletSection();
 
-			driver.executeScript("mobile: scrollGesture", Map.of(
-			    "left", 0,
-			    "top", (int) (size.height * 0.25),
-			    "width", size.width,
-			    "height", (int) (size.height * 0.50),
-			    "direction", "down",
-			    "percent", 0.5
-			));
 			// Wallet redemption can persist on the account's cart server-side across runs
 			// (the session launches with noReset=true and reuses pooled test credentials -
 			// see Base.launchApp), so a prior attempt that got this far before failing later
@@ -423,6 +420,31 @@ public class PaymentPageElementsNew extends CommonUtils {
 		default:
 			throw new IllegalArgumentException(
 					"Unsupported payment method: " + paymentMethod);
+		}
+	}
+
+	// The wallet section sits below the fold and isn't in the hierarchy until it's on screen,
+	// and how far it is varies by device (a single fixed scroll left it off screen on a
+	// BrowserStack Galaxy S24). Stops at either the checkbox or an already-applied redemption.
+	private void scrollToWalletSection() {
+
+		By walletSection = By.xpath("//android.widget.CheckBox"
+				+ " | //android.view.View[starts-with(@content-desc,'Titan Wallet')]");
+
+		Dimension size = driver.manage().window().getSize();
+		int x = size.width / 2;
+
+		for (int attempt = 0; attempt < 6 && !isElementPresent(walletSection); attempt++) {
+
+			PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+			Sequence swipe = new Sequence(finger, 1);
+
+			swipe.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, (int) (size.height * 0.65)));
+			swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+			swipe.addAction(finger.createPointerMove(Duration.ofMillis(500), PointerInput.Origin.viewport(), x, (int) (size.height * 0.35)));
+			swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+
+			driver.perform(List.of(swipe));
 		}
 	}
 
