@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import com.titan.eyestage.v2.models.CartProduct;
 import com.titan.eyestage.v2.pom.CartPageElementsNew;
 import com.titan.eyestage.v2.pom.LoginElementsNew;
+import com.titan.eyestage.v2.pom.OrderDetailsPage;
 import com.titan.eyestage.v2.pom.PaymentPageElementsNew;
 import com.titan.eyestage.v2.pom.PurchaseJourneyElementsNew;
 import com.titan.eyestage.v2.utils.DeviceReader;
@@ -28,12 +29,13 @@ public class PurchaseTestNew extends Base {
 	@Test(retryAnalyzer = RetryAnalyzer.class,
 			description = "TC_ADD_TO_CART_NEW - Search SKU and add product to cart (new UI)",
 			dataProvider = "addToCartCases")
-	public void Steps(String testCaseId, List<CartProduct> products, String paymentMethod)
-			throws InterruptedException, IOException {
+	public void Steps(String testCaseId, List<CartProduct> products, String paymentMethod,
+			boolean cancelOrder) throws InterruptedException, IOException {
 
-		System.out.println("AddToCart TestCaseID = " + testCaseId + " | Products = " + products);
+		System.out.println("AddToCart TestCaseID = " + testCaseId + " | Products = " + products
+				+ " | CancelOrder = " + cancelOrder);
 
-		test().info("TestCase=" + testCaseId + ", Products=" + products);
+		test().info("TestCase=" + testCaseId + ", Products=" + products + ", CancelOrder=" + cancelOrder);
 
 		Object[] device = DeviceReader.getDevices()[0];
 		String mobileNumber = (String) device[0];
@@ -56,12 +58,19 @@ public class PurchaseTestNew extends Base {
 		
 		PaymentPageElementsNew paymentPage = new PaymentPageElementsNew(driver());
 		paymentPage.selectPaymentMethod(paymentMethod);
+
+		// Starts from the "Order Confirmed." screen selectPaymentMethod() ends on.
+		if (cancelOrder) {
+			test().info("CancelOrder=Yes - cancelling the order just placed");
+			new OrderDetailsPage(driver()).cancelOrder();
+			test().pass("Order cancelled");
+		}
 	}
 
-	// {testCaseId, products, paymentMethod} - paymentMethod is unused here, it's only
-	// carried so the sheet stays identical to AddToCart.xlsx.
+	// {testCaseId, products, paymentMethod, cancelOrder} - cancelOrder comes from the
+	// CancelOrder (Yes/No) column; missing column or blank cell = No.
 	@DataProvider(name = "addToCartCases")
 	public Object[][] addToCartCases() {
-		return PurchaseDataReader.getPurchaseCases("AddToCartNew.xlsx");
+		return PurchaseDataReader.getPurchaseCasesWithCancel("AddToCartNew.xlsx");
 	}
 }

@@ -46,6 +46,19 @@ public class PurchaseDataReader {
 	// Same layout read from any workbook under TestData/ (e.g. AddToCartNew.xlsx for
 	// AddToCartTestNew), so new-UI suites can keep their own sheet.
 	public static Object[][] getPurchaseCases(String fileName) {
+		return readPurchaseCases(fileName, false);
+	}
+
+	// Same rows plus a 4th value from the optional CancelOrder column (Yes/No, Y/N):
+	// {testCaseId, products, paymentMethod, cancelOrder(Boolean)}. A missing column or blank
+	// cell means No, so a sheet without the column still runs every row as a plain purchase.
+	// Kept separate from getPurchaseCases() because TestNG needs every data-provider row to
+	// match its @Test method's parameter count, and the other suites take 3.
+	public static Object[][] getPurchaseCasesWithCancel(String fileName) {
+		return readPurchaseCases(fileName, true);
+	}
+
+	private static Object[][] readPurchaseCases(String fileName, boolean includeCancelOrder) {
 
 		String path = Paths.get(
 				System.getProperty("user.dir"),
@@ -75,6 +88,8 @@ public class PurchaseDataReader {
 			// AddToCart.xlsx (the sheet this file is a copy of) has no Execute column,
 			// so treat it as optional - present means filter, absent means run every row.
 			int executeCol = findColumnOptional(headerRow, formatter, "Execute");
+
+			int cancelOrderCol = findColumnOptional(headerRow, formatter, "CancelOrder");
 
 			int[] categoryCols = new int[CATEGORY_COLUMNS.length];
 
@@ -131,7 +146,15 @@ public class PurchaseDataReader {
 							"No product SKUs found for purchase row: " + testCaseId);
 				}
 
-				cases.add(new Object[] { testCaseId, products, paymentMethod });
+				if (includeCancelOrder) {
+					boolean cancelOrder = cancelOrderCol >= 0
+							&& parseYesNo(fileName, testCaseId,
+									formatter.formatCellValue(row.getCell(cancelOrderCol)));
+
+					cases.add(new Object[] { testCaseId, products, paymentMethod, cancelOrder });
+				} else {
+					cases.add(new Object[] { testCaseId, products, paymentMethod });
+				}
 			}
 
 		} catch (IOException e) {
@@ -144,6 +167,23 @@ public class PurchaseDataReader {
 		}
 
 		return cases.toArray(new Object[0][]);
+	}
+
+	// Fails on anything other than Yes/No so a typo can't silently skip (or trigger) a cancel.
+	private static boolean parseYesNo(String fileName, String testCaseId, String value) {
+
+		String v = value.replace(' ', ' ').strip();
+
+		if (v.isEmpty() || v.equalsIgnoreCase("No") || v.equalsIgnoreCase("N")) {
+			return false;
+		}
+
+		if (v.equalsIgnoreCase("Yes") || v.equalsIgnoreCase("Y")) {
+			return true;
+		}
+
+		throw new RuntimeException(
+				"CancelOrder must be Yes or No in " + fileName + " row " + testCaseId + ", found: " + value);
 	}
 
 	private static int findColumn(String fileName, Row headerRow, DataFormatter formatter, String columnName) {

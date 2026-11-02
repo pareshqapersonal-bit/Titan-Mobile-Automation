@@ -165,7 +165,9 @@ public class PaymentPageElementsNew extends CommonUtils {
 			test().info(getText(OrderIDText) + " is the OrderID");
 			test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 			assertTrue(OrderIDText.isDisplayed());
-			clickBackFromOrderPage();
+			// Stays on the order confirmation page, like the other methods, so a
+			// CancelOrder=Yes row can go straight to "View order details".
+		//	clickBackFromOrderPage();
 
 			break;
 
@@ -178,11 +180,17 @@ public class PaymentPageElementsNew extends CommonUtils {
 			test().info("Selecting payment method");
 			click(creditDebitCardCheckbox);
 
+			// The keyboard opened by each field covers the next one, which then never turns up
+			// in the hierarchy. Confirmed via failure screenshots: the card number was typed,
+			// Expiry's input sat behind the keyboard, and the wait timed out on it after 30s.
 			sendKeys(cardNumberField, "4100280000001007");
+			hideKeyboardIfShown();
 			sendKeys(cardExpiryField, "12/35");
+			hideKeyboardIfShown();
 			sendKeys(cardCVVField, "123");
+			hideKeyboardIfShown();
 			sendKeys(cardHolderNameField, "Test User");
-			driver.hideKeyboard();
+			hideKeyboardIfShown();
 			click(continuePaymentCTA);
 
 			test().info("Initiating Razorpay payment");
@@ -420,6 +428,13 @@ public class PaymentPageElementsNew extends CommonUtils {
 		default:
 			throw new IllegalArgumentException(
 					"Unsupported payment method: " + paymentMethod);
+		}
+	}
+
+	private void hideKeyboardIfShown() {
+
+		if (driver.isKeyboardShown()) {
+			driver.hideKeyboard();
 		}
 	}
 
