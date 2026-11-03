@@ -33,6 +33,7 @@ import io.appium.java_client.AppiumClientConfig;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Base {
@@ -178,7 +179,11 @@ public class Base {
 		String bsDeviceName = "";
 		String bsOsVersion = "";
 
-		if (testData != null && testData.length >= 4) {
+		// Purchase-case rows ({testCaseId, products, paymentMethod, cancelOrder}, see
+		// PurchaseDataReader.getPurchaseCasesWithCancel) are also 4 long but carry no device -
+		// reading them here sent paymentMethod ("Wallet") to BrowserStack as the device name.
+		// Their products column is a List, where device rows have the password String.
+		if (testData != null && testData.length >= 4 && !(testData[1] instanceof List)) {
 			bsDeviceName = String.valueOf(testData[2]);
 			bsOsVersion = String.valueOf(testData[3]);
 		}

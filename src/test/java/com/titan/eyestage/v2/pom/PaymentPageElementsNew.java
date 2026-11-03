@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
@@ -378,6 +379,7 @@ public class PaymentPageElementsNew extends CommonUtils {
 		
 			
 			click(walletCheckbox);
+			scrollWalletRedeemIntoView();
 			sendKeys(walletAmountField, amount);
 			click(walletRedeemButton);
 
@@ -457,6 +459,39 @@ public class PaymentPageElementsNew extends CommonUtils {
 			swipe.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, (int) (size.height * 0.65)));
 			swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
 			swipe.addAction(finger.createPointerMove(Duration.ofMillis(500), PointerInput.Origin.viewport(), x, (int) (size.height * 0.35)));
+			swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+
+			driver.perform(List.of(swipe));
+		}
+	}
+
+	// scrollToWalletSection() stops as soon as the checkbox is on screen, which can leave it just
+	// above the sticky Total Amount / Continue to Payment bar. Ticking it expands the amount field
+	// and Redeem button below that - off screen and so missing from the hierarchy (Vivo V25, ₹2680
+	// cart). Swipe until Redeem is present and clear of the bar.
+	private void scrollWalletRedeemIntoView() {
+
+		By redeem = AppiumBy.accessibilityId("Redeem");
+
+		Dimension size = driver.manage().window().getSize();
+		int x = size.width / 2;
+		int maxBottom = (int) (size.height * 0.72);
+
+		for (int attempt = 0; attempt < 6; attempt++) {
+
+			if (isElementPresent(redeem)) {
+				Rectangle r = driver.findElement(redeem).getRect();
+				if (r.y + r.height < maxBottom) {
+					return;
+				}
+			}
+
+			PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+			Sequence swipe = new Sequence(finger, 1);
+
+			swipe.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, (int) (size.height * 0.65)));
+			swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+			swipe.addAction(finger.createPointerMove(Duration.ofMillis(400), PointerInput.Origin.viewport(), x, (int) (size.height * 0.45)));
 			swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
 
 			driver.perform(List.of(swipe));
