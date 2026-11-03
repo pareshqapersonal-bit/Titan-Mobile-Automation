@@ -120,7 +120,11 @@ public class Base {
 	// thread without even attempting to relaunch the app (seen wiping out 4 of 5 payment-method
 	// cases from a single flaky launch). Retry the whole launch once, on a fresh session, before
 	// letting the failure propagate.
-	private static final int LAUNCH_MAX_RETRY = 1;
+	// Raised from 1: on 2026-11-03 16:53 IST row 3's POST /session timed out twice (90s each) with
+	// no session ever appearing on BrowserStack and only 1 of 2 slots in use - no public Galaxy S24
+	// came free in time (row 2's S24 was still being torn down until ~16:55). One retry wasn't
+	// enough to outlast that, and the failed @BeforeMethod then skipped rows 4-5 too.
+	private static final int LAUNCH_MAX_RETRY = 3;
 
 	// BrowserStack's account-level parallel-session cap observed today is exactly 2 - the same as
 	// this suite's thread-count - so there is zero spare capacity. Retrying a launch immediately
@@ -130,7 +134,7 @@ public class Base {
 	// free slots instead of waiting for one to actually open up. A short pause first gives that
 	// slot a real chance to free (either the orphaned session finishes and goes idle, or the other
 	// thread's attempt clears) before spending the retry.
-	private static final Duration LAUNCH_RETRY_BACKOFF = Duration.ofSeconds(10);
+	private static final Duration LAUNCH_RETRY_BACKOFF = Duration.ofSeconds(30);
 
 	@BeforeMethod
 	public void opn_app(Method testMethod, Object[] testData) throws MalformedURLException {
