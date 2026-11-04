@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - main
-  schedule:
-    # GitHub cron is always UTC: 08:00 UTC = 01:30 PM IST
-    - cron: '0 8 * * *'
+  # Daily 1:30 PM IST run lives in titan-eyewear-scheduled.yml (with email to QA)
   workflow_dispatch:
 
 jobs:
