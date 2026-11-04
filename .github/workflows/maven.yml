@@ -1,10 +1,9 @@
 name: Titan Automation
 
 on:
-  push:
-    branches:
-      - main
-  # Daily 1:30 PM IST run lives in titan-eyewear-scheduled.yml (with email to QA)
+  # Manual only. This runs the old native-app suite; the daily 1:30 PM IST Flutter run
+  # lives in titan-eyewear-scheduled.yml. No push trigger, so pushes to main don't start a
+  # competing BrowserStack run.
   workflow_dispatch:
 
 jobs:
