@@ -72,7 +72,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           from: Titan Mobile Automation <${{ secrets.EMAIL_USERNAME }}>
-          to: qa@uppercliff.com
+          to: paresh.p@fortune4.in
           subject: "Titan Eyewear Mobile Automation | ${{ steps.meta.outputs.result }} | Run #${{ github.run_number }}"
           html_body: |
             <html>
