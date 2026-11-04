@@ -52,25 +52,46 @@ jobs:
           fi
 
           # Attach this run's Extent report (renamed with the IST run time so it can't be
-          # mistaken for an older one) plus every failure screenshot this run produced.
-          # Gmail caps a message at 25 MB, so screenshots are dropped if they'd exceed ~18 MB.
-          stamp=$(TZ=Asia/Kolkata date '+%d-%b-%Y_%I-%M-%p')
+          # mistaken for an older one) plus failure screenshots. Gmail rejects messages over
+          # 25 MB and attachments grow ~37% when encoded, so keep the raw total under 16 MB:
+          # report first, then as many screenshots as still fit.
+          budget=$((16 * 1024 * 1024))
+          used=0
           files=""
+          report_note=""
+          stamp=$(TZ=Asia/Kolkata date '+%d-%b-%Y_%I-%M-%p')
           if [ -f Reports/ExtentReport_v2.html ]; then
-            cp Reports/ExtentReport_v2.html "Reports/TitanEyewear_Report_${stamp}.html"
-            files="Reports/TitanEyewear_Report_${stamp}.html"
-          fi
-          shot_count=$(ls Screenshots/*.png 2>/dev/null | wc -l)
-          shot_kb=$(du -ck Screenshots/*.png 2>/dev/null | tail -1 | cut -f1)
-          shot_note="No failure screenshots were captured."
-          if [ "$shot_count" -gt 0 ]; then
-            if [ "${shot_kb:-0}" -le 18000 ]; then
-              files="${files:+$files,}Screenshots/*.png"
-              shot_note="${shot_count} failure screenshot(s) attached."
+            report="Reports/TitanEyewear_Report_${stamp}.html"
+            cp Reports/ExtentReport_v2.html "$report"
+            size=$(stat -c %s "$report")
+            if [ "$size" -le "$budget" ]; then
+              files="$report"
+              used=$size
             else
-              shot_note="${shot_count} failure screenshot(s) captured (too large to email) - download them from the run's artifacts."
+              report_note="The Extent report was too large to email - download it from the run's artifacts."
             fi
+          else
+            report_note="No Extent report was generated."
           fi
+          shot_total=0
+          shot_attached=0
+          for f in $(ls -t Screenshots/*.jpg Screenshots/*.png 2>/dev/null); do
+            shot_total=$((shot_total + 1))
+            size=$(stat -c %s "$f")
+            if [ $((used + size)) -le "$budget" ]; then
+              files="${files:+$files,}$f"
+              used=$((used + size))
+              shot_attached=$((shot_attached + 1))
+            fi
+          done
+          if [ "$shot_total" -eq 0 ]; then
+            shot_note="No failure screenshots were captured."
+          elif [ "$shot_attached" -eq "$shot_total" ]; then
+            shot_note="${shot_total} failure screenshot(s) attached."
+          else
+            shot_note="${shot_attached} of ${shot_total} failure screenshot(s) attached (size limit) - the rest are in the run's artifacts."
+          fi
+          shot_note="${report_note} ${shot_note}"
           echo "attachments=${files}" >> "$GITHUB_OUTPUT"
           echo "shot_note=${shot_note}" >> "$GITHUB_OUTPUT"
 

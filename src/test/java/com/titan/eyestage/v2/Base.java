@@ -7,7 +7,17 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -594,19 +604,20 @@ public class Base {
 
 	        if (driver() != null && driver().getSessionId() != null) {
 
-	            String base64Png =
-	                    captureScreenshot(result.getName());
+	            byte[] png = Base64.getDecoder().decode(captureScreenshot(result.getName()));
+
+	            // Full-resolution PNGs (~1-3 MB each) blew past Gmail's 25 MB limit once a run had
+	            // a handful of failures, so shrink to a small JPEG and embed it in the report only
+	            // once (it used to be embedded twice - link href and img src).
+	            byte[] jpg = toSmallJpeg(png);
 
 	            test().info(
-	                    "<a href='data:image/png;base64," + base64Png
-	                            + "' data-featherlight='image'><img src='data:image/png;base64,"
-	                            + base64Png
-	                            + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+	                    "<img src='data:image/jpeg;base64," + Base64.getEncoder().encodeToString(jpg)
+	                            + "' style='width:300px;height:auto;'/>");
 
-	            // Also write a real PNG under Screenshots/ so CI can attach failure screenshots
-	            // to the report email on their own (and so the console log no longer gets a
-	            // multi-KB base64 dump per failure).
-	            Path pngFile = saveScreenshotFile(result, base64Png);
+	            // Also write it under Screenshots/ so CI can attach failure screenshots to the
+	            // report email on their own (and the console log shows a path, not base64).
+	            Path pngFile = saveScreenshotFile(result, jpg);
 
 	            System.out.println(
 	                    "Failure screenshot captured: " + pngFile);
@@ -626,8 +637,8 @@ public class Base {
 	    }
 	}
 
-	// Screenshots/<method>_<first String param, e.g. test case id>_<timestamp>.png
-	private static Path saveScreenshotFile(ITestResult result, String base64Png) throws IOException {
+	// Screenshots/<method>_<first String param, e.g. test case id>_<timestamp>.jpg
+	private static Path saveScreenshotFile(ITestResult result, byte[] jpg) throws IOException {
 
 	    String caseId = "";
 	    Object[] params = result.getParameters();
@@ -637,14 +648,54 @@ public class Base {
 
 	    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
 	    String fileName = (result.getName() + caseId + "_" + timestamp)
-	            .replaceAll("[^A-Za-z0-9_.-]", "_") + ".png";
+	            .replaceAll("[^A-Za-z0-9_.-]", "_") + ".jpg";
 
 	    Path dir = Paths.get("Screenshots");
 	    Files.createDirectories(dir);
 
 	    Path file = dir.resolve(fileName);
-	    Files.write(file, Base64.getDecoder().decode(base64Png));
+	    Files.write(file, jpg);
 
 	    return file.toAbsolutePath();
+	}
+	// Scales a screenshot down to 540px wide and re-encodes it as a ~70% quality JPEG
+	// (typically 30-80 KB instead of 1-3 MB). Falls back to the original PNG bytes if
+	// decoding fails for any reason.
+	private static byte[] toSmallJpeg(byte[] png) {
+
+	    try {
+	        BufferedImage src = ImageIO.read(new ByteArrayInputStream(png));
+	        if (src == null) {
+	            return png;
+	        }
+
+	        int width = Math.min(540, src.getWidth());
+	        int height = (int) Math.round(src.getHeight() * (width / (double) src.getWidth()));
+
+	        BufferedImage scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+	        Graphics2D g = scaled.createGraphics();
+	        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	        g.drawImage(src, 0, 0, width, height, null);
+	        g.dispose();
+
+	        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
+	        ImageWriteParam param = writer.getDefaultWriteParam();
+	        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+	        param.setCompressionQuality(0.7f);
+
+	        ByteArrayOutputStream out = new ByteArrayOutputStream();
+	        try (ImageOutputStream ios = ImageIO.createImageOutputStream(out)) {
+	            writer.setOutput(ios);
+	            writer.write(null, new IIOImage(scaled, null, null), param);
+	        } finally {
+	            writer.dispose();
+	        }
+
+	        return out.toByteArray();
+
+	    } catch (Exception e) {
+	        System.out.println("Could not shrink screenshot, keeping original: " + e.getMessage());
+	        return png;
+	    }
 	}
 }
