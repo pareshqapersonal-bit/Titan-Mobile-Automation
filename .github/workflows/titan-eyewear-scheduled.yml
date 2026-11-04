@@ -95,7 +95,7 @@ jobs:
           attachments: Reports/ExtentReport_v2.html
 
       - name: Mark Job Failed If Tests Failed
-        if: steps.tests.outcome != 'success'
+        if: always() && steps.tests.outcome != 'success'
         run: |
           echo "Test execution failed - see attached report / uploaded artifacts."
           exit 1
