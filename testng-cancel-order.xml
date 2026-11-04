@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  New-UI (Flutter) Titan Eyewear flow: login -> add products to cart -> checkout -> pay,
+  then cancel the order for rows marked CancelOrder=Yes. Rows come from
+  TestData/AddToCartNew.xlsx; the login comes from the Execute=Y row in
+  TestData/DeviceConfig.xlsx. Used by .github/workflows/titan-eyewear-scheduled.yml.
+-->
+<suite name="Titan Eyewear Mobile Automation - Cancel Order (Flutter)">
+
+    <test name="Flutter - Purchase and Cancel Order">
+        <classes>
+            <class name="com.titan.eyestage.v2.CancelOrderTest"/>
+        </classes>
+    </test>
+
+</suite>

@@ -36,7 +36,7 @@ jobs:
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           TEST_DEFAULT_USER_MOBILE: ${{ secrets.TEST_DEFAULT_USER_MOBILE }}
           TEST_DEFAULT_USER_PASSWORD: ${{ secrets.TEST_DEFAULT_USER_PASSWORD }}
-        run: mvn clean test -DsuiteXmlFile=testng-parallel-purchase-rows.xml
+        run: mvn clean test -DsuiteXmlFile=testng-cancel-order.xml
 
       - name: Compute Run Details
         if: always()
@@ -84,7 +84,7 @@ jobs:
               <tr><td><b>Executed At</b></td><td>${{ steps.meta.outputs.run_time }}</td></tr>
               <tr><td><b>Branch</b></td><td>${{ github.ref_name }}</td></tr>
               <tr><td><b>Execution Mode</b></td><td>BrowserStack</td></tr>
-              <tr><td><b>Test Suite</b></td><td>testng-parallel-purchase-rows.xml</td></tr>
+              <tr><td><b>Test Suite</b></td><td>testng-cancel-order.xml</td></tr>
               <tr><td><b>Result</b></td><td><b>${{ steps.meta.outputs.result }}</b></td></tr>
             </table>
             <br>
