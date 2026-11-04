@@ -36,7 +36,9 @@ jobs:
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           TEST_DEFAULT_USER_MOBILE: ${{ secrets.TEST_DEFAULT_USER_MOBILE }}
           TEST_DEFAULT_USER_PASSWORD: ${{ secrets.TEST_DEFAULT_USER_PASSWORD }}
-        run: mvn clean test -DsuiteXmlFile=testng-cancel-order.xml
+          # Runner is UTC; run the JVM in IST so Extent report timestamps match the run time
+          TZ: Asia/Kolkata
+        run: mvn clean test -DsuiteXmlFile=testng-cancel-order.xml -Duser.timezone=Asia/Kolkata
 
       - name: Compute Run Details
         if: always()
@@ -48,6 +50,29 @@ jobs:
           else
             echo "result=FAILED" >> "$GITHUB_OUTPUT"
           fi
+
+          # Attach this run's Extent report (renamed with the IST run time so it can't be
+          # mistaken for an older one) plus every failure screenshot this run produced.
+          # Gmail caps a message at 25 MB, so screenshots are dropped if they'd exceed ~18 MB.
+          stamp=$(TZ=Asia/Kolkata date '+%d-%b-%Y_%I-%M-%p')
+          files=""
+          if [ -f Reports/ExtentReport_v2.html ]; then
+            cp Reports/ExtentReport_v2.html "Reports/TitanEyewear_Report_${stamp}.html"
+            files="Reports/TitanEyewear_Report_${stamp}.html"
+          fi
+          shot_count=$(ls Screenshots/*.png 2>/dev/null | wc -l)
+          shot_kb=$(du -ck Screenshots/*.png 2>/dev/null | tail -1 | cut -f1)
+          shot_note="No failure screenshots were captured."
+          if [ "$shot_count" -gt 0 ]; then
+            if [ "${shot_kb:-0}" -le 18000 ]; then
+              files="${files:+$files,}Screenshots/*.png"
+              shot_note="${shot_count} failure screenshot(s) attached."
+            else
+              shot_note="${shot_count} failure screenshot(s) captured (too large to email) - download them from the run's artifacts."
+            fi
+          fi
+          echo "attachments=${files}" >> "$GITHUB_OUTPUT"
+          echo "shot_note=${shot_note}" >> "$GITHUB_OUTPUT"
 
       - name: Upload Reports
         if: always()
@@ -88,11 +113,12 @@ jobs:
               <tr><td><b>Result</b></td><td><b>${{ steps.meta.outputs.result }}</b></td></tr>
             </table>
             <br>
-            <p>The detailed Extent Report is attached to this email.</p>
+            <p>The detailed Extent Report of this run is attached to this email.</p>
+            <p>${{ steps.meta.outputs.shot_note }}</p>
             <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">Open GitHub Actions Run</a></p>
             </body>
             </html>
-          attachments: Reports/ExtentReport_v2.html
+          attachments: ${{ steps.meta.outputs.attachments }}
 
       - name: Mark Job Failed If Tests Failed
         if: always() && steps.tests.outcome != 'success'

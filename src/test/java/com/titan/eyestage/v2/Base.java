@@ -8,7 +8,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 import java.lang.reflect.Method;
@@ -589,17 +594,22 @@ public class Base {
 
 	        if (driver() != null && driver().getSessionId() != null) {
 
-	            String screenshotPath =
+	            String base64Png =
 	                    captureScreenshot(result.getName());
 
 	            test().info(
-	                    "<a href='data:image/png;base64," + screenshotPath
+	                    "<a href='data:image/png;base64," + base64Png
 	                            + "' data-featherlight='image'><img src='data:image/png;base64,"
-	                            + screenshotPath
+	                            + base64Png
 	                            + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
 
+	            // Also write a real PNG under Screenshots/ so CI can attach failure screenshots
+	            // to the report email on their own (and so the console log no longer gets a
+	            // multi-KB base64 dump per failure).
+	            Path pngFile = saveScreenshotFile(result, base64Png);
+
 	            System.out.println(
-	                    "Failure screenshot captured: " + screenshotPath);
+	                    "Failure screenshot captured: " + pngFile);
 
 	        } else {
 
@@ -614,5 +624,27 @@ public class Base {
 	                "Could not capture failure screenshot: "
 	                + e.getMessage());
 	    }
+	}
+
+	// Screenshots/<method>_<first String param, e.g. test case id>_<timestamp>.png
+	private static Path saveScreenshotFile(ITestResult result, String base64Png) throws IOException {
+
+	    String caseId = "";
+	    Object[] params = result.getParameters();
+	    if (params != null && params.length > 0 && params[0] instanceof String) {
+	        caseId = "_" + params[0];
+	    }
+
+	    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+	    String fileName = (result.getName() + caseId + "_" + timestamp)
+	            .replaceAll("[^A-Za-z0-9_.-]", "_") + ".png";
+
+	    Path dir = Paths.get("Screenshots");
+	    Files.createDirectories(dir);
+
+	    Path file = dir.resolve(fileName);
+	    Files.write(file, Base64.getDecoder().decode(base64Png));
+
+	    return file.toAbsolutePath();
 	}
 }
