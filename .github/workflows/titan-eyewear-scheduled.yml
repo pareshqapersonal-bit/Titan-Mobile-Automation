@@ -92,7 +92,6 @@ jobs:
             </body>
             </html>
           attachments: Reports/ExtentReport_v2.html
-          ignore_cert: true
 
       - name: Mark Job Failed If Tests Failed
         if: steps.tests.outcome != 'success'
