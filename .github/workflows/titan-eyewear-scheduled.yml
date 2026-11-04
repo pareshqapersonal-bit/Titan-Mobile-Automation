@@ -65,12 +65,13 @@ jobs:
         if: always()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          secure: ${{ secrets.SMTP_PORT == '465' }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          from: Titan Mobile Automation <${{ secrets.SMTP_USERNAME }}>
+          # Defaults to Gmail SMTP; add SMTP_SERVER / SMTP_PORT secrets to override
+          server_address: ${{ secrets.SMTP_SERVER || 'smtp.gmail.com' }}
+          server_port: ${{ secrets.SMTP_PORT || '465' }}
+          secure: ${{ (secrets.SMTP_PORT || '465') == '465' }}
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          from: Titan Mobile Automation <${{ secrets.EMAIL_USERNAME }}>
           to: qa@uppercliff.com
           subject: "Titan Eyewear Mobile Automation | ${{ steps.meta.outputs.result }} | Run #${{ github.run_number }}"
           html_body: |
