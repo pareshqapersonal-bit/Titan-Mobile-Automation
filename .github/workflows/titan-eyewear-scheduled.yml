@@ -129,6 +129,13 @@ jobs:
           echo "attachments=${files}" >> "$GITHUB_OUTPUT"
           echo "shot_note=${shot_note}" >> "$GITHUB_OUTPUT"
 
+          # Passed/failed counts per payment method, plus the list of failed cases
+          {
+            echo "payment_summary<<SUMMARY_EOF"
+            python3 .github/scripts/payment_summary.py target/surefire-reports/testng-results.xml
+            echo "SUMMARY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -167,6 +174,7 @@ jobs:
               <tr><td><b>Test Suite</b></td><td>testng-cancel-order.xml</td></tr>
               <tr><td><b>Result</b></td><td><b>${{ steps.meta.outputs.result }}</b></td></tr>
             </table>
+            ${{ steps.meta.outputs.payment_summary }}
             <br>
             <p>The detailed Extent Report of this run is attached to this email.</p>
             <p>${{ steps.meta.outputs.shot_note }}</p>
