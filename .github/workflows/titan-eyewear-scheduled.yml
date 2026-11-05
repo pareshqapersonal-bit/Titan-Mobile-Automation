@@ -12,7 +12,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # GitHub often starts scheduled runs hours late. That's fine, but run at most once per
+  # IST day: if this workflow already ran today (manually or on schedule), skip the
+  # scheduled one. Manual (workflow_dispatch) runs always go ahead.
+  check-already-ran:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check for an earlier run today (IST)
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Manual trigger - always run."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Start of today in IST, expressed in UTC for the API filter
+          day_start=$(date -u -d "$(TZ=Asia/Kolkata date '+%Y-%m-%d') 00:00 +0530" '+%Y-%m-%dT%H:%M:%SZ')
+          earlier=$(gh api "repos/${{ github.repository }}/actions/workflows/titan-eyewear-scheduled.yml/runs?created=>=${day_start}&per_page=100" \
+            --jq "[.workflow_runs[] | select(.id != ${{ github.run_id }}) | select(.conclusion != \"cancelled\")] | length")
+          echo "Runs of this workflow since ${day_start} (excluding this one): ${earlier}"
+          if [ "$earlier" -gt 0 ]; then
+            echo "Already ran today - skipping this scheduled run."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   run-tests:
+    needs: check-already-ran
+    if: needs.check-already-ran.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
