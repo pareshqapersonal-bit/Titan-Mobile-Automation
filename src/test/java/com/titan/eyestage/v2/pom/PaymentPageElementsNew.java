@@ -11,6 +11,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
@@ -197,7 +198,7 @@ public class PaymentPageElementsNew extends CommonUtils {
 			test().info("Initiating Razorpay payment");
 			clickInWebviewIfPresentFlutter(By.xpath("//*[contains(@text,'Success')]"), 15);
 
-			visibilityOf(orderConfirmationText);
+			waitForOrderConfirmed(60);
 			System.out.println("Payment confirmation text: " + orderConfirmationText.getAttribute("contentDescription")
 					);
 			assertEquals(orderConfirmationText.getAttribute("contentDescription")
@@ -224,8 +225,7 @@ public class PaymentPageElementsNew extends CommonUtils {
 			// Other UPI has no Razorpay webview step to absorb the processing time, so this is
 			// the only wait covering it. Confirmed via a failure screenshot: the spinner was
 			// still up on the Payment page when the default 30s ran out.
-			new WebDriverWait(driver, Duration.ofSeconds(90))
-					.until(ExpectedConditions.visibilityOf(orderConfirmationText));
+			waitForOrderConfirmed(90);
 			System.out.println("Payment confirmation text: " + orderConfirmationText.getAttribute("contentDescription")
 					);
 			assertEquals(orderConfirmationText.getAttribute("contentDescription")
@@ -257,7 +257,7 @@ public class PaymentPageElementsNew extends CommonUtils {
 			test().info("Initiating Razorpay payment");
 			clickInWebviewIfPresentFlutter(By.xpath("//*[contains(@text,'Success')]"), 15);
 
-			visibilityOf(orderConfirmationText);
+			waitForOrderConfirmed(60);
 			System.out.println("Payment confirmation text: " + orderConfirmationText.getAttribute("contentDescription")
 					);
 			assertEquals(orderConfirmationText.getAttribute("contentDescription")
@@ -585,6 +585,14 @@ public class PaymentPageElementsNew extends CommonUtils {
 
 	        } catch (TimeoutException e) {
 	            System.out.println("Element not found in NATIVE_APP: " + locator);
+	        } catch (WebDriverException e) {
+	            // While the Razorpay step is on screen the driver can hang ~30s and return
+	            // "unexpected driver response" instead of a result. Seen in scheduled run #11:
+	            // the order was already confirmed when this threw, failing the case anyway.
+	            // Skip the click and let the caller's "Order Confirmed." check decide.
+	            System.out.println("Driver error while looking for " + locator
+	                    + " - skipping, order confirmation check decides: " + firstLine(e));
+	            return;
 	        }
 
 	        String webviewContext = new WebDriverWait(
@@ -605,8 +613,30 @@ public class PaymentPageElementsNew extends CommonUtils {
 	    } catch (TimeoutException e) {
 	        System.out.println("Element or WEBVIEW context not found: " + locator);
 
+	    } catch (WebDriverException e) {
+	        System.out.println("Driver error in WEBVIEW step for " + locator
+	                + " - skipping, order confirmation check decides: " + firstLine(e));
+
 	    } finally {
-	        driver.context("NATIVE_APP");
+	        try {
+	            driver.context("NATIVE_APP");
+	        } catch (WebDriverException e) {
+	            System.out.println("Could not switch back to NATIVE_APP: " + firstLine(e));
+	        }
 	    }
+	}
+
+	// Waits for "Order Confirmed." but rides out transient driver errors (the same
+	// "unexpected driver response" hang) instead of failing on the first one - only a
+	// real timeout fails the case.
+	private void waitForOrderConfirmed(int timeoutSeconds) {
+		new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds))
+				.ignoring(WebDriverException.class)
+				.until(ExpectedConditions.visibilityOf(orderConfirmationText));
+	}
+
+	private static String firstLine(Throwable e) {
+		String msg = e.getMessage();
+		return msg == null ? e.getClass().getSimpleName() : msg.split("\\R", 2)[0];
 	}
 }
