@@ -637,17 +637,35 @@ public class Base {
 	    }
 	}
 
-	// Screenshots/<method>_<first String param, e.g. test case id>_<timestamp>.jpg
+	// Screenshots/<method>_<test case id>_<payment method>_<timestamp>.jpg
+	// The purchase tests all take (..., String testCaseId, List<CartProduct> products,
+	// String paymentMethod, ...), so the test case id is the String just before the product
+	// list and the payment method the String just after it. Tests without a product list
+	// fall back to their first String parameter.
 	private static Path saveScreenshotFile(ITestResult result, byte[] jpg) throws IOException {
 
 	    String caseId = "";
+	    String paymentMethod = "";
 	    Object[] params = result.getParameters();
-	    if (params != null && params.length > 0 && params[0] instanceof String) {
-	        caseId = "_" + params[0];
+	    if (params != null) {
+	        for (int i = 0; i < params.length; i++) {
+	            if (params[i] instanceof List) {
+	                if (i > 0 && params[i - 1] instanceof String) {
+	                    caseId = "_" + params[i - 1];
+	                }
+	                if (i + 1 < params.length && params[i + 1] instanceof String) {
+	                    paymentMethod = "_" + params[i + 1];
+	                }
+	                break;
+	            }
+	        }
+	        if (caseId.isEmpty() && params.length > 0 && params[0] instanceof String) {
+	            caseId = "_" + params[0];
+	        }
 	    }
 
 	    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
-	    String fileName = (result.getName() + caseId + "_" + timestamp)
+	    String fileName = (result.getName() + caseId + paymentMethod + "_" + timestamp)
 	            .replaceAll("[^A-Za-z0-9_.-]", "_") + ".jpg";
 
 	    Path dir = Paths.get("Screenshots");
