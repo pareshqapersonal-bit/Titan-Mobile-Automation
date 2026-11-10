@@ -2,8 +2,10 @@ name: Titan Eyewear Mobile Automation - Scheduled Run
 
 on:
   schedule:
-    # GitHub cron is always UTC: 08:00 UTC = 01:30 PM IST (UTC+5:30)
-    - cron: '0 8 * * *'
+    # GitHub cron is always UTC: 08:07 UTC = 01:37 PM IST (UTC+5:30).
+    # Off the top of the hour on purpose: minute 0 is GitHub's busiest slot and
+    # scheduled runs there are often delayed by hours.
+    - cron: '7 8 * * *'
   workflow_dispatch:
 
 concurrency:
