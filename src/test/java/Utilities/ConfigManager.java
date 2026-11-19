@@ -79,6 +79,22 @@ public class ConfigManager {
                     properties.setProperty(
                             "browserstack.accessKey",
                             browserStackAccessKey);
+
+                    // App id (bs://...): -Dbrowserstack.app or the BROWSERSTACK_APP env var
+                    // (filled from the GitHub secret in CI) wins; the properties file value
+                    // is only the fallback for local runs.
+                    String browserStackApp = getConfigurationValue(
+                            "browserstack.app",
+                            "BROWSERSTACK_APP",
+                            null);
+
+                    if (browserStackApp == null) {
+                        throw new IllegalStateException(
+                                "BrowserStack app id is not configured: set the "
+                                        + "BROWSERSTACK_APP secret/env var or browserstack.app");
+                    }
+
+                    properties.setProperty("browserstack.app", browserStackApp);
                 }
             }
 

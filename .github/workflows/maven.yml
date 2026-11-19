@@ -25,6 +25,7 @@ jobs:
           EXECUTION_MODE: browserstack
           BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
           BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          BROWSERSTACK_APP: ${{ secrets.BROWSERSTACK_APP }}
           TEST_DEFAULT_USER_MOBILE: ${{ secrets.TEST_DEFAULT_USER_MOBILE }}
           TEST_DEFAULT_USER_PASSWORD: ${{ secrets.TEST_DEFAULT_USER_PASSWORD }}
         run: mvn clean test -DsuiteXmlFile=testng-parallel-purchase-rows.xml
