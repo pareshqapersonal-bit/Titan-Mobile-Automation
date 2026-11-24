@@ -90,7 +90,12 @@ public class PurchaseDataReader {
 			int executeCol = findColumnOptional(headerRow, formatter, "Execute");
 
 			int cancelOrderCol = findColumnOptional(headerRow, formatter, "CancelOrder");
+			
+			int couponCodeCol = findColumnOptional(headerRow, formatter, "CouponCode");
+			
+			int offerCol = findColumnOptional(headerRow, formatter, "Offer");
 
+			
 			int[] categoryCols = new int[CATEGORY_COLUMNS.length];
 
 			for (int i = 0; i < CATEGORY_COLUMNS.length; i++) {
@@ -121,11 +126,23 @@ public class PurchaseDataReader {
 				}
 
 				String paymentMethod = formatter.formatCellValue(row.getCell(paymentMethodCol)).trim();
-
+              
 				if (paymentMethod.isEmpty()) {
 					throw new RuntimeException(
 							"PaymentMethod missing for purchase row: " + testCaseId);
 				}
+				
+				// CouponCode is optional: a missing column or a blank cell gives "",
+				// and the cart pages skip applying a coupon when it is empty.
+				String couponCode = couponCodeCol >= 0
+						? formatter.formatCellValue(row.getCell(couponCodeCol)).replace(' ', ' ').strip()
+						: "";
+
+				// Offer is optional: an empty cell (or no Offer column) means no offer is
+				// applied in this run, and the cart pages skip the offer step for "".
+				String offer = offerCol >= 0
+						? formatter.formatCellValue(row.getCell(offerCol)).replace(' ', ' ').strip()
+						: "";
 
 				List<CartProduct> products = new ArrayList<>();
 
@@ -145,15 +162,17 @@ public class PurchaseDataReader {
 					throw new RuntimeException(
 							"No product SKUs found for purchase row: " + testCaseId);
 				}
+				
+				
 
 				if (includeCancelOrder) {
 					boolean cancelOrder = cancelOrderCol >= 0
 							&& parseYesNo(fileName, testCaseId,
 									formatter.formatCellValue(row.getCell(cancelOrderCol)));
 
-					cases.add(new Object[] { testCaseId, products, paymentMethod, cancelOrder });
+					cases.add(new Object[] { testCaseId, products, paymentMethod, cancelOrder ,couponCode,offer });
 				} else {
-					cases.add(new Object[] { testCaseId, products, paymentMethod });
+					cases.add(new Object[] { testCaseId, products, paymentMethod, couponCode, offer });
 				}
 			}
 

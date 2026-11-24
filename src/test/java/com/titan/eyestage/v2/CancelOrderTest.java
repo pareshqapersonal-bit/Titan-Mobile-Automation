@@ -30,9 +30,9 @@ public class CancelOrderTest extends Base {
 			description = "TC_ADD_TO_CART_NEW - Search SKU and add product to cart (new UI)",
 			dataProvider = "addToCartCases")
 	public void Steps(String testCaseId, List<CartProduct> products, String paymentMethod,
-			boolean cancelOrder) throws InterruptedException, IOException {
+			boolean cancelOrder,String coupon,String offer) throws InterruptedException, IOException {
 
-		System.out.println("AddToCart TestCaseID = " + testCaseId + " | Products = " + products);
+		System.out.println("AddToCart TestCaseID = " + testCaseId + " | Products = " + products + " | Coupon = " + coupon + " | Offer = " + offer + " | CancelOrder = " + cancelOrder);
 
 		test().info("TestCase=" + testCaseId + ", Products=" + products);
 
@@ -49,7 +49,7 @@ public class CancelOrderTest extends Base {
 
 		CartPageElementsNew cart = new CartPageElementsNew(driver());
 
-		cart.addProductsToCart(products);
+		cart.addProductsToCartTest(products, coupon, offer);
 		
 		PurchaseJourneyElementsNew purchaseJourney = new PurchaseJourneyElementsNew(driver());
 		purchaseJourney.proceedToCheckout();

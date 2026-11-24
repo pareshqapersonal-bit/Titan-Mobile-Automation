@@ -36,6 +36,8 @@ public class CartPageElementsNew extends CommonUtils {
 	ComputerGlassesCartNew computerGlassesCart;
 	AccessoriesCartNew accessoriesCart;
 	RemoveProductsFromCartPAge removeProductsFromCartPage;
+	
+	List<WebElement> continueButtons;
 
 	public CartPageElementsNew(
 			AndroidDriver driver
@@ -113,7 +115,8 @@ public class CartPageElementsNew extends CommonUtils {
 			searchProduct(product.getSku());
 			visibilityOf(buyNowCTA);
 			System.out.println("Buy Now CTA is visible for product: " + product.getSku());
-			dispatchProduct(product);
+			String couponCode = "";String offer = "";
+			dispatchProduct(product, couponCode,offer);
 			System.out.println("Product added to cart: " + product.getSku());
 			test().info("Added " + product.getCategory() + " " + product.getSku() + " - next: back to Home");
 
@@ -290,7 +293,7 @@ public class CartPageElementsNew extends CommonUtils {
 		}
 	}
 
-	private void dispatchProduct(CartProduct product) {
+	private void dispatchProduct(CartProduct product,String couponcode,String offer) throws InterruptedException, IOException {
 
 		switch (product.getCategory()) {
 
@@ -301,12 +304,12 @@ public class CartPageElementsNew extends CommonUtils {
 
 		case "Eyeglass":
 			System.out.println("Adding Eyeglass Product to Cart");
-			eyeglassCart.addToCart(product);
+			eyeglassCart.addToCart(product,offer);
 			break;
 
 		case "ContactLens":
 			System.out.println("Adding Contact Lens Product to Cart");
-			contactLensCart.addToCart(product);
+			contactLensCart.addToCart(product,offer);
 			break;
 
 		case "PoweredSunglass":
@@ -316,7 +319,7 @@ public class CartPageElementsNew extends CommonUtils {
 
 		case "Sunglass":
 			System.out.println("Adding Sunglass Product to Cart");
-			sunglassCart.addToCart(product);
+			sunglassCart.addToCart(product, couponcode,offer);
 			break;
 
 		case "ReadingGlass":
@@ -326,7 +329,7 @@ public class CartPageElementsNew extends CommonUtils {
 
 		case "ComputerGlass":
 			System.out.println("Adding Computer Glass Product to Cart");
-			computerGlassesCart.addToCart();
+			computerGlassesCart.addToCart(couponcode);
 			break;
 
 		case "Accessories":
@@ -522,5 +525,122 @@ public class CartPageElementsNew extends CommonUtils {
 						PointerInput.MouseButton.LEFT.asArg()));
 
 		driver.perform(Collections.singletonList(tap));
+	}
+	
+	
+	
+	
+	public void addProductsToCartTest(List<CartProduct> products, String Coupon, String Offer) throws InterruptedException, IOException {
+
+		// Continue Shopping popup dismissal now lives inside removeProductFromCart() itself -
+		// it was popping up right on entering the cart, before a check placed here (after
+		// already leaving the cart) ever got a chance to see it.
+		removeProductsFromCartPage.removeProductFromCart();
+		click(cartBackButton);
+
+		
+
+		for (int i = 0; i < products.size(); i++) {
+
+			CartProduct product = products.get(i);
+
+			searchProduct(product.getSku());
+			visibilityOf(buyNowCTA);
+			System.out.println("Buy Now CTA is visible for product: " + product.getSku());
+			dispatchProduct(product,Coupon,Offer);
+			System.out.println("Product added to cart: " + product.getSku());
+			test().info("Added " + product.getCategory() + " " + product.getSku() + " - next: back to Home");
+
+			// Just-in-case reset - most add-to-cart flows never leave NATIVE_APP, so this is a
+			// no-op most of the time. Unguarded, a transient device/session hiccup on this one
+			// housekeeping call would abort the whole loop even though the product was already
+			// added successfully above.
+			try {
+				driver.context("NATIVE_APP");
+			} catch (Exception e) {
+				System.out.println("Could not confirm NATIVE_APP context after add-to-cart: " + e.getMessage());
+			}
+
+			 continueButtons = driver.findElements(
+					AppiumBy.xpath(
+							"//android.view.View[@content-desc=\"Continue Shopping\"]"));
+
+			System.out.println("Continue Shopping button count = " + continueButtons.size());
+
+			if (!continueButtons.isEmpty()) {
+
+				System.out.println("Continue Shopping button found");
+
+				visibilityOf(continueShoppingButton);
+
+				System.out.println(
+						"Continue Shopping CTA is visible and text is: "
+								+ continueShoppingButton.getText());
+
+				continueShoppingButton.click();
+
+				System.out.println("Clicked Continue Shopping");
+			}
+
+			if (i < products.size() - 1) {
+				System.out.println("Navigating back to search page for next product");
+
+				backToSearch();
+			}
+		}
+
+		System.out.println("All products added to cart");
+
+		visibilityOf(cartTitle);
+		visibilityOf(proceedToCheckout);
+
+		path = captureScreenshot("Cart_Page");
+
+		test().info("Cart Page Displayed");
+		test().info("<a href='data:image/png;base64," + path + "' data-featherlight='image'><img src='data:image/png;base64," + path + "' style='width:200px;height:auto;cursor:pointer;'/></a>");
+
+		assertTrue(
+				cartTitle.isDisplayed(),
+				"Cart page not displayed");
+	}
+	
+	
+	public void continueShopping()
+	{
+		 continueButtons = driver.findElements(
+					AppiumBy.xpath(
+							"//android.view.View[@content-desc=\"Continue Shopping\"]"));
+
+			System.out.println("Continue Shopping button count = " + continueButtons.size());
+
+			if (!continueButtons.isEmpty()) {
+
+				System.out.println("Continue Shopping button found");
+
+				visibilityOf(continueShoppingButton);
+
+				System.out.println(
+						"Continue Shopping CTA is visible and text is: "
+								+ continueShoppingButton.getText());
+
+				continueShoppingButton.click();
+
+				System.out.println("Clicked Continue Shopping");
+			}
+	}
+	
+	
+	public void applyCoupon(String couponCode) {
+		if (couponCode != null && !couponCode.isEmpty()) {
+			System.out.println("Applying coupon code: " + couponCode);
+			test().info("Applying coupon code: " + couponCode);
+			// Assuming there's a method to enter the coupon code and apply it
+			// This is a placeholder for the actual implementation
+			// enterCouponCode(couponCode);
+			// clickApplyCouponButton();
+		} else {
+			System.out.println("No coupon code provided.");
+			test().info("No coupon code provided.");
+		}
 	}
 }

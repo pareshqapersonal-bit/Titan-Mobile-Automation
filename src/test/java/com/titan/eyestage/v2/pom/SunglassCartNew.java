@@ -1,5 +1,7 @@
 package com.titan.eyestage.v2.pom;
 
+import java.util.List;
+
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -16,8 +18,13 @@ public class SunglassCartNew extends CommonUtils {
 
 	AndroidDriver driver;
 	
-
-
+	List<WebElement> continueButtons;
+	ApplyCopounOffersPage applyCopounOffersPage;
+	
+	@FindBy(xpath = "//android.view.View[@content-desc=\"Continue Shopping\"]")
+	WebElement continueShoppingButton;
+	
+	
 	public SunglassCartNew(AndroidDriver driver) {
 
 		this.driver = driver;
@@ -32,10 +39,10 @@ public class SunglassCartNew extends CommonUtils {
 	WebElement addToCartButton;
 
 
-	public void addToCart(CartProduct product) {
+	public void addToCart(CartProduct product, String couponCode,String offer) {
 
 		test().info("Adding Sunglass product to cart");
-
+System.out.println("coupon is " + couponCode);
 		// Diagnostic: accessibility-id lookups scan the whole view hierarchy rather than
 		// using an indexed id lookup, so if "Add to cart" isn't unique on screen (e.g. a
 		// cross-sell carousel further down the PDP reusing the same label), resolving which
@@ -50,5 +57,39 @@ public class SunglassCartNew extends CommonUtils {
 		
 
 		test().pass("Sunglass added to cart successfully");
+		
+		 continueButtons = driver.findElements(
+					AppiumBy.xpath(
+							"//android.view.View[@content-desc=\"Continue Shopping\"]"));
+
+			System.out.println("Continue Shopping button count = " + continueButtons.size());
+
+			if (!continueButtons.isEmpty()) {
+
+				System.out.println("Continue Shopping button found");
+
+				visibilityOf(continueShoppingButton);
+
+				System.out.println(
+						"Continue Shopping CTA is visible and text is: "
+								+ continueShoppingButton.getText());
+
+				continueShoppingButton.click();
+
+				System.out.println("Clicked Continue Shopping");
+			}
+			//String couponCode = "Flat65";
+			
+			applyCopounOffersPage = new ApplyCopounOffersPage(driver);
+			if (couponCode != null && !couponCode.isEmpty()) {
+				applyCopounOffersPage.applyCoupon(couponCode);
+			}
+			
+			if (offer != null && !offer.isEmpty()) {
+				applyCopounOffersPage.applyOffer(offer);
+			}
+
 	}
+	
+	
 }

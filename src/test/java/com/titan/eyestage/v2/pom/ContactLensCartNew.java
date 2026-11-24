@@ -101,7 +101,7 @@ public class ContactLensCartNew extends CommonUtils {
 	@AndroidFindBy(accessibility = "Proceed without subscription")
 	WebElement skipOption;
 
-	public void addToCart(CartProduct product) {
+	public void addToCart(CartProduct product,String offer) throws InterruptedException {
 
 		System.out.println("Inside Adding Contact Lens Product");
 
@@ -126,8 +126,20 @@ public class ContactLensCartNew extends CommonUtils {
 		selectIfPresent(rightAxisSelect, "80");
 
 		scrollPowerRowIntoView("No of boxes");
-		selectIfPresent(leftBoxesSelect, "1");
-		selectIfPresent(rightBoxesSelect, "1");
+		
+		
+		
+		
+		
+		if (offer != null && !offer.isEmpty()) {
+			System.out.println("Applying offer: " + offer);
+			selectIfPresent(leftBoxesSelect, "12");
+			selectIfPresent(rightBoxesSelect, "12");
+		}else {
+			selectIfPresent(leftBoxesSelect, "1");
+			selectIfPresent(rightBoxesSelect, "1");
+		}
+	
 		click(addToCartButton);
 		System.out.println("After Buy Now");
 		
